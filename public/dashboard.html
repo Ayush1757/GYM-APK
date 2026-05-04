@@ -1,0 +1,4402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Management Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #050505;
+            --bg-secondary: #111111;
+            --bg-card: #121212;
+            --bg-input: #0b0b0b;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --border-color: #4b0000;
+            --border-light: #660000;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --table-header-bg: #1a0000;
+            --table-header-text: #f9fafb;
+            --table-border: #330000;
+            --table-row-hover: #1f0a0a;
+        }
+
+        body.light-theme {
+            --bg-primary: #050505;
+            --bg-secondary: #111111;
+            --bg-card: #121212;
+            --bg-input: #0b0b0b;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --border-color: #4b0000;
+            --border-light: #660000;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --table-header-bg: #1a0000;
+            --table-header-text: #f9fafb;
+            --table-border: #330000;
+            --table-row-hover: #1f0a0a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: linear-gradient(135deg, #330000 0%, #990000 50%, #ff1a1a 100%);
+            color: white;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .sidebar.collapsed .sidebar-header h2 {
+            display: none;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #fff;
+            color: white;
+        }
+
+        .menu-item i {
+            min-width: 25px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .sidebar.collapsed .menu-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+        }
+
+        .main-container {
+            margin-left: 260px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-container.collapsed {
+            margin-left: 80px;
+        }
+
+        .navbar {
+            background: var(--bg-secondary);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background 0.3s ease;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-bell,
+        .user-avatar {
+            cursor: pointer;
+            font-size: 20px;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4b5c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            border-left: 4px solid #ff1a1a;
+            transition: background 0.3s ease;
+        }
+
+        .stat-card.secondary {
+            border-left-color: #cc0000;
+        }
+
+        .stat-card.success {
+            border-left-color: #22c55e;
+        }
+
+        .stat-card.warning {
+            border-left-color: #f97316;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            color: #ff4d4d;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #ff1a1a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.35);
+        }
+
+        .btn-secondary {
+            background: #1f2933;
+            color: #f9fafb;
+        }
+
+        .btn-secondary:hover {
+            background: #111827;
+        }
+
+        .btn-danger {
+            background: #ff4b5c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff1e38;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .table th {
+            background: var(--table-header-bg);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--table-header-text);
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--table-border);
+            color: var(--text-primary);
+        }
+
+        .table tr:hover {
+            background: var(--table-row-hover);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-danger {
+            background: #2a0505;
+            color: #991b1b;
+        }
+
+        .badge-warning {
+            background: #2a1f05;
+            color: #92400e;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #111111;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            border: 1px solid #660000;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #660000;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #f9fafb;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #d1d5db;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background: #ff1a1a;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+            z-index: 3000;
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        .toast.error {
+            background: #ff4b5c;
+        }
+
+        .toast.info {
+            background: #3b82f6;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #1a0000;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid #660000;
+            min-width: 200px;
+            margin-top: 10px;
+            display: none;
+            z-index: 1500;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: #f9fafb;
+            text-decoration: none;
+            border-bottom: 1px solid #330000;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dropdown-menu a:hover {
+            background: #330000;
+            padding-left: 25px;
+        }
+
+        .dropdown-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .content input,
+        .content select {
+            background: #0b0b0b !important;
+            color: #f9fafb !important;
+        }
+
+        /* â”€â”€ QR Camera Scanner â”€â”€ */
+        #scanner-wrapper {
+            position: relative;
+            width: 100%;
+            min-height: 350px;
+            background: #0b0b0b;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #qrVideo {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: none;
+            transform: scaleX(-1);
+        }
+
+        #qrCanvas {
+            display: none;
+        }
+
+        .torch-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #ff1a1a;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: none;
+        }
+
+        .torch-btn:hover {
+            background: rgba(255, 26, 26, 0.3);
+        }
+
+        .torch-btn.active {
+            background: rgba(255, 26, 26, 0.5);
+            color: #fff;
+        }
+
+        .scanner-idle-msg {
+            color: #9ca3af;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .scan-overlay {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px solid #ff1a1a;
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+            animation: scanPulse 1.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .scan-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #ff1a1a;
+            animation: scanLine 1.5s ease-in-out infinite;
+        }
+
+        @keyframes scanLine {
+            0% {
+                top: 0;
+                opacity: 1;
+            }
+
+            100% {
+                top: calc(100% - 3px);
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes scanPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45), 0 0 10px rgba(255, 26, 26, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45), 0 0 25px rgba(255, 26, 26, 0.8);
+            }
+        }
+
+        .scan-status-label {
+            display: none;
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #9ca3af;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        #scanResult {
+            border: 1px solid #330000;
+            transition: border-color 0.3s;
+        }
+
+        #scanResult.ok {
+            border-color: #22c55e;
+        }
+
+        #scanResult.err {
+            border-color: #ff4b5c;
+        }
+
+        /* ── Workout Assignment ── */
+        .workout-card {
+            background: linear-gradient(135deg, #0d0d0d, #1a0000);
+            border: 1px solid #330000;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            transition: box-shadow 0.25s ease;
+        }
+
+        .workout-card:hover {
+            box-shadow: 0 4px 20px rgba(255, 26, 26, 0.15);
+        }
+
+        .workout-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .workout-date-badge {
+            display: inline-block;
+            background: #330000;
+            color: #ff6b6b;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .workout-category-tag {
+            display: inline-block;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 6px;
+            background: #0a1a2a;
+            color: #60a5fa;
+            border: 1px solid #1e3a5f;
+        }
+
+        .workout-text {
+            color: #e5e7eb;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+
+        .workout-notes {
+            color: #9ca3af;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #330000;
+        }
+
+        .workout-member-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #1a1a00;
+            color: #fbbf24;
+            border: 1px solid #3d3300;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .workout-composer textarea {
+            width: 100%;
+            min-height: 160px;
+            padding: 14px;
+            background: #0b0b0b;
+            border: 1px solid #330000;
+            border-radius: 8px;
+            color: #f9fafb;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .workout-composer textarea:focus {
+            outline: none;
+            border-color: #ff1a1a;
+        }
+
+        .workout-template-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-bottom: 10px;
+        }
+
+        .workout-template-chip {
+            background: #1a0000;
+            border: 1px solid #660000;
+            color: #fca5a5;
+            border-radius: 16px;
+            padding: 4px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .workout-template-chip:hover {
+            background: #330000;
+            color: #fff;
+        }
+
+        /* ── QR Block Button ── */
+        .btn-block-qr {
+            background: linear-gradient(135deg, #7c1c1c, #ff2d2d);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 11px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .btn-block-qr:hover {
+            background: linear-gradient(135deg, #991f1f, #ff4545);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 45, 45, 0.4);
+        }
+
+        .btn-unblock-qr {
+            background: linear-gradient(135deg, #064d30, #10b981);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 11px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .btn-unblock-qr:hover {
+            background: linear-gradient(135deg, #065f3b, #059669);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .qr-blocked-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #3a0000;
+            color: #ff6b6b;
+            border: 1px solid #7a0000;
+            border-radius: 12px;
+            padding: 3px 9px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+    </style>
+
+    <style id="auto-styles">
+        .auto-style-1 {
+            color: var(--text-primary);
+            margin-bottom: 30px;
+        }
+
+        .auto-style-2 {
+            color: #ff4d4d;
+        }
+
+        .auto-style-3 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .auto-style-4 {
+            color: var(--text-primary);
+        }
+
+        .auto-style-5 {
+            overflow-x: auto;
+        }
+
+        .auto-style-6 {
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        .auto-style-7 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .auto-style-8 {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .auto-style-9 {
+            color: #9ca3af;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .auto-style-10 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        .auto-style-11 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .auto-style-12 {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auto-style-13 {
+            padding: 8px 12px;
+            border: 1px solid #330000;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .auto-style-14 {
+            color: var(--text-primary);
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .auto-style-15 {
+            color: #9ca3af;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .auto-style-16 {
+            margin-bottom: 15px;
+        }
+
+        .auto-style-17 {
+            font-size: 48px;
+            color: #660000;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .auto-style-18 {
+            font-size: 12px;
+            margin-top: 6px;
+            color: #6b7280;
+        }
+
+        .auto-style-19 {
+            color: #f9fafb;
+        }
+
+        .auto-style-20 {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .auto-style-21 {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .auto-style-22 {
+            flex: 1;
+            justify-content: center;
+            display: none;
+        }
+
+        .auto-style-23 {
+            border-color: #330000;
+            margin: 5px 0 15px;
+        }
+
+        .auto-style-24 {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #f9fafb;
+        }
+
+        .auto-style-25 {
+            display: flex;
+            gap: 8px;
+        }
+
+        .auto-style-26 {
+            padding: 10px 15px;
+            border: 1px solid #330000;
+            border-radius: 8px;
+            flex: 1;
+        }
+
+        .auto-style-27 {
+            padding: 20px;
+            background: #0b0b0b;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .auto-style-28 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .auto-style-29 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .auto-style-30 {
+            color: #d1d5db;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+
+        .auto-style-31 {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .auto-style-32 {
+            padding: 40px 20px;
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        .auto-style-33 {
+            font-size: 48px;
+            color: #330000;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .auto-style-34 {
+            border-color: #330000;
+            margin: 20px 0 15px;
+        }
+
+        .auto-style-35 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .auto-style-36 {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .auto-style-37 {
+            color: #9ca3af;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .auto-style-38 {
+            display: none;
+            background: #0b0b0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #330000;
+        }
+
+        .auto-style-39 {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .auto-style-40 {
+            color: #9ca3af;
+        }
+
+        .auto-style-41 {
+            color: #f9fafb;
+            font-weight: 600;
+        }
+
+        .auto-style-42 {
+            color: #f9fafb;
+        }
+
+        .auto-style-43 {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .auto-style-44 {
+            font-weight: 600;
+        }
+
+        .auto-style-45 {
+            background: #0f1a0f;
+            border: 1px solid #22c55e33;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .auto-style-46 {
+            color: #86efac;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .auto-style-47 {
+            display: none;
+            background: #1a1a0f;
+            border: 1px solid #f59e0b33;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .auto-style-48 {
+            color: #fbbf24;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .auto-style-49 {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .auto-style-50 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 350px;
+        }
+
+        .auto-style-51 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .auto-style-52 {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 6px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 0 0 2px #ddd;
+        }
+
+        .auto-style-53 {
+            font-size: 48px;
+            color: #330000;
+            margin-bottom: 15px;
+        }
+
+        .auto-style-54 {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .auto-style-55 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .auto-style-56 {
+            color: var(--text-primary);
+        }
+
+        .auto-style-57 {
+            color: #9ca3af;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .auto-style-58 {
+            color: var(--text-primary);
+            margin-bottom: 18px;
+        }
+
+        .auto-style-59 {
+            display: none;
+            background: #0b0b0b;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 14px;
+            border: 1px solid #330000;
+        }
+
+        .auto-style-60 {
+            color: #9ca3af;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .auto-style-61 {
+            padding: 10px 14px;
+            border: 1px solid #330000;
+            border-radius: 8px;
+            background: #0b0b0b;
+            color: #f9fafb;
+            width: 100%;
+        }
+
+        .auto-style-62 {
+            color: #9ca3af;
+            font-weight: normal;
+            font-size: 12px;
+        }
+
+        .auto-style-63 {
+            width: 100%;
+            justify-content: center;
+            padding: 14px;
+        }
+
+        .auto-style-64 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .auto-style-65 {
+            padding: 6px 10px;
+            border: 1px solid #330000;
+            border-radius: 8px;
+            background: #0b0b0b;
+            color: #f9fafb;
+            font-size: 12px;
+        }
+
+        .auto-style-66 {
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .auto-style-67 {
+            color: #9ca3af;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .auto-style-68 {
+            margin-top: 20px;
+        }
+
+        .auto-style-69 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .auto-style-70 {
+            padding: 6px 14px;
+            font-size: 12px;
+        }
+
+        .auto-style-71 {
+            color: #9ca3af;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .auto-style-72 {
+            margin-bottom: 20px;
+        }
+
+        .auto-style-73 {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #330000;
+            border-radius: 8px;
+        }
+
+        .auto-style-74 {
+            padding: 10px 15px;
+            border: 1px solid #330000;
+            border-radius: 8px;
+        }
+
+        .auto-style-75 {
+            color: var(--text-primary);
+            margin-bottom: 25px;
+        }
+
+        .auto-style-76 {
+            display: none;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #0b0b0b;
+            border-radius: 8px;
+        }
+
+        .auto-style-77 {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .auto-style-78 {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .auto-style-79 {
+            width: 100%;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .auto-style-80 {
+            color: var(--text-primary);
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .auto-style-81 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .auto-style-82 {
+            width: 100px;
+            height: 100px;
+            background: #ff1a1a;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+        }
+
+        .auto-style-83 {
+            background: #0b0b0b;
+        }
+
+        .auto-style-84 {
+            color: #e5e7eb;
+            margin-bottom: 10px;
+        }
+
+        .auto-style-85 {
+            margin-top: 20px;
+        }
+
+        .auto-style-86 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #330000;
+        }
+
+        .auto-style-87 {
+            color: #e5e7eb;
+            margin-bottom: 5px;
+        }
+
+        .auto-style-88 {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .auto-style-89 {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .auto-style-90 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .auto-style-91 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .auto-style-92 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .auto-style-93 {
+            max-width: 420px;
+        }
+
+        .auto-style-94 {
+            text-align: center;
+            padding: 10px 0 20px;
+        }
+
+        .auto-style-95 {
+            font-size: 52px;
+            margin-bottom: 14px;
+        }
+
+        .auto-style-96 {
+            color: #d1d5db;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 6px;
+        }
+
+        .auto-style-97 {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .auto-style-98 {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .auto-style-99 {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .auto-style-100 {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .auto-style-101 {
+            background: #1f1f1f;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .auto-style-102 {
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .auto-style-103 {
+            color: #d1d5db;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .auto-style-104 {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .auto-style-105 {
+            color: #f97316;
+            font-weight: bold;
+        }
+
+        .auto-style-106 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auto-style-107 {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .auto-style-108 {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .auto-style-109 {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .auto-style-110 {
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        .auto-style-111 {
+            max-width: 150px;
+            border: 2px solid #ff1a1a;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .auto-style-112 {
+            color: #000;
+            margin-bottom: 12px;
+            font-family: sans-serif;
+            font-size: 15px;
+            letter-spacing: .5px;
+        }
+
+        .auto-style-113 {
+            color: ' + (data.success ? ' #22c55e' : ' #ff4b5c') + '
+        }
+
+        .auto-style-114 {
+            color: #f9fafb;
+            flex: 1;
+            margin: 0 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .auto-style-115 {
+            color: #9ca3af;
+        }
+
+        .auto-style-116 {
+            color: #22c55e
+        }
+
+        .auto-style-117 {
+            background: linear-gradient(135deg, #064d30, #10b981);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .auto-style-118 {
+            background: linear-gradient(135deg, #7c3c00, #f97316);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .auto-style-119 {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #052a15;
+            color: #22c55e;
+            border: 1px solid #14532d;
+            border-radius: 12px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .auto-style-120 {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #1a0a00;
+            color: #f97316;
+            border: 1px solid #7c3c00;
+            border-radius: 12px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .auto-style-121 {
+            border-left: 3px solid #f97316;
+        }
+
+        .auto-style-122 {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auto-style-123 {
+            margin-left: 4px;
+        }
+
+        .auto-style-124 {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .auto-style-125 {
+            background: none;
+            border: none;
+            color: #ff4b5c;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 4px;
+        }
+
+        .auto-style-126 {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #052a15;
+            border-radius: 8px;
+            color: #22c55e;
+            font-size: 12px;
+        }
+
+        .auto-style-127 {
+            color: #ff4b5c;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .auto-style-128 {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .auto-style-129 {
+            background: #1a0000;
+        }
+
+        .auto-style-130 {
+            padding: 10px;
+            text-align: left;
+            color: #f9fafb;
+            font-size: 13px;
+        }
+
+        .auto-style-131 {
+            padding: 10px;
+            text-align: center;
+            color: #f9fafb;
+            font-size: 13px;
+        }
+
+        .auto-style-132 {
+            border-bottom: 1px solid #1a0000;
+        }
+
+        .auto-style-133 {
+            padding: 10px;
+            color: #e5e7eb;
+            font-size: 13px;
+        }
+
+        .auto-style-134 {
+            padding: 10px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .auto-style-135 {
+            padding: 10px;
+            text-align: center;
+            color: #22c55e;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .auto-style-136 {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .auto-style-137 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .auto-style-138 {
+            width: 60px;
+            height: 6px;
+            background: #1a0000;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .auto-style-139 {
+            width: 60%;
+            height: 100%;
+            background: #1a0000;
+            border-radius: 3px;
+        }
+
+        .auto-style-140 {
+            color: #1a0000;
+            font-weight: 700;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2> GYM GANG</h2>
+            <button class="toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar" onclick="toggleSidebar()"><i
+                    class="fas fa-bars"></i></button>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" onclick="switchPage('dashboard')">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('announcements')">
+                <i class="fas fa-bullhorn"></i>
+                <span>Announcements</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('attendance')">
+                <i class="fas fa-calendar-check"></i>
+                <span>Attendance</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('qrScanner')">
+                <i class="fas fa-qrcode"></i>
+                <span>QR Scanner</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('generateQr')">
+                <i class="fas fa-magic"></i>
+                <span>Generate QR</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('workoutAssign')">
+                <i class="fas fa-dumbbell"></i>
+                <span>Assign Workout</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('membership')">
+                <i class="fas fa-id-card"></i>
+                <span>Membership</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('payments')">
+                <i class="fas fa-credit-card"></i>
+                <span>Fees & Payments</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('profile')">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/attendanceQR.html'">
+                <i class="fas fa-qrcode"></i>
+                <span>My Attendance QR</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="main-container" id="mainContainer">
+
+        <!-- NAVBAR -->
+        <div class="navbar">
+            <div class="navbar-left"></div>
+            <div class="navbar-right">
+                <div class="notification-bell" onclick="toggleNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge">3</div>
+                </div>
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserMenu()">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="dropdown-menu" id="userMenu">
+                        <a href="#" onclick="switchPage('profile')">Profile Settings</a>
+                        <a href="#" onclick="toggleTheme()" id="themeToggleLink">Light Mode</a>
+                        <a href="#" onclick="logout()">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div class="content">
+
+            <!-- DASHBOARD PAGE -->
+            <div class="page active" id="dashboard-page">
+                <h1 class="auto-style-1">Welcome back, <span id="userName">Admin</span>!👋</h1>
+
+                <!-- STATS GRID -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-label">Total Members</div>
+                        <div class="stat-value" id="totalMembers">0</div>
+                    </div>
+                    <div class="stat-card secondary">
+                        <div class="auto-style-2 stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-label">Today's Attendance</div>
+                        <div class="stat-value" id="todayAttendance">0</div>
+                    </div>
+                </div>
+
+                <!-- TOTAL MEMBERS LIST -->
+                <div class="card">
+                    <div class="auto-style-3">
+                        <h3 class="auto-style-4">Total Members List</h3>
+                        <button class="btn btn-primary" onclick="openModal('addMemberModal')">
+                            <i class="fas fa-user-plus"></i> Add Member
+                        </button>
+                    </div>
+                    <div class="auto-style-5">
+                        <table class="table" id="dashboardMemberTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Plan</th>
+                                    <th>Expiry</th>
+                                    <th>Streak 🔥</th>
+                                    <th>QR</th>
+                                    <th>QR Block</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" class="auto-style-6">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+
+                <!-- ANNOUNCEMENTS PREVIEW -->
+                <div class="card">
+                    <h3 class="auto-style-7">Recent Announcements</h3>
+                    <div id="announcementsPreview">
+                        <p class="auto-style-9">No announcements yet</p>
+                    </div>
+                </div>
+
+                <!-- CHARTS -->
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 class="auto-style-10">Weekly Attendance Trend</h3>
+                        <div class="chart-container">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="auto-style-10">Revenue Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANNOUNCEMENTS PAGE -->
+            <div class="page" id="announcements-page">
+                <div class="auto-style-11">
+                    <h1 class="auto-style-4">Announcements</h1>
+                    <button class="btn btn-primary" onclick="openModal('addAnnouncementModal')">
+                        <i class="fas fa-plus"></i> New Announcement
+                    </button>
+                </div>
+
+                <div class="card">
+                    <table class="table" id="announcementsTable">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Priority</th>
+                                <th>Target</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="auto-style-6">No announcements found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ATTENDANCE PAGE -->
+            <div class="page" id="attendance-page">
+                <div class="auto-style-11">
+                    <h1 class="auto-style-4">Attendance Management</h1>
+                    <div class="auto-style-12">
+                        <button class="btn btn-primary" onclick="openModal('markAttendanceModal')">
+                            <i class="fas fa-plus"></i> Mark Attendance
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportAttendance()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="auto-style-7">Selected Date Attendance</h3>
+                    <input type="date" id="attendanceDate" class="auto-style-13">
+                    <table class="table" id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th>Member Name</th>
+                                <th>Check-in Time</th>
+                                <th>Check-out Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="auto-style-6">No attendance records</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- QR SCANNER PAGE -->
+            <div class="page" id="qrScanner-page">
+                <h1 class="auto-style-14">&#128247; QR Attendance
+                    Scanner</h1>
+                <p class="auto-style-15">Point the camera at a member&#39;s
+                    QR code to instantly mark attendance</p>
+
+                <div class="grid-2">
+                    <!-- CAMERA SCANNER -->
+                    <div class="card">
+                        <h3 class="auto-style-7">&#128269; Camera Scanner</h3>
+
+                        <div id="scanner-wrapper" class="auto-style-16">
+                            <div class="scanner-idle-msg" id="scannerIdleMsg">
+                                <i class="auto-style-17 fas fa-camera"></i>
+                                <p>Camera preview will appear here</p>
+                                <p class="auto-style-18">Click <strong class="auto-style-19">Start Camera</strong> to
+                                    begin scanning</p>
+                            </div>
+                            <video id="qrVideo" autoplay playsinline muted></video>
+                            <canvas id="qrCanvas"></canvas>
+                            <div class="scan-overlay" id="scanOverlay"></div>
+                            <button class="torch-btn" id="torchBtn" onclick="toggleTorch()" title="Toggle Flashlight"><i
+                                    class="fas fa-bolt"></i></button>
+                            <span class="scan-status-label" id="scanStatusLabel">&#128269; Scanning...</span>
+                        </div>
+
+                        <div class="auto-style-20">
+                            <button class="auto-style-21 btn btn-primary" id="startScanBtn" onclick="startQrScanner()">
+                                <i class="fas fa-camera"></i> Start Camera
+                            </button>
+                            <button class="auto-style-22 btn btn-danger" id="stopScanBtn" onclick="stopQrScanner()">
+                                <i class="fas fa-stop"></i> Stop Camera
+                            </button>
+                        </div>
+
+                        <hr class="auto-style-23">
+                        <label class="auto-style-24">Or Enter
+                            Member Email Manually:</label>
+                        <div class="auto-style-25">
+                            <input type="text" id="manualQRCode" placeholder="member@email.com" class="auto-style-26">
+                            <button class="btn btn-primary" onclick="scanQrManually()">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SCAN RESULTS -->
+                    <div class="card">
+                        <h3 class="auto-style-7">&#9989; Last Scan Result</h3>
+                        <div id="scanResult" class="auto-style-27">
+                            <div id="scanResultIcon" class="auto-style-28"></div>
+                            <h4 id="scanMemberName" class="auto-style-29"></h4>
+                            <p id="scanType" class="auto-style-30"></p>
+                            <p id="scanTime" class="auto-style-31"></p>
+                        </div>
+                        <div id="scanResultEmpty" class="auto-style-32">
+                            <i class="auto-style-33 fas fa-qrcode"></i>
+                            <p>No scan yet. Start the camera or enter a code manually.</p>
+                        </div>
+
+                        <hr class="auto-style-34">
+                        <h4 class="auto-style-35">&#128203; Recent Scans Today</h4>
+                        <div id="recentScansList" class="auto-style-36">
+                            <p class="auto-style-37">No scans today</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GENERATE QR PAGE -->
+            <div class="page" id="generateQr-page">
+                <h1 class="auto-style-14">✨ Generate Member QR</h1 <p class="auto-style-15">Generate a permanent QR code
+                for a
+                member. The same QR can be scanned daily for attendance until the membership expires.</p>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 class="auto-style-7">QR Details</h3>
+
+                        <div class="form-group">
+                            <label>Select Member</label>
+                            <select id="genQREmail" onchange="onGenQRMemberChange()">
+                                <option value="">Select member...</option>
+                            </select>
+                        </div>
+
+                        <div id="genQRMemberInfo" class="auto-style-38">
+                            <div class="auto-style-39">
+                                <span class="auto-style-40">Name:</span>
+                                <span id="genQRMemberName" class="auto-style-41"></span>
+                            </div>
+                            <div class="auto-style-39">
+                                <span class="auto-style-40">Plan:</span>
+                                <span id="genQRMemberPlan" class="auto-style-42"></span>
+                            </div>
+                            <div class="auto-style-43">
+                                <span class="auto-style-40">Expires:</span>
+                                <span id="genQRMemberExpiry" class="auto-style-44"></span>
+                            </div>
+                        </div>
+
+                        <div class="auto-style-45">
+                            <p class="auto-style-46">
+                                <i class="fas fa-info-circle"></i>
+                                This QR is <strong>permanent</strong> &amp; reusable. The member scans the same code
+                                every day. Attendance is blocked automatically once membership expires.
+                            </p>
+                        </div>
+
+                        <div id="genQRExistingNotice" class="auto-style-47">
+                            <p class="auto-style-48">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                This member already has a QR code. Generating a new one will replace the existing QR.
+                            </p>
+                        </div>
+
+                        <button class="auto-style-49 btn btn-primary" onclick="verifyAndGenerateQR()">
+                            <i class="fas fa-qrcode"></i> Generate QR Code
+                        </button>
+                    </div>
+
+                    <div class="auto-style-50 card">
+                        <h3 class="auto-style-51">
+                            Generated QR
+                        </h3>
+
+                        <div id="generatedQRContainer" class="auto-style-52">
+                            <!-- QR code generated by qrcode.js will appear here -->
+                        </div>
+
+                        <div id="noQRState" class="auto-style-40">
+                            <i class="auto-style-53 fas fa-magic"></i>
+                            <p>Fill out the details to generate the QR code</p>
+                        </div>
+
+                        <button id="downloadQRBtn" class="auto-style-54 btn btn-success"
+                            onclick="downloadGeneratedQR()">
+                            <i class="fas fa-download"></i> Download QR
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKOUT ASSIGNMENT PAGE -->
+            <div class="page" id="workoutAssign-page">
+                <div class="auto-style-55">
+                    <div>
+                        <h1 class="auto-style-56">&#127947; Assign Workout</h1>
+                        <p class="auto-style-57">Select a member and type today's workout plan</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <!-- COMPOSER CARD -->
+                    <div class="card">
+                        <h3 class="auto-style-58">&#9997; Workout Composer</h3>
+
+                        <div class="form-group">
+                            <label>Select Member</label>
+                            <select id="workoutMemberSelect" onchange="onWorkoutMemberChange()">
+                                <option value="">Select member...</option>
+                            </select>
+                        </div>
+
+                        <div id="workoutMemberInfo" class="auto-style-59">
+                            <span class="workout-member-chip"><i class="fas fa-user"></i> <span
+                                    id="workoutMemberName"></span></span>
+                            <span class="auto-style-60">Plan: <span id="workoutMemberPlan">--</span></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="workoutDate" class="auto-style-61">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="workoutCategory">
+                                <option value="General">&#127947; General</option>
+                                <option value="Chest">&#128170; Chest</option>
+                                <option value="Back">&#129336; Back</option>
+                                <option value="Legs">&#129461; Legs</option>
+                                <option value="Shoulders">&#128170; Shoulders</option>
+                                <option value="Arms">&#128170; Arms (Biceps &amp; Triceps)</option>
+                                <option value="Core">&#128293; Core / Abs</option>
+                                <option value="Cardio">&#127939; Cardio</option>
+                                <option value="Full Body">&#9889; Full Body</option>
+                                <option value="Rest">&#128564; Rest Day</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group workout-composer">
+                            <label>Workout Plan <span class="auto-style-62">(type exercises, sets, reps)</span></label>
+                            <div class="workout-template-chips">
+                                <span class="workout-template-chip"
+                                    onclick="appendWorkoutTemplate('Bench Press — 4x10\nIncline Dumbbell — 3x12\nCable Fly — 3x15\nPush-ups — 3x20')">&#129366;
+                                    Chest Day</span>
+                                <span class="workout-template-chip"
+                                    onclick="appendWorkoutTemplate('Pull-ups — 4x8\nBarbell Row — 4x10\nLat Pulldown — 3x12\nSeated Row — 3x12')">&#129336;
+                                    Back Day</span>
+                                <span class="workout-template-chip"
+                                    onclick="appendWorkoutTemplate('Squat — 4x10\nLeg Press — 3x12\nLunges — 3x12\nLeg Curl — 3x15\nCalf Raises — 4x20')">&#129461;
+                                    Leg Day</span>
+                                <span class="workout-template-chip"
+                                    onclick="appendWorkoutTemplate('Treadmill — 30 min\nCycling — 20 min\nJump Rope — 10 min')">&#127939;
+                                    Cardio</span>
+                                <span class="workout-template-chip"
+                                    onclick="appendWorkoutTemplate('Rest Day — Light stretching and recovery\nFoam rolling — 15 min\nHydrate well &#128167;')">&#128564;
+                                    Rest Day</span>
+                            </div>
+                            <textarea id="workoutText"
+                                placeholder="e.g.\nBench Press — 4 sets x 10 reps\nIncline DB Press — 3 sets x 12 reps\nCable Fly — 3 sets x 15 reps"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Notes for Member <span class="auto-style-62">(optional)</span></label>
+                            <input type="text" id="workoutNotes"
+                                placeholder="e.g. Focus on form, increase weight next session..." class="auto-style-61">
+                        </div>
+
+                        <button class="auto-style-63 btn btn-primary" onclick="assignWorkout()">
+                            <i class="fas fa-paper-plane"></i> Assign Workout
+                        </button>
+                    </div>
+
+                    <!-- HISTORY CARD -->
+                    <div class="card">
+                        <div class="auto-style-64">
+                            <h3 class="auto-style-56">&#128203; Assigned Workouts</h3>
+                            <select id="workoutHistoryFilter" onchange="loadWorkoutHistory()" class="auto-style-65">
+                                <option value="">All Members</option>
+                            </select>
+                        </div>
+                        <div id="workoutHistoryList" class="auto-style-66">
+                            <p class="auto-style-67">Select a member or assign a workout to see history</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COMPLETION STATS CARD -->
+                <div class="auto-style-68 card">
+                    <div class="auto-style-69">
+                        <h3 class="auto-style-56">&#128202; Workout Completion Overview</h3>
+                        <button class="auto-style-70 btn btn-secondary" onclick="loadCompletionStats()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div id="workoutStatsContainer">
+                        <p class="auto-style-71">Assign workouts and mark them complete to see stats here</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEMBERSHIP PAGE -->
+            <div class="page" id="membership-page">
+                <div class="auto-style-11">
+                    <h1 class="auto-style-4">Membership Management</h1>
+                    <button class="btn btn-primary" onclick="openModal('addMemberModal')">
+                        <i class="fas fa-user-plus"></i> Add Member
+                    </button>
+                </div>
+
+                <div class="auto-style-72 card">
+                    <div class="auto-style-20">
+                        <input type="text" id="searchMember" placeholder="Search by name, email, or ID..."
+                            class="auto-style-73">
+                        <select id="membershipFilter" class="auto-style-74">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="expired">Expired</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <table class="table" id="memberTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Membership Plan</th>
+                                <th>Days Remaining</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                                <th>Streak 🔥</th>
+                                <th>QR</th>
+                                <th>QR Block</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="10" class="auto-style-6">No members found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PAYMENTS PAGE -->
+            <div class="page" id="payments-page">
+                <h1 class="auto-style-75">Fees & Payments</h1>
+
+                <!-- PAYMENT STATS -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                        <div class="stat-label">Total Collected</div>
+                        <div class="stat-value" id="totalCollected">₹0</div>
+                    </div>
+                    <div class="stat-card secondary">
+                        <div class="auto-style-2 stat-icon"><i class="fas fa-hourglass"></i></div>
+                        <div class="stat-label">Pending Payments</div>
+                        <div class="stat-value" id="pendingCount">0</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <!-- COLLECT PAYMENT FORM -->
+                    <div class="card">
+                        <h3 class="auto-style-7">Collect Payment</h3>
+                        <div class="form-group">
+                            <label>Member Name (A-Z)</label>
+                            <select id="paymentMember" onchange="handlePaymentMemberChange()">
+                                <option value="">Select member...</option>
+                            </select>
+                        </div>
+                        <div id="memberDetailsDisplay" class="auto-style-76">
+                            <p class="auto-style-77">Email: <span id="displayMemberEmail" class="auto-style-4"></span>
+                            </p>
+                            <p class="auto-style-77">Phone: <span id="displayMemberPhone" class="auto-style-4"></span>
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label>Membership Plan</label>
+                            <select id="paymentPlanMain"
+                                onchange="document.getElementById('paymentAmountMain').value = this.options[this.selectedIndex].getAttribute('data-price') || '';">
+                                <option value="" data-price="">Select plan...</option>
+                                <option value="monthly" data-price="1000">Monthly without cardio - ₹1000</option>
+                                <option value="monthly_cardio" data-price="1500">Monthly + cardio - ₹1500</option>
+                                <option value="quarterly" data-price="3000">Three months without cardio - ₹3000</option>
+                                <option value="quarterly_cardio" data-price="4500">Three months + cardio - ₹4500
+                                </option>
+                                <option value="yearly" data-price="6000">Yearly without cardio - ₹6000</option>
+                                <option value="yearly_cardio" data-price="9000">Yearly + cardio - ₹9000</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" id="paymentAmountMain" placeholder="Enter amount">
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Method</label>
+                            <select id="paymentMethodMain">
+                                <option value="Cash">Cash</option>
+                                <option value="UPI">UPI</option>
+                                <option value="Card">Card</option>
+                            </select>
+                        </div>
+                        <button class="auto-style-49 btn btn-success" onclick="processPayment()">
+                            <i class="fas fa-check"></i> Save Payment Record
+                        </button>
+                    </div>
+
+                    <!-- ADMIN UPI SETTINGS -->
+                    <div class="card">
+                        <h3 class="auto-style-7">Admin UPI Settings</h3>
+                        <div class="form-group">
+                            <label>Admin Phone Number</label>
+                            <input type="text" id="adminPhoneInput" placeholder="Enter phone for UPI">
+                        </div>
+                        <div class="form-group">
+                            <label>UPI QR Code Image</label>
+                            <input type="file" id="adminUPIFile" accept="image/*">
+                        </div>
+                        <div id="adminUPIPreview" class="auto-style-78">
+                            <!-- Preview Image shows here -->
+                        </div>
+                        <button class="auto-style-79 btn btn-primary" onclick="updateAdminSettings()">
+                            <i class="fas fa-save"></i> Update Admin UPI Info
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PAYMENT HISTORY -->
+                <div class="card">
+                    <h3 class="auto-style-7">Payment Records</h3>
+                    <table class="table" id="paymentTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Member Name</th>
+                                <th>Plan</th>
+                                <th>Amount</th>
+                                <th>Payment Mode</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="7" class="auto-style-6">No payment records</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PROFILE PAGE -->
+            <div class="page" id="profile-page">
+                <h1 class="auto-style-75">Profile Settings</h1>
+
+                <div class="grid-2">
+                    <!-- PROFILE INFO -->
+                    <div class="card">
+                        <h3 class="auto-style-80">Personal
+                            Information</h3>
+                        <div class="auto-style-81">
+                            <div class="auto-style-82">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <button class="btn btn-secondary">Upload Photo</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="profileName" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="profileEmail" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="profilePhone" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <input type="text" id="profileRole" value="Admin" readonly class="auto-style-83">
+                        </div>
+                        <button class="auto-style-49 btn btn-primary" onclick="saveProfile()">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+
+                    <!-- SECURITY SETTINGS -->
+                    <div class="card">
+                        <h3 class="auto-style-10">Security</h3>
+                        <div class="auto-style-72">
+                            <h4 class="auto-style-84">Change Password</h4>
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" id="currentPassword">
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" id="newPassword">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm Password</label>
+                                <input type="password" id="confirmPassword">
+                            </div>
+                            <button class="auto-style-49 btn btn-primary" onclick="updatePassword()">
+                                <i class="fas fa-lock"></i> Update Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GYM DETAILS (Editable by admin) -->
+                <div class="card" style="margin-top:1.5rem;">
+                    <h3 class="auto-style-10" style="margin-bottom:0.5rem;">
+                        <i class="fas fa-dumbbell" style="color:var(--primary,#e74c3c);margin-right:8px;"></i>Gym
+                        Details
+                    </h3>
+                    <p style="font-size:0.82rem;color:#888;margin-bottom:1.4rem;">These details are shown (read-only) to
+                        all members on their profile page.</p>
+                    <div class="grid-2" style="gap:2rem;">
+                        <!-- ADMIN DETAILS -->
+                        <div>
+                            <h4
+                                style="font-size:0.95rem;font-weight:600;margin-bottom:1rem;color:var(--primary,#e74c3c);">
+                                <i class="fas fa-user-shield" style="margin-right:6px;"></i>Admin Details</h4>
+                            <!-- Photo -->
+                            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+                                <div id="adminPhotoPreviewHolder"
+                                    style="width:72px;height:72px;border-radius:50%;background:#1e1e1e;border:2px solid var(--primary,#e74c3c);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+                                    <i class="fas fa-user" style="color:#888;font-size:1.5rem;"></i>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.78rem;display:block;margin-bottom:4px;">Admin
+                                        Photo</label>
+                                    <input type="file" id="adminPhotoFile" accept="image/*"
+                                        onchange="previewAdminPhoto(event)" style="font-size:0.82rem;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Admin Name</label>
+                                <input type="text" id="adminNameInput" placeholder="Enter admin full name">
+                            </div>
+                            <div class="form-group">
+                                <label>Admin Email</label>
+                                <input type="email" id="adminEmailInput" placeholder="Enter admin email">
+                            </div>
+                            <div class="form-group">
+                                <label>Admin Phone</label>
+                                <input type="text" id="adminPhoneInput" placeholder="Enter phone for UPI / contact">
+                            </div>
+                        </div>
+                        <!-- TRAINER DETAILS -->
+                        <div>
+                            <h4 style="font-size:0.95rem;font-weight:600;margin-bottom:1rem;color:#3b82f6;"><i
+                                    class="fas fa-running" style="margin-right:6px;"></i>Trainer Details</h4>
+                            <!-- Photo -->
+                            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+                                <div id="trainerPhotoPreviewHolder"
+                                    style="width:72px;height:72px;border-radius:50%;background:#1e1e1e;border:2px solid #3b82f6;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+                                    <i class="fas fa-user" style="color:#888;font-size:1.5rem;"></i>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.78rem;display:block;margin-bottom:4px;">Trainer
+                                        Photo</label>
+                                    <input type="file" id="trainerPhotoFile" accept="image/*"
+                                        onchange="previewTrainerPhoto(event)" style="font-size:0.82rem;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Trainer Name</label>
+                                <input type="text" id="trainerNameInput" placeholder="Enter trainer full name">
+                            </div>
+                            <div class="form-group">
+                                <label>Trainer Email</label>
+                                <input type="email" id="trainerEmailInput" placeholder="Enter trainer email">
+                            </div>
+                            <div class="form-group">
+                                <label>Trainer Phone</label>
+                                <input type="tel" id="trainerPhoneInput" placeholder="Enter trainer phone number">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="auto-style-49 btn btn-primary" onclick="updateGymDetails()" style="margin-top:1rem;">
+                        <i class="fas fa-save"></i> Save Gym Details
+                    </button>
+                </div>
+
+                <!-- NOTIFICATION PREFERENCES -->
+                <div class="auto-style-85 card">
+                    <h3 class="auto-style-10">Notification Preferences</h3>
+                    <div class="auto-style-86">
+                        <div>
+                            <h4 class="auto-style-87">Email Notifications</h4>
+                            <p class="auto-style-88">Receive updates via email</p>
+                        </div>
+                        <input type="checkbox" checked class="auto-style-89">
+                    </div>
+                    <div class="auto-style-86">
+                        <div>
+                            <h4 class="auto-style-87">SMS Notifications</h4>
+                            <p class="auto-style-88">Receive updates via SMS</p>
+                        </div>
+                        <input type="checkbox" class="auto-style-89">
+                    </div>
+                    <div class="auto-style-90">
+                        <div>
+                            <h4 class="auto-style-87">Payment Reminders</h4>
+                            <p class="auto-style-88">Get reminded about due payments</p>
+                        </div>
+                        <input type="checkbox" checked class="auto-style-89">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- MODALS -->
+
+        <!-- ADD ANNOUNCEMENT MODAL -->
+        <div class="modal" id="addAnnouncementModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create Announcement</h3>
+                    <button class="close-btn" onclick="closeModal('addAnnouncementModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="announcementTitle" placeholder="Announcement title">
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea id="announcementContent" placeholder="Write your announcement..."></textarea>
+                </div>
+                <div class="auto-style-92">
+                    <div class="form-group">
+                        <label>Priority Level</label>
+                        <select id="announcementPriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Audience</label>
+                        <select id="announcementTarget">
+                            <option value="all">All Members</option>
+                            <option value="active">Active Members</option>
+                            <option value="specific">Specific Group</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Expiration Date</label>
+                    <input type="date" id="announcementExpiry">
+                </div>
+                <div class="auto-style-12">
+                    <button class="auto-style-21 btn btn-primary" onclick="addAnnouncement()">Create</button>
+                    <button class="auto-style-21 btn btn-secondary"
+                        onclick="closeModal('addAnnouncementModal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD MEMBER MODAL -->
+        <div class="modal" id="addMemberModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add New Member</h3>
+                    <button class="close-btn" onclick="closeModal('addMemberModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="memberName" placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="memberEmail" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="memberPhone" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                    <label>Initial Password (optional, default: Member@123)</label>
+                    <input type="password" id="memberPassword" placeholder="Leave blank for default">
+                </div>
+                <div class="auto-style-12">
+                    <button class="auto-style-21 btn btn-primary" onclick="addMember()">Add
+                        Member</button>
+                    <button class="auto-style-21 btn btn-secondary"
+                        onclick="closeModal('addMemberModal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD MEMBER OTP MODAL -->
+        <div class="modal" id="addMemberOTPModal">
+            <div class="modal-content" style="max-width: 350px;">
+                <div class="modal-header">
+                    <h3>Verify Member Email</h3>
+                    <button class="close-btn" onclick="closeModal('addMemberOTPModal')">×</button>
+                </div>
+                <div style="text-align: center; padding: 10px;">
+                    <div style="font-size: 36px; margin-bottom: 15px; color: #ff1a1a;">📧</div>
+                    <p style="font-size: 13px; color: #888; margin-bottom: 15px;">Enter the 4-digit code sent to:<br><b
+                            id="adminOTPEmailDisplay" style="color:var(--text-primary);"></b></p>
+                    <input type="text" id="adminMemberOTPInput" maxlength="4" placeholder="0000"
+                        style="text-align:center; font-size:24px; letter-spacing:10px; width:180px; margin:20px auto; display:block; background:#111; border:1px solid #333; color:white; border-radius: 8px; padding: 10px;">
+                    <button class="btn btn-primary" onclick="verifyMemberOTP()" id="adminVerifyBtn"
+                        style="width: 100%; height: 45px; font-weight: bold;">Verify & Create Account</button>
+                    <button class="btn btn-secondary" onclick="closeModal('addMemberOTPModal')"
+                        style="width: 100%; margin-top: 10px; background: transparent; border: none; font-size: 12px; color: #666;">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="markAttendanceModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Mark Attendance</h3>
+                    <button class="close-btn" onclick="closeModal('markAttendanceModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label>Select Member</label>
+                    <select id="attendanceMember">
+                        <option value="">Choose member...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="attendanceMarkDate">
+                </div>
+                <div class="form-group">
+                    <label>Check-in Time</label>
+                    <input type="time" id="checkInTime">
+                </div>
+                <div class="form-group">
+                    <label>Check-out Time</label>
+                    <input type="time" id="checkOutTime">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="attendanceStatus">
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="late">Late</option>
+                    </select>
+                </div>
+                <div class="auto-style-12">
+                    <button class="auto-style-21 btn btn-primary" onclick="markAttendance()">Save</button>
+                    <button class="auto-style-21 btn btn-secondary"
+                        onclick="closeModal('markAttendanceModal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLLECT PAYMENT MODAL -->
+        <div class="modal" id="collectPaymentModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Collect Payment</h3>
+                    <button class="close-btn" onclick="closeModal('collectPaymentModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label>Member Name</label>
+                    <select id="modalPaymentMember">
+                        <option value="">Select member...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Membership Plan</label>
+                    <select id="modalPaymentPlan"
+                        onchange="document.getElementById('paymentAmount').value = this.options[this.selectedIndex].getAttribute('data-price') || '';">
+                        <option value="" data-price="">Select plan...</option>
+                        <option value="monthly" data-price="1000">Monthly without cardio - ₹1000</option>
+                        <option value="monthly_cardio" data-price="1500">Monthly + cardio - ₹1500</option>
+                        <option value="quarterly" data-price="3000">Three months without cardio - ₹3000</option>
+                        <option value="quarterly_cardio" data-price="4500">Three months + cardio - ₹4500</option>
+                        <option value="yearly" data-price="6000">Yearly without cardio - ₹6000</option>
+                        <option value="yearly_cardio" data-price="9000">Yearly + cardio - ₹9000</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="paymentAmount" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="modalPaymentMethod">
+                        <option value="cash">Cash</option>
+                        <option value="card">Card</option>
+                        <option value="online">Online</option>
+                    </select>
+                </div>
+                <div class="auto-style-12">
+                    <button class="auto-style-21 btn btn-success" onclick="savePayment()">Collect Payment</button>
+                    <button class="auto-style-21 btn btn-secondary"
+                        onclick="closeModal('collectPaymentModal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- UPLOAD QR MODAL (from members list) -->
+        <div class="modal" id="uploadQRModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Upload QR Code for Member</h3>
+                    <button class="close-btn" onclick="closeModal('uploadQRModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label>Member</label>
+                    <input type="text" id="uploadQRMemberEmail" readonly class="auto-style-83">
+                </div>
+                <div class="form-group">
+                    <label>Select QR Image (unique per member)</label>
+                    <input type="file" id="uploadQRFile" accept="image/*">
+                </div>
+                <div class="auto-style-12">
+                    <button class="auto-style-21 btn btn-primary" onclick="uploadMemberQr()">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                    <button class="auto-style-21 btn btn-secondary"
+                        onclick="closeModal('uploadQRModal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR BLOCK CONFIRMATION MODAL -->
+        <div class="modal" id="qrBlockModal">
+            <div class="auto-style-93 modal-content">
+                <div class="modal-header">
+                    <h3 id="qrBlockModalTitle">🔒 Block QR Code</h3>
+                    <button class="close-btn" onclick="closeModal('qrBlockModal')">×</button>
+                </div>
+                <div class="auto-style-94">
+                    <div id="qrBlockModalIcon" class="auto-style-95">🔒</div>
+                    <p id="qrBlockModalMsg" class="auto-style-96"></p>
+                    <p class="auto-style-97">The member's QR code will immediately stop working for
+                        attendance.</p>
+                </div>
+                <input type="hidden" id="qrBlockTargetEmail">
+                <input type="hidden" id="qrBlockAction"><!-- 'block' or 'unblock' -->
+                <div class="auto-style-98">
+                    <button id="qrBlockConfirmBtn" class="auto-style-99 btn btn-danger" onclick="confirmQRBlock()"><i
+                            class="fas fa-lock"></i> Confirm</button>
+                    <button class="auto-style-99 btn btn-secondary" onclick="closeModal('qrBlockModal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NO OTP MODAL -->
+
+        <script>
+            let userEmailForOTP = ''; // Global for OTP verification
+
+            // Initialize
+            document.addEventListener('DOMContentLoaded', function () {
+                // Load saved theme preference first
+                loadTheme();
+
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                // if a nonâ€‘admin somehow landed on this page, bounce them out
+                if (user.role !== 'admin') {
+                    // you can comment out the redirect if you want them to stay here
+                    // and see only their QR image
+                    // window.location.href = '/home.html';
+                }
+
+                document.getElementById('userName').textContent = user.fullname;
+                document.getElementById('profileName').value = user.fullname;
+                document.getElementById('profileEmail').value = user.email;
+                document.getElementById('profilePhone').value = user.phone || '';
+                document.getElementById('profileRole').value = user.role === 'admin' ? 'Admin' : 'Member';
+
+                loadDashboardData();
+                loadMembers();
+                loadAnnouncements();
+                initCharts();
+                const attDate = document.getElementById('attendanceDate');
+                if (attDate) {
+                    attDate.value = new Date().toISOString().split('T')[0];
+                    attDate.addEventListener('change', (e) => loadAttendanceTable(e.target.value));
+                }
+                adjustQrSection();              // <â€“â€“ roleâ€‘aware adjustment
+            });
+
+            // Sidebar Toggle
+            function toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                const container = document.getElementById('mainContainer');
+                sidebar.classList.toggle('collapsed');
+                container.classList.toggle('collapsed');
+            }
+
+            // Page Switching
+            function switchPage(page) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+                const pageElement = document.getElementById(page + '-page');
+                if (pageElement) {
+                    pageElement.classList.add('active');
+
+                    // Refresh data based on page
+                    if (page === 'dashboard') { loadDashboardData(); loadAnnouncements(); }
+                    if (page === 'announcements') loadAnnouncements();
+                    if (page === 'attendance') {
+                        const dateInput = document.getElementById('attendanceDate');
+                        if (dateInput && !dateInput.value) {
+                            dateInput.value = new Date().toISOString().split('T')[0];
+                        }
+                        loadAttendanceTable(dateInput ? dateInput.value : null);
+                    }
+                    if (page === 'payments') {
+                        loadPayments();
+                        loadAdminConfig();
+                        loadMembers();
+                    }
+                    if (page === 'generateQr') {
+                        populateGenQRDropdown();
+                    }
+                    if (page === 'workoutAssign') {
+                        populateWorkoutMemberDropdown();
+                        populateWorkoutHistoryFilter();
+                        loadWorkoutHistory();
+                        loadCompletionStats();
+                    }
+                }
+
+                const menuItem = document.querySelector(`[onclick="switchPage('${page}')"]`);
+                if (menuItem) {
+                    menuItem.classList.add('active');
+                }
+            }
+
+            // Modal Functions
+            function openModal(modalId) {
+                document.getElementById(modalId).classList.add('active');
+            }
+
+            function closeModal(modalId) {
+                document.getElementById(modalId).classList.remove('active');
+            }
+
+            // User Menu Toggle
+            function toggleUserMenu() {
+                document.getElementById('userMenu').classList.toggle('active');
+            }
+
+            // Logout
+            function logout() {
+                localStorage.removeItem('user');
+                window.location.href = '/login.html';
+            }
+
+            // Notifications Toggle
+            function toggleNotifications() {
+                showToast('3 new notifications!', 'info');
+            }
+
+            // Theme Toggle
+            function toggleTheme() {
+                const body = document.body;
+                const isLight = body.classList.toggle('light-theme');
+                localStorage.setItem('theme', isLight ? 'light' : 'dark');
+                updateThemeToggleText();
+                showToast(isLight ? 'Light mode enabled!' : 'Dark mode enabled!', 'success');
+            }
+
+            function updateThemeToggleText() {
+                const link = document.getElementById('themeToggleLink');
+                if (link) {
+                    const isLight = document.body.classList.contains('light-theme');
+                    link.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+                }
+            }
+
+            function loadTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'light') {
+                    document.body.classList.add('light-theme');
+                }
+                updateThemeToggleText();
+            }
+
+            // Toast Notification
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            // Attendance Table Loading
+            function loadAttendanceTable(dateVal) {
+                const tableBody = document.querySelector('#attendanceTable tbody');
+                if (!tableBody) return;
+                const dt = dateVal || new Date().toISOString().split('T')[0];
+                fetch('/attendanceRecords?date=' + dt)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.records) {
+                            if (data.records.length === 0) {
+                                tableBody.innerHTML = '<tr><td colspan="5" class="auto-style-6">No attendance records for ' + dt + '</td></tr>';
+                                return;
+                            }
+                            let html = '';
+                            data.records.forEach(r => {
+                                let statusClass = r.status === 'absent' ? 'status-expired' : 'status-active';
+                                html += `<tr>
+                                <td>`+ escapeHtml(r.memberName || r.email || '') + `</td>
+                                <td>`+ escapeHtml(r.checkInTime || '-') + `</td>
+                                <td>`+ escapeHtml(r.checkOutTime || '-') + `</td>
+                                <td><span class="status-badge ${statusClass}">` + escapeHtml(r.status || 'present') + `</span></td>
+                                <td></td>
+                            </tr>`;
+                            });
+                            tableBody.innerHTML = html;
+                        }
+                    })
+                    .catch(e => console.error("Error loading attendance: ", e));
+            }
+
+            // Dashboard Data Loading
+            function loadDashboardData() {
+
+                fetch("/getDashboardStats")
+                    .then(res => res.json())
+                    .then(data => {
+
+                        document.getElementById("totalMembers").textContent = data.totalMembers;
+                        document.getElementById("todayAttendance").textContent = data.todaysAttendance;
+
+                    });
+
+            }
+            setInterval(loadDashboardData, 10000);
+            // Chart Initialization
+            function initCharts() {
+                const attendanceCtx = document.getElementById('attendanceChart');
+                if (attendanceCtx) {
+                    new Chart(attendanceCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                            datasets: [{
+                                label: 'Attendance',
+                                data: [35, 38, 42, 40, 45, 43, 28],
+                                borderColor: '#ff1a1a',
+                                backgroundColor: 'rgba(255, 26, 26, 0.15)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: true } }
+                        }
+                    });
+                }
+
+                const revenueCtx = document.getElementById('revenueChart');
+                if (revenueCtx) {
+                    new Chart(revenueCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Cash', 'Card', 'Online'],
+                            datasets: [{
+                                data: [40, 35, 25],
+                                backgroundColor: ['#ff1a1a', '#cc0000', '#22c55e']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: true } }
+                        }
+                    });
+                }
+            }
+
+            // Announcement Functions
+            function addAnnouncement() {
+                const title = document.getElementById('announcementTitle').value;
+                const content = document.getElementById('announcementContent').value;
+                const priority = document.getElementById('announcementPriority').value;
+                const target = document.getElementById('announcementTarget').value;
+                const expiry = document.getElementById('announcementExpiry').value;
+
+                if (!title || !content) {
+                    showToast('Please fill all fields', 'error');
+                    return;
+                }
+
+                fetch('/addAnnouncement', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content, priority, target, expiry })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Announcement created successfully!', 'success');
+                            closeModal('addAnnouncementModal');
+                            document.getElementById('announcementTitle').value = '';
+                            document.getElementById('announcementContent').value = '';
+                            document.getElementById('announcementExpiry').value = '';
+                            loadAnnouncements();
+                        } else {
+                            showToast(data.message || 'Error creating announcement', 'error');
+                        }
+                    })
+                    .catch(err => showToast('Error creating announcement', 'error'));
+            }
+
+            function loadAnnouncements() {
+                fetch('/getAnnouncements')
+                    .then(r => r.json())
+                    .then(data => {
+                        const tbody = document.querySelector('#announcementsTable tbody');
+                        const previewDiv = document.getElementById('announcementsPreview');
+                        if (data.success && data.announcements.length > 0) {
+                            let rows = '';
+                            let previews = '';
+                            data.announcements.forEach((a, i) => {
+                                rows += `<tr>
+                            <td>${escapeHtml(a.title)}</td>
+                            <td><span class="badge badge-${a.priority === 'high' ? 'danger' : a.priority === 'low' ? 'success' : 'warning'}">${a.priority}</span></td>
+                            <td>${a.target}</td>
+                            <td>Active</td>
+                            <td><button class="auto-style-100 btn btn-secondary"><i class="fas fa-trash"></i></button></td>
+                        </tr>`;
+
+                                if (i < 3) {
+                                    previews += `
+                            <div class="auto-style-101">
+                                <h4 class="auto-style-102">${escapeHtml(a.title)}</h4>
+                                <p class="auto-style-103">${escapeHtml(a.content)}</p>
+                                <span class="auto-style-104">Posted: ${new Date(a.createdAt).toLocaleDateString()}</span>
+                            </div>`;
+                                }
+                            });
+                            if (tbody) tbody.innerHTML = rows;
+                            if (previewDiv) previewDiv.innerHTML = previews;
+                        } else {
+                            if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="auto-style-6">No announcements found</td></tr>';
+                            if (previewDiv) previewDiv.innerHTML = '<p class="auto-style-9">No announcements yet</p>';
+                        }
+                    })
+                    .catch(err => console.log('Error fetching announcements', err));
+            }
+
+            // Member Functions
+            function addMember() {
+                const fullname = document.getElementById('memberName').value.trim();
+                const email = document.getElementById('memberEmail').value.trim();
+                const phone = document.getElementById('memberPhone').value.trim();
+                const password = document.getElementById('memberPassword').value;
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+                if (!fullname || !email) {
+                    showToast('Full name and email are required', 'error');
+                    return;
+                }
+
+                if (!user || !user.email) {
+                    showToast('Please log in again', 'error');
+                    return;
+                }
+
+                fetch('/addMember', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullname,
+                        email,
+                        phone,
+                        password: password || undefined,
+                        adminEmail: user.email
+                    })
+                })
+                    .then(async r => {
+                        let data = {};
+                        try {
+                            data = await r.json();
+                        } catch (_) {
+                            throw new Error(r.status ? `Server error (${r.status})` : 'Network error');
+                        }
+                        if (!r.ok) {
+                            throw new Error(data.message || data.error || `Failed (${r.status})`);
+                        }
+                        return data;
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            userEmailForOTP = email;
+                            document.getElementById('adminOTPEmailDisplay').innerText = email;
+                            closeModal('addMemberModal');
+                            openModal('addMemberOTPModal');
+                            showToast('OTP sent to member email', 'success');
+                        } else {
+                            showToast(data.message || 'Error adding member', 'error');
+                        }
+                    })
+                    .catch(err => showToast(err.message || 'Error adding member', 'error'));
+            }
+
+            function verifyMemberOTP() {
+                const otp = document.getElementById('adminMemberOTPInput').value;
+                if (otp.length !== 4) return showToast('Enter 4-digit code', 'error');
+
+                const btn = document.getElementById('adminVerifyBtn');
+                btn.innerText = 'Verifying...';
+                btn.disabled = true;
+
+                fetch('/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmailForOTP, otp })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        btn.disabled = false;
+                        btn.innerText = 'Verify & Create Account';
+                        if (data.success) {
+                            showToast('Member verified and added successfully!', 'success');
+                            closeModal('addMemberOTPModal');
+                            document.getElementById('memberName').value = '';
+                            document.getElementById('memberEmail').value = '';
+                            document.getElementById('memberPhone').value = '';
+                            document.getElementById('memberPassword').value = '';
+                            document.getElementById('adminMemberOTPInput').value = '';
+                            loadMembers();
+                            loadDashboardData();
+                        } else {
+                            showToast(data.message || 'Invalid OTP', 'error');
+                        }
+                    })
+                    .catch(err => {
+                        btn.disabled = false;
+                        btn.innerText = 'Verify & Create Account';
+                        showToast('Verification failed', 'error');
+                    });
+            }
+
+            let allMembers = [];
+            function loadMembers() {
+                fetch('/getMembers')
+                    .then(r => r.json())
+                    .then(data => {
+                        allMembers = data.members || [];
+                        const tbody = document.querySelector('#dashboardMemberTable tbody');
+                        const memberTbody = document.querySelector('#memberTable tbody');
+
+                        // Dashboard Mini Table
+                        const rows = allMembers.map(m => {
+                            const expiry = m.expiry ? new Date(m.expiry).toLocaleDateString() : '--';
+                            const plan = m.membershipPlan ? m.membershipPlan.replace(/([a-z]+)/g, c => c.charAt(0).toUpperCase() + c.slice(1)) : '--';
+                            const isBlockedDash = m.qrBlocked;
+                            const dashBlockBtn = isBlockedDash
+                                ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock</button>`
+                                : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block</button>`;
+                            return `<tr>
+                        <td>${escapeHtml(m.fullname || '--')}</td>
+                        <td>${escapeHtml(m.email || '--')}</td>
+                        <td>${escapeHtml(m.phone || '--')}</td>
+                        <td>${escapeHtml(plan)}</td>
+                        <td>${escapeHtml(expiry)}</td>
+                        <td><span class="auto-style-105">${m.streak || 0} 🔥</span></td>
+                        <td>
+                            ${m.qrImage ? `<div class="auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
+                        </td>
+                        <td>${dashBlockBtn}${isBlockedDash ? ' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
+                    </tr>`;
+                        }).join('');
+                        if (tbody) tbody.innerHTML = rows || '<tr><td colspan="8" class="auto-style-6">No members found</td></tr>';
+
+                        // Detailed Members Table
+                        if (memberTbody) {
+                            const membershipRows = allMembers.map(m => {
+                                const expiry = m.expiry ? new Date(m.expiry) : null;
+                                const today = new Date();
+                                const daysRemaining = expiry ? Math.ceil((expiry - today) / (1000 * 60 * 60 * 24)) : null;
+                                const status = daysRemaining === null ? '--' : daysRemaining <= 0 ? 'Expired' : daysRemaining <= 5 ? 'Expiring' : 'Active';
+                                const plan = m.membershipPlan ? m.membershipPlan.replace(/_/g, ' ') : '--';
+                                const isBlocked = m.qrBlocked;
+                                const blockBtn = isBlocked
+                                    ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock QR</button>`
+                                    : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block QR</button>`;
+                                return `<tr>
+                            <td>${escapeHtml(m.fullname || '--')}</td>
+                            <td>${escapeHtml(m.email || '--')}</td>
+                            <td>${escapeHtml(m.phone || '--')}</td>
+                            <td>${escapeHtml(plan)}</td>
+                            <td>${daysRemaining != null ? daysRemaining : '--'}</td>
+                            <td><span class="badge badge-${status === 'Active' ? 'success' : status === 'Expired' ? 'danger' : 'warning'}">${status}</span></td>
+                            <td>${m.feesStatus || 'Pending'}</td>
+                            <td><span class="auto-style-105">${m.streak || 0} 🔥</span></td>
+                            <td>
+                                ${m.qrImage ? `<div class="auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
+                            </td>
+                            <td>${blockBtn}${isBlocked ? ' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
+                        </tr>`;
+                            }).join('');
+                            memberTbody.innerHTML = membershipRows || '<tr><td colspan="10" class="auto-style-6">No members found</td></tr>';
+                        }
+
+                        // Populate Generate QR Dropdown
+                        populateGenQRDropdown();
+
+                        // Populate Payment Dropdown (A-Z)
+                        const paymentSelect = document.getElementById('paymentMember');
+                        const attendanceSelect = document.getElementById('attendanceMember');
+                        if (paymentSelect) {
+                            const currentVal = paymentSelect.value;
+                            paymentSelect.innerHTML = '<option value="">Select member...</option>';
+                            allMembers.forEach(m => {
+                                const opt = document.createElement('option');
+                                opt.value = m.email;
+                                opt.textContent = m.fullname;
+                                paymentSelect.appendChild(opt);
+                            });
+                            paymentSelect.value = currentVal;
+                        }
+                        if (attendanceSelect) {
+                            const currentAttVal = attendanceSelect.value;
+                            attendanceSelect.innerHTML = '<option value="">Choose member...</option>';
+                            allMembers.forEach(m => {
+                                const opt = document.createElement('option');
+                                opt.value = m.email;
+                                opt.textContent = m.fullname;
+                                attendanceSelect.appendChild(opt);
+                            });
+                            attendanceSelect.value = currentAttVal;
+                        }
+                    })
+                    .catch(() => {
+                        const tbody = document.querySelector('#dashboardMemberTable tbody');
+                        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="auto-style-6">Failed to load members</td></tr>';
+                    });
+            }
+
+            function handlePaymentMemberChange() {
+                const email = document.getElementById('paymentMember').value;
+                const displayDiv = document.getElementById('memberDetailsDisplay');
+                if (!email) {
+                    displayDiv.style.display = 'none';
+                    return;
+                }
+                const member = allMembers.find(m => m.email === email);
+                if (member) {
+                    displayDiv.style.display = 'block';
+                    document.getElementById('displayMemberEmail').textContent = member.email;
+                    document.getElementById('displayMemberPhone').textContent = member.phone || 'N/A';
+                }
+            }
+
+            function processPayment() {
+                const email = document.getElementById('paymentMember').value;
+                const amount = document.getElementById('paymentAmountMain').value;
+                const method = document.getElementById('paymentMethodMain').value;
+                const plan = document.getElementById('paymentPlanMain').value;
+
+                if (!email || !amount) {
+                    showToast('Please select a member and enter amount', 'error');
+                    return;
+                }
+
+                fetch('/collectPayment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ memberEmail: email, amount: amount, method: method, plan: plan })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            document.getElementById('paymentAmountMain').value = '';
+                            loadPayments();
+                            loadMembers();
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(() => showToast('Error processing payment', 'error'));
+            }
+
+            function loadPayments() {
+                fetch('/getPayments')
+                    .then(r => r.json())
+                    .then(data => {
+                        const tbody = document.querySelector('#paymentTable tbody');
+                        if (!tbody) return;
+
+                        if (data.success && data.payments) {
+                            const rows = data.payments.map(p => `
+                            <tr>
+                                <td>${p.date}</td>
+                                <td>${escapeHtml(p.memberName)}</td>
+                                <td>${p.plan ? p.plan.replace(/_/g, ' ') : '--'}</td>
+                                <td>₹${p.amount}</td>
+                                <td>${p.method}</td>
+                                <td><span class="badge badge-success">${p.status}</span></td>
+                                <td><button class="auto-style-100 btn btn-secondary"><i class="fas fa-print"></i></button></td>
+                            </tr>
+                        `).join('');
+                            tbody.innerHTML = rows || '<tr><td colspan="7" class="auto-style-110">No records</td></tr>';
+
+                            // Update stats
+                            const total = data.payments.reduce((acc, p) => acc + (p.amount || 0), 0);
+                            document.getElementById('totalCollected').textContent = '₹' + total;
+                        }
+                    });
+            }
+
+            function loadAdminConfig() {
+                fetch('/getAdminConfig')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.config) {
+                            const c = data.config;
+                            // UPI / Phone (payments page)
+                            document.getElementById('adminPhoneInput').value = c.adminPhone || '';
+                            if (c.upiQR) {
+                                document.getElementById('adminUPIPreview').innerHTML = `<img src="${c.upiQR}" class="auto-style-111">`;
+                            }
+                            // Gym Details card
+                            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+                            setVal('adminNameInput', c.adminName);
+                            setVal('adminEmailInput', c.adminEmail);
+                            setVal('trainerNameInput', c.trainerName);
+                            setVal('trainerEmailInput', c.trainerEmail);
+                            setVal('trainerPhoneInput', c.trainerPhone);
+                            // Photos
+                            if (c.adminPhoto) {
+                                document.getElementById('adminPhotoPreviewHolder').innerHTML = `<img src="${c.adminPhoto}" style="width:100%;height:100%;object-fit:cover;">`;
+                            }
+                            if (c.trainerPhoto) {
+                                document.getElementById('trainerPhotoPreviewHolder').innerHTML = `<img src="${c.trainerPhoto}" style="width:100%;height:100%;object-fit:cover;">`;
+                            }
+                        }
+                    });
+            }
+
+            function updateAdminSettings() {
+                const phone = document.getElementById('adminPhoneInput').value;
+                const fileInput = document.getElementById('adminUPIFile');
+                const formData = new FormData();
+                formData.append('adminPhone', phone);
+                if (fileInput && fileInput.files[0]) {
+                    formData.append('upiQR', fileInput.files[0]);
+                }
+
+                fetch('/updateAdminConfig', { method: 'POST', body: formData })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            loadAdminConfig();
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(() => showToast('Error updating admin config', 'error'));
+            }
+
+            function updateGymDetails() {
+                const formData = new FormData();
+                formData.append('adminName', document.getElementById('adminNameInput').value.trim());
+                formData.append('adminEmail', document.getElementById('adminEmailInput').value.trim());
+                formData.append('adminPhone', document.getElementById('adminPhoneInput').value.trim());
+                formData.append('trainerName', document.getElementById('trainerNameInput').value.trim());
+                formData.append('trainerEmail', document.getElementById('trainerEmailInput').value.trim());
+                formData.append('trainerPhone', document.getElementById('trainerPhoneInput').value.trim());
+                const adminPhoto = document.getElementById('adminPhotoFile');
+                const trainerPhoto = document.getElementById('trainerPhotoFile');
+                if (adminPhoto && adminPhoto.files[0]) formData.append('adminPhoto', adminPhoto.files[0]);
+                if (trainerPhoto && trainerPhoto.files[0]) formData.append('trainerPhoto', trainerPhoto.files[0]);
+
+                fetch('/updateAdminConfig', { method: 'POST', body: formData })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Gym details saved successfully!', 'success');
+                            loadAdminConfig();
+                        } else {
+                            showToast(data.message || 'Error saving gym details', 'error');
+                        }
+                    })
+                    .catch(() => showToast('Error saving gym details', 'error'));
+            }
+
+            function previewAdminPhoto(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    document.getElementById('adminPhotoPreviewHolder').innerHTML =
+                        `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function previewTrainerPhoto(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    document.getElementById('trainerPhotoPreviewHolder').innerHTML =
+                        `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function escapeHtml(s) {
+                const div = document.createElement('div');
+                div.textContent = s;
+                return div.innerHTML;
+            }
+
+            // Attendance Functions
+            function markAttendance() {
+                const email = document.getElementById('attendanceMember').value;
+                const date = document.getElementById('attendanceMarkDate').value;
+                const inTime = document.getElementById('checkInTime').value;
+                const outTime = document.getElementById('checkOutTime').value;
+
+                if (!email || !date || !inTime) {
+                    showToast('Please fill all required fields', 'error');
+                    return;
+                }
+
+                fetch('/markAttendanceManual', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        date: date,
+                        checkInTime: inTime,
+                        checkOutTime: outTime
+                    })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            closeModal('markAttendanceModal');
+                            loadDashboardData();
+                            // Let's also refresh attendance table if we are on that page
+                            if (document.getElementById('attendance-page').classList.contains('active')) {
+                                const currentDate = document.getElementById('attendanceDate');
+                                if (currentDate && currentDate.value === date) {
+                                    // Optionally we could manually fetch or use a function if it existed
+                                    // to reload the attendance table for a specific date, but let's just trigger scan list update.
+                                    loadRecentScans();
+                                }
+                            }
+                            setTimeout(() => {
+                                document.getElementById('attendanceMember').value = '';
+                                document.getElementById('attendanceMarkDate').value = '';
+                                document.getElementById('checkInTime').value = '';
+                                document.getElementById('checkOutTime').value = '';
+                            }, 500);
+                        } else {
+                            showToast(data.message || 'Error marking attendance', 'error');
+                        }
+                    })
+                    .catch(err => showToast('Error marking attendance', 'error'));
+            }
+
+            function exportAttendance() {
+                showToast('Exporting attendance...', 'success');
+            }
+
+            function savePayment() {
+                showToast('Payment saved successfully!', 'success');
+                closeModal('collectPaymentModal');
+            }
+
+            function openUploadQRModal(memberEmail) {
+                document.getElementById('uploadQRMemberEmail').value = memberEmail || '';
+                document.getElementById('uploadQRFile').value = '';
+                openModal('uploadQRModal');
+            }
+
+            function uploadMemberQr() {
+                const memberEmail = document.getElementById('uploadQRMemberEmail').value.trim();
+                const fileInput = document.getElementById('uploadQRFile');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!memberEmail) {
+                    showToast('Select a member first', 'error');
+                    return;
+                }
+                if (!fileInput.files || !fileInput.files[0]) {
+                    showToast('Select a QR image to upload', 'error');
+                    return;
+                }
+                const formData = new FormData();
+                formData.append('memberEmail', memberEmail);
+                formData.append('adminEmail', user.email);
+                formData.append('qrImage', fileInput.files[0]);
+                fetch('/uploadQR', { method: 'POST', body: formData })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('QR uploaded successfully!', 'success');
+                            closeModal('uploadQRModal');
+                            loadMembers();
+                        } else {
+                            showToast(data.message || 'Upload failed', 'error');
+                        }
+                    })
+                    .catch(() => showToast('Error uploading QR', 'error'));
+            }
+
+            // QR Functions
+            function populateGenQRDropdown() {
+                const select = document.getElementById('genQREmail');
+                if (!select) return;
+                const currentVal = select.value;
+                select.innerHTML = '<option value="">Select member...</option>';
+                allMembers.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.email;
+                    opt.textContent = m.fullname + ' (' + m.email + ')';
+                    select.appendChild(opt);
+                });
+                select.value = currentVal;
+            }
+
+            function onGenQRMemberChange() {
+                const email = document.getElementById('genQREmail').value;
+                const infoDiv = document.getElementById('genQRMemberInfo');
+                const noticeDiv = document.getElementById('genQRExistingNotice');
+                if (!email) {
+                    infoDiv.style.display = 'none';
+                    noticeDiv.style.display = 'none';
+                    return;
+                }
+                const member = allMembers.find(m => m.email === email);
+                if (member) {
+                    infoDiv.style.display = 'block';
+                    document.getElementById('genQRMemberName').textContent = member.fullname || '--';
+                    document.getElementById('genQRMemberPlan').textContent = member.membershipPlan ? member.membershipPlan.replace(/_/g, ' ') : '--';
+                    const expiryEl = document.getElementById('genQRMemberExpiry');
+                    if (member.expiry) {
+                        const exp = new Date(member.expiry);
+                        const today = new Date();
+                        const isExpired = today > exp;
+                        expiryEl.textContent = exp.toLocaleDateString();
+                        expiryEl.style.color = isExpired ? '#ef4444' : '#22c55e';
+                    } else {
+                        expiryEl.textContent = 'Not set';
+                        expiryEl.style.color = '#f59e0b';
+                    }
+                    // Show warning if member already has QR
+                    noticeDiv.style.display = member.qrImage ? 'block' : 'none';
+                }
+            }
+
+            function verifyAndGenerateQR() {
+                const memberEmail = document.getElementById('genQREmail').value.trim();
+
+                if (!memberEmail) {
+                    showToast('Please select a member', 'error');
+                    return;
+                }
+
+                document.getElementById('noQRState').style.display = 'none';
+                const qrContainer = document.getElementById('generatedQRContainer');
+                qrContainer.style.display = 'flex';
+                const member = allMembers.find(m => m.email === memberEmail);
+                const memberName = member ? member.fullname : memberEmail;
+                // Container (#generatedQRContainer) is already white with 40px padding — just inject name + QR div
+                qrContainer.innerHTML =
+                    '<h5 class="auto-style-112">'
+                    + escapeHtml(memberName) + '</h5>'
+                    + '<div id="actualQR"></div>';
+
+                // Use pure BLACK for maximum scanner contrast
+                new QRCode(document.getElementById('actualQR'), {
+                    text: memberEmail,
+                    width: 250,
+                    height: 250,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                document.getElementById('downloadQRBtn').style.display = 'inline-block';
+                showToast('QR code generated for ' + escapeHtml(memberName) + '!', 'success');
+
+                // Auto-save QR to member's profile so they can view it
+                setTimeout(function () {
+                    const qrDiv = document.getElementById('actualQR');
+                    const canvas = qrDiv ? qrDiv.querySelector('canvas') : null;
+                    const img = qrDiv ? qrDiv.querySelector('img') : null;
+                    let qrDataUrl = null;
+                    if (img && img.src && img.src.startsWith('data:image')) {
+                        qrDataUrl = img.src;
+                    } else if (canvas) {
+                        qrDataUrl = canvas.toDataURL('image/png');
+                    }
+                    if (qrDataUrl) {
+                        fetch('/saveGeneratedQR', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ memberEmail: memberEmail, qrDataUrl: qrDataUrl })
+                        }).then(function (r) { return r.json(); })
+                            .then(function (d) {
+                                if (d.success) {
+                                    showToast('QR saved to member profile!', 'success');
+                                }
+                            }).catch(function () { /* silent */ });
+                    }
+                }, 500);
+
+                // refresh members if possible
+                if (typeof loadMembers === 'function') loadMembers();
+            }
+
+            function downloadGeneratedQR() {
+                // 1cm white border: 1cm = ~38px at 96dpi; we use 40px for a safe margin
+                const BORDER = 40;
+                setTimeout(() => {
+                    const qrDiv = document.getElementById('actualQR');
+                    const canvas = qrDiv ? qrDiv.querySelector('canvas') : null;
+                    let qrImg = qrDiv ? qrDiv.querySelector('img') : null;
+
+                    // Resolve raw QR source (data URL)
+                    let source = null;
+                    if (canvas) {
+                        source = canvas.toDataURL('image/png');
+                    } else if (qrImg && qrImg.src && qrImg.src.startsWith('data:image')) {
+                        source = qrImg.src;
+                    }
+
+                    if (!source) {
+                        showToast('QR code not ready yet, try again', 'error');
+                        return;
+                    }
+
+                    // Composite: white canvas + QR offset by BORDER
+                    const img = new Image();
+                    img.onload = function () {
+                        const out = document.createElement('canvas');
+                        out.width = img.width + BORDER * 2;
+                        out.height = img.height + BORDER * 2;
+                        const ctx = out.getContext('2d');
+                        // White background (quiet zone)
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, out.width, out.height);
+                        // Draw QR centred with border
+                        ctx.drawImage(img, BORDER, BORDER, img.width, img.height);
+
+                        const link = document.createElement('a');
+                        link.href = out.toDataURL('image/png');
+                        link.download = document.getElementById('genQREmail').value.trim() + '-QR.png';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    };
+                    img.src = source;
+                }, 150);
+            }
+
+            /* ===== QR CAMERA SCANNER ===== */
+            let scanStream = null;
+            let scanAnimFrame = null;
+            let scanCooldown = false;
+            let torchOn = false;
+            let scanTrack = null;
+
+            function startQrScanner() {
+                if (scanStream) return; // already running
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    showToast('Camera not supported on this browser/device', 'error');
+                    return;
+                }
+
+                // Request higher resolution with autofocus for better QR reading
+                const constraints = {
+                    video: {
+                        facingMode: { ideal: 'environment' },
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 },
+                        focusMode: { ideal: 'continuous' },
+                        advanced: [{ focusMode: 'continuous' }]
+                    }
+                };
+
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(function (stream) {
+                        scanStream = stream;
+                        scanTrack = stream.getVideoTracks()[0];
+                        const video = document.getElementById('qrVideo');
+                        video.srcObject = stream;
+                        video.style.display = 'block';
+
+                        document.getElementById('scannerIdleMsg').style.display = 'none';
+                        document.getElementById('scanOverlay').style.display = 'block';
+                        document.getElementById('scanStatusLabel').style.display = 'block';
+                        document.getElementById('startScanBtn').style.display = 'none';
+                        document.getElementById('stopScanBtn').style.display = 'flex';
+
+                        // Show torch button if device supports it
+                        if (scanTrack) {
+                            try {
+                                const caps = scanTrack.getCapabilities ? scanTrack.getCapabilities() : {};
+                                if (caps.torch) {
+                                    document.getElementById('torchBtn').style.display = 'block';
+                                }
+                            } catch (e) { /* ignore */ }
+                        }
+
+                        // Try to apply continuous autofocus
+                        if (scanTrack && scanTrack.applyConstraints) {
+                            scanTrack.applyConstraints({
+                                advanced: [{ focusMode: 'continuous' }]
+                            }).catch(function () { /* not supported, ignore */ });
+                        }
+
+                        video.onloadedmetadata = function () {
+                            video.play();
+                            scanFrame();
+                        };
+                    })
+                    .catch(function (err) {
+                        console.error('Camera error', err);
+                        // Fallback: try with basic constraints
+                        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                            .then(function (stream) {
+                                scanStream = stream;
+                                scanTrack = stream.getVideoTracks()[0];
+                                const video = document.getElementById('qrVideo');
+                                video.srcObject = stream;
+                                video.style.display = 'block';
+                                document.getElementById('scannerIdleMsg').style.display = 'none';
+                                document.getElementById('scanOverlay').style.display = 'block';
+                                document.getElementById('scanStatusLabel').style.display = 'block';
+                                document.getElementById('startScanBtn').style.display = 'none';
+                                document.getElementById('stopScanBtn').style.display = 'flex';
+                                video.onloadedmetadata = function () {
+                                    video.play();
+                                    scanFrame();
+                                };
+                            })
+                            .catch(function (err2) {
+                                console.error('Camera fallback error', err2);
+                                showToast('Camera access denied or unavailable. Use manual entry below.', 'error');
+                            });
+                    });
+            }
+
+            function toggleTorch() {
+                if (!scanTrack) return;
+                torchOn = !torchOn;
+                scanTrack.applyConstraints({
+                    advanced: [{ torch: torchOn }]
+                }).then(function () {
+                    document.getElementById('torchBtn').classList.toggle('active', torchOn);
+                }).catch(function () {
+                    showToast('Flashlight not available on this device', 'error');
+                    torchOn = false;
+                });
+            }
+
+            function stopQrScanner() {
+                if (scanAnimFrame) { cancelAnimationFrame(scanAnimFrame); scanAnimFrame = null; }
+                if (scanStream) {
+                    // Turn off torch before stopping
+                    if (torchOn && scanTrack) {
+                        try { scanTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch (e) { }
+                        torchOn = false;
+                    }
+                    scanStream.getTracks().forEach(function (t) { t.stop(); });
+                    scanStream = null;
+                    scanTrack = null;
+                }
+
+                const video = document.getElementById('qrVideo');
+                video.srcObject = null;
+                video.style.display = 'none';
+
+                document.getElementById('scannerIdleMsg').style.display = '';
+                document.getElementById('scanOverlay').style.display = 'none';
+                document.getElementById('scanStatusLabel').style.display = 'none';
+                document.getElementById('startScanBtn').style.display = '';
+                document.getElementById('stopScanBtn').style.display = 'none';
+                document.getElementById('torchBtn').style.display = 'none';
+                document.getElementById('torchBtn').classList.remove('active');
+            }
+
+            // Enhance image contrast for better QR detection
+            function enhanceImageData(imageData) {
+                const data = imageData.data;
+                const len = data.length;
+                // Simple contrast stretch: find min/max luminance, then stretch
+                let minL = 255, maxL = 0;
+                for (let i = 0; i < len; i += 16) { // sample every 4th pixel for speed
+                    const gray = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+                    if (gray < minL) minL = gray;
+                    if (gray > maxL) maxL = gray;
+                }
+                const range = maxL - minL;
+                if (range < 40) return imageData; // already low contrast, skip
+                const scale = 255 / range;
+                for (let i = 0; i < len; i += 4) {
+                    data[i] = Math.min(255, Math.max(0, (data[i] - minL) * scale));     // R
+                    data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - minL) * scale)); // G
+                    data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - minL) * scale)); // B
+                }
+                return imageData;
+            }
+
+            let scanFrameCount = 0;
+            function scanFrame() {
+                const video = document.getElementById('qrVideo');
+                const canvas = document.getElementById('qrCanvas');
+
+                if (!scanStream || video.readyState !== video.HAVE_ENOUGH_DATA) {
+                    scanAnimFrame = requestAnimationFrame(scanFrame);
+                    return;
+                }
+
+                // Scan every 2nd frame for faster detection
+                scanFrameCount++;
+                if (scanFrameCount % 2 !== 0) {
+                    scanAnimFrame = requestAnimationFrame(scanFrame);
+                    return;
+                }
+
+                // Use higher resolution for better QR readability
+                const MAX_SCAN_WH = 640;
+                let drawW = video.videoWidth;
+                let drawH = video.videoHeight;
+                if (drawW > MAX_SCAN_WH || drawH > MAX_SCAN_WH) {
+                    const ratio = Math.min(MAX_SCAN_WH / drawW, MAX_SCAN_WH / drawH);
+                    drawW = Math.round(drawW * ratio);
+                    drawH = Math.round(drawH * ratio);
+                }
+
+                canvas.width = drawW;
+                canvas.height = drawH;
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                // Enhance contrast for better QR detection
+                imageData = enhanceImageData(imageData);
+
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: 'attemptBoth'
+                });
+
+                if (code && code.data && !scanCooldown) {
+                    // Vibrate on successful scan if available
+                    if (navigator.vibrate) navigator.vibrate(200);
+                    processScan(code.data);
+                }
+
+                scanAnimFrame = requestAnimationFrame(scanFrame);
+            }
+
+            function processScan(scannedData) {
+                scanCooldown = true;
+                document.getElementById('scanStatusLabel').textContent = 'Processing...';
+
+                fetch('/scanMemberQR', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scannedData: scannedData })
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        displayScanResult(data, scannedData);
+                        addToRecentList(data, scannedData);
+                        showToast(data.message, data.success ? 'success' : 'error');
+                        loadDashboardData();
+
+                        document.getElementById('scanStatusLabel').textContent = 'Scanning...';
+                        // Short cooldown for faster marking next scan
+                        setTimeout(function () { scanCooldown = false; }, 800);
+                    })
+                    .catch(function () {
+                        showToast('Network error while processing QR', 'error');
+                        document.getElementById('scanStatusLabel').textContent = 'Scanning...';
+                        setTimeout(function () { scanCooldown = false; }, 800);
+                    });
+            }
+
+            function displayScanResult(data, raw) {
+                const resultDiv = document.getElementById('scanResult');
+                const emptyDiv = document.getElementById('scanResultEmpty');
+                const iconEl = document.getElementById('scanResultIcon');
+                const nameEl = document.getElementById('scanMemberName');
+                const typeEl = document.getElementById('scanType');
+                const timeEl = document.getElementById('scanTime');
+
+                resultDiv.style.display = 'block';
+                if (emptyDiv) emptyDiv.style.display = 'none';
+
+                if (data.success) {
+                    iconEl.textContent = '\u2705';
+                    nameEl.textContent = data.message.replace('Attendance marked for ', '');
+                    typeEl.textContent = '\u2705 Attendance Marked Successfully';
+                    resultDiv.className = 'ok';
+                } else {
+                    iconEl.textContent = '\u274C';
+                    nameEl.textContent = raw;
+                    typeEl.textContent = data.message || 'Scan failed';
+                    resultDiv.className = 'err';
+                }
+                timeEl.textContent = 'Time: ' + new Date().toLocaleTimeString();
+            }
+
+            function addToRecentList(data, raw) {
+                const list = document.getElementById('recentScansList');
+                if (!list) return;
+                // Remove placeholder paragraph if present
+                if (list.children.length === 1 && list.children[0].tagName === 'P') {
+                    list.innerHTML = '';
+                }
+                const item = document.createElement('div');
+                item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #330000;font-size:13px;';
+                const label = data.success ? data.message.replace('Attendance marked for ', '') : raw;
+                item.innerHTML =
+                    '<span class="auto-style-113">' + (data.success ? '\u2705' : '\u274C') + '</span>' +
+                    '<span class="auto-style-114">' + label + '</span>' +
+                    '<span class="auto-style-115">' + new Date().toLocaleTimeString() + '</span>';
+                list.prepend(item);
+            }
+
+            // Manual QR / email entry
+            function scanQrManually() {
+                const val = document.getElementById('manualQRCode').value.trim();
+                if (!val) { showToast('Please enter member email or QR data', 'error'); return; }
+                processScan(val);
+                document.getElementById('manualQRCode').value = '';
+            }
+
+            // Load today's recent scans into the UI
+            function loadRecentScans() {
+                fetch('/attendanceRecords')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.records) {
+                            const list = document.getElementById('recentScansList');
+                            if (!list) return;
+                            list.innerHTML = '';
+
+                            if (data.records.length === 0) {
+                                list.innerHTML = '<p class="auto-style-37">No scans today</p>';
+                                return;
+                            }
+
+                            data.records.forEach(record => {
+                                const item = document.createElement('div');
+                                item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #330000;font-size:13px;';
+                                item.innerHTML =
+                                    '<span class="auto-style-116">\u2705</span>' +
+                                    '<span class="auto-style-114">' + escapeHtml(record.memberName || '') + '</span>' +
+                                    '<span class="auto-style-115">' + escapeHtml(record.checkInTime || '') + '</span>';
+                                list.appendChild(item);
+                            });
+                        }
+                    })
+                    .catch(err => console.error("Error loading recent scans:", err));
+            }
+
+            // Stop camera if navigating away from QR Scanner page
+            var _origSwitchPage = switchPage;
+            switchPage = function (page) {
+                if (page !== 'qrScanner' && scanStream) stopQrScanner();
+                if (page === 'qrScanner') loadRecentScans();
+                _origSwitchPage(page);
+            };
+
+            // Close dropdowns on outside click
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.user-dropdown')) {
+                    document.getElementById('userMenu').classList.remove('active');
+                }
+            });
+
+            // Profile Update Logic
+            function saveProfile() {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const fullname = document.getElementById('profileName').value.trim();
+                const newEmail = document.getElementById('profileEmail').value.trim();
+                const phone = document.getElementById('profilePhone').value.trim();
+
+                if (!fullname || !newEmail) {
+                    showToast('Name and email are required', 'error');
+                    return;
+                }
+
+                fetch('/updateProfile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user.email,
+                        requesterEmail: user.email,
+                        fullname,
+                        newEmail,
+                        phone
+                    })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            // Update localStorage with new user data
+                            const updatedUser = { ...user, ...data.user };
+                            localStorage.setItem('user', JSON.stringify(updatedUser));
+                            // Update form fields with new values
+                            document.getElementById('userName').textContent = updatedUser.fullname;
+                            document.getElementById('profileName').value = updatedUser.fullname;
+                            document.getElementById('profileEmail').value = updatedUser.email;
+                            document.getElementById('profilePhone').value = updatedUser.phone || '';
+                        } else {
+                            showToast(data.message || 'Error updating profile', 'error');
+                        }
+                    })
+                    .catch(err => {
+                        showToast('Failed to update profile', 'error');
+                    });
+            }
+
+            // Password Update Logic (No OTP)
+            function updatePassword() {
+                const currentPassword = document.getElementById('currentPassword').value.trim();
+                const newPassword = document.getElementById('newPassword').value.trim();
+                const confirmPassword = document.getElementById('confirmPassword').value.trim();
+                const user = JSON.parse(localStorage.getItem('user'));
+
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    showToast('Please fill all password fields', 'error');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    showToast('New passwords do not match', 'error');
+                    return;
+                }
+
+                fetch('/updatePassword', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email, currentPassword, newPassword })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            document.getElementById('currentPassword').value = '';
+                            document.getElementById('newPassword').value = '';
+                            document.getElementById('confirmPassword').value = '';
+                        } else {
+                            showToast(data.message || 'Error updating password', 'error');
+                        }
+                    })
+                    .catch(err => {
+                        showToast('Failed to update password', 'error');
+                    });
+            }
+
+            /* ===== QR BLOCK / UNBLOCK ===== */
+            function openQRBlockModal(memberEmail, shouldBlock) {
+                const member = allMembers.find(m => m.email === memberEmail);
+                const name = member ? member.fullname : memberEmail;
+
+                document.getElementById('qrBlockTargetEmail').value = memberEmail;
+                document.getElementById('qrBlockAction').value = shouldBlock ? 'block' : 'unblock';
+
+                if (shouldBlock) {
+                    document.getElementById('qrBlockModalTitle').textContent = '🔒 Block QR Code';
+                    document.getElementById('qrBlockModalIcon').textContent = '🔒';
+                    document.getElementById('qrBlockModalMsg').innerHTML =
+                        `Are you sure you want to <strong>block</strong> the QR code for "<strong>${name}</strong>"? Their QR will no longer work for attendance.`;
+                    document.getElementById('qrBlockConfirmBtn').innerHTML = "<i class='fas fa-lock'></i> Block QR";
+                    document.getElementById('qrBlockConfirmBtn').className = 'auto-style-99 btn btn-danger';
+                } else {
+                    document.getElementById('qrBlockModalTitle').textContent = '🔓 Unblock QR Code';
+                    document.getElementById('qrBlockModalIcon').textContent = '🔓';
+                    document.getElementById('qrBlockModalMsg').innerHTML =
+                        `Unblock the QR code for "<strong>${name}</strong>"? Their QR will work for attendance again.`;
+                    document.getElementById('qrBlockConfirmBtn').innerHTML = "<i class='fas fa-lock-open'></i> Unblock QR";
+                    document.getElementById('qrBlockConfirmBtn').className = 'auto-style-99 btn btn-success';
+                }
+                openModal('qrBlockModal');
+            }
+
+            function confirmQRBlock() {
+                const memberEmail = document.getElementById('qrBlockTargetEmail').value;
+                const action = document.getElementById('qrBlockAction').value;
+                const adminUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+                if (!memberEmail || !adminUser.email) {
+                    showToast('Unable to process. Please refresh and try again.', 'error');
+                    return;
+                }
+
+                const btn = document.getElementById('qrBlockConfirmBtn');
+                btn.disabled = true;
+                btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Processing...";
+
+                fetch('/toggleQRBlock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminEmail: adminUser.email, memberEmail: memberEmail, action: action })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        btn.disabled = false;
+                        closeModal('qrBlockModal');
+                        if (data.success) {
+                            showToast(data.message, data.blocked ? 'warning' : 'success');
+                            loadMembers(); // Refresh the member lists to show the new status
+                        } else {
+                            showToast(data.message || 'Operation failed', 'error');
+                        }
+                    })
+                    .catch(() => {
+                        btn.disabled = false;
+                        showToast('Network error. Please try again.', 'error');
+                    });
+            }
+
+            /* ===== WORKOUT ASSIGNMENT ===== */
+
+            function populateWorkoutMemberDropdown() {
+                const sel = document.getElementById('workoutMemberSelect');
+                if (!sel) return;
+                const cur = sel.value;
+                sel.innerHTML = '<option value="">Select member...</option>';
+                allMembers.forEach(m => {
+                    const o = document.createElement('option');
+                    o.value = m.email;
+                    o.textContent = m.fullname + ' (' + m.email + ')';
+                    sel.appendChild(o);
+                });
+                sel.value = cur;
+            }
+
+            function populateWorkoutHistoryFilter() {
+                const sel = document.getElementById('workoutHistoryFilter');
+                if (!sel) return;
+                const cur = sel.value;
+                sel.innerHTML = '<option value="">All Members</option>';
+                allMembers.forEach(m => {
+                    const o = document.createElement('option');
+                    o.value = m.email;
+                    o.textContent = m.fullname;
+                    sel.appendChild(o);
+                });
+                sel.value = cur;
+            }
+
+            function onWorkoutMemberChange() {
+                const email = document.getElementById('workoutMemberSelect').value;
+                const infoDiv = document.getElementById('workoutMemberInfo');
+                if (!email) { infoDiv.style.display = 'none'; return; }
+                const m = allMembers.find(x => x.email === email);
+                if (m) {
+                    document.getElementById('workoutMemberName').textContent = m.fullname;
+                    document.getElementById('workoutMemberPlan').textContent = m.membershipPlan ? m.membershipPlan.replace(/_/g, ' ') : '--';
+                    infoDiv.style.display = 'block';
+                }
+                // also filter history to this member
+                const filter = document.getElementById('workoutHistoryFilter');
+                if (filter) { filter.value = email; loadWorkoutHistory(); }
+            }
+
+            function appendWorkoutTemplate(text) {
+                const ta = document.getElementById('workoutText');
+                if (!ta) return;
+                ta.value = ta.value ? ta.value + '\n' + text : text;
+                ta.focus();
+            }
+
+            // Set today's date as default for workout date on load
+            (function setWorkoutDefaultDate() {
+                const dateInput = document.getElementById('workoutDate');
+                if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+            })();
+
+            function assignWorkout() {
+                const adminUser = JSON.parse(localStorage.getItem('user') || '{}');
+                const memberEmail = document.getElementById('workoutMemberSelect').value;
+                const workout = document.getElementById('workoutText').value.trim();
+                const date = document.getElementById('workoutDate').value;
+                const category = document.getElementById('workoutCategory').value;
+                const notes = document.getElementById('workoutNotes').value.trim();
+
+                if (!memberEmail) { showToast('Please select a member', 'error'); return; }
+                if (!workout) { showToast('Please enter a workout plan', 'error'); return; }
+                if (!date) { showToast('Please select a date', 'error'); return; }
+
+                const btn = event.currentTarget;
+                btn.disabled = true;
+                btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Assigning...";
+
+                fetch('/assignWorkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminEmail: adminUser.email, memberEmail, workout, date, category, notes })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        btn.disabled = false;
+                        btn.innerHTML = "<i class='fas fa-paper-plane'></i> Assign Workout";
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            document.getElementById('workoutText').value = '';
+                            document.getElementById('workoutNotes').value = '';
+                            loadWorkoutHistory();
+                        } else {
+                            showToast(data.message || 'Failed to assign workout', 'error');
+                        }
+                    })
+                    .catch(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = "<i class='fas fa-paper-plane'></i> Assign Workout";
+                        showToast('Network error. Please try again.', 'error');
+                    });
+            }
+
+            function loadWorkoutHistory() {
+                const filterEmail = document.getElementById('workoutHistoryFilter') ? document.getElementById('workoutHistoryFilter').value : '';
+                const container = document.getElementById('workoutHistoryList');
+                if (!container) return;
+                container.innerHTML = '<p class="auto-style-71"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+
+                const url = filterEmail ? '/getWorkoutHistory?memberEmail=' + encodeURIComponent(filterEmail) : '/getWorkoutHistory';
+                fetch(url)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.success || !data.workouts.length) {
+                            container.innerHTML = '<p class="auto-style-67">No workouts assigned yet</p>';
+                            return;
+                        }
+                        const today = new Date().toISOString().split('T')[0];
+                        container.innerHTML = data.workouts.map(w => {
+                            const isToday = w.date === today;
+                            const isCompleted = w.completed;
+                            const completedTime = w.completedAt ? new Date(w.completedAt).toLocaleString() : '';
+
+                            const completeBtn = isCompleted
+                                ? `<button onclick="markWorkoutComplete('${w._id}', false)" title="Undo completion" class="auto-style-117">
+                                <i class='fas fa-undo'></i> Undo</button>`
+                                : `<button onclick="markWorkoutComplete('${w._id}', true)" title="Mark as completed" class="auto-style-118">
+                                <i class='fas fa-check'></i> Mark Done</button>`;
+
+                            const completedBadge = isCompleted
+                                ? `<span class="auto-style-119">&#10003; Completed</span>`
+                                : `<span class="auto-style-120">&#9899; Pending</span>`;
+
+                            return `<div class="auto-style-121 workout-card">
+                            <div class="workout-card-header">
+                                <div class="auto-style-122">
+                                    <span class="workout-member-chip"><i class="fas fa-user"></i> ${escapeHtml(w.memberName || w.memberEmail)}</span>
+                                    <span class="auto-style-123 workout-date-badge">${isToday ? '&#128197; Today' : w.date}</span>
+                                    <span class="workout-category-tag">${escapeHtml(w.category || 'General')}</span>
+                                    ${completedBadge}
+                                </div>
+                                <div class="auto-style-124">
+                                    ${completeBtn}
+                                    <button onclick="deleteWorkout('${w._id}')" title="Delete" class="auto-style-125"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <pre class="workout-text">${escapeHtml(w.workout)}</pre>
+                            ${w.notes ? `<div class="workout-notes"><i class="fas fa-sticky-note"></i> ${escapeHtml(w.notes)}</div>` : ''}
+                            ${isCompleted ? `<div class="auto-style-126"><i class="fas fa-check-circle"></i> Completed on ${completedTime}${w.completionNote ? ' &mdash; <em>' + escapeHtml(w.completionNote) + '</em>' : ''}</div>` : ''}
+                        </div>`;
+                        }).join('');
+                    })
+                    .catch(() => {
+                        container.innerHTML = '<p class="auto-style-127">Failed to load workouts</p>';
+                    });
+            }
+
+            function deleteWorkout(id) {
+                if (!confirm('Delete this workout assignment?')) return;
+                const adminUser = JSON.parse(localStorage.getItem('user') || '{}');
+                fetch('/deleteWorkout/' + id + '?adminEmail=' + encodeURIComponent(adminUser.email), { method: 'DELETE' })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) { showToast('Workout deleted', 'success'); loadWorkoutHistory(); loadCompletionStats(); }
+                        else showToast(data.message || 'Delete failed', 'error');
+                    })
+                    .catch(() => showToast('Network error', 'error'));
+            }
+
+            function markWorkoutComplete(id, shouldComplete) {
+                const adminUser = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!adminUser.email) { showToast('Please log in again', 'error'); return; }
+
+                fetch('/markWorkoutComplete/' + id, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminEmail: adminUser.email, completionNote: '' })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, data.completed ? 'success' : 'info');
+                            loadWorkoutHistory();
+                            loadCompletionStats();
+                        } else {
+                            showToast(data.message || 'Failed to update', 'error');
+                        }
+                    })
+                    .catch(() => showToast('Network error', 'error'));
+            }
+
+            function loadCompletionStats() {
+                const adminUser = JSON.parse(localStorage.getItem('user') || '{}');
+                const container = document.getElementById('workoutStatsContainer');
+                if (!container || !adminUser.email) return;
+
+                fetch('/getWorkoutCompletionStats?adminEmail=' + encodeURIComponent(adminUser.email))
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.success || !data.stats.length) {
+                            container.innerHTML = '<p class="auto-style-71">No data yet</p>';
+                            return;
+                        }
+                        container.innerHTML = `
+                        <table class="auto-style-128">
+                            <thead>
+                                <tr class="auto-style-129">
+                                    <th class="auto-style-130">Member</th>
+                                    <th class="auto-style-131">Assigned</th>
+                                    <th class="auto-style-131">Completed</th>
+                                    <th class="auto-style-131">Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.stats.map(s => {
+                            const rate = s.total > 0 ? Math.round((s.completed / s.total) * 100) : 0;
+                            const barColor = rate >= 75 ? '#22c55e' : rate >= 40 ? '#f97316' : '#ef4444';
+                            return `<tr class="auto-style-132">
+                                        <td class="auto-style-133">${escapeHtml(s.memberName || s._id)}</td>
+                                        <td class="auto-style-134">${s.total}</td>
+                                        <td class="auto-style-135">${s.completed}</td>
+                                        <td class="auto-style-136">
+                                            <div class="auto-style-137">
+                                                <div class="auto-style-138">
+                                                    <div class="auto-style-139"></div>
+                                                </div>
+                                                <span class="auto-style-140">${rate}%</span>
+                                            </div>
+                                        </td>
+                                    </tr>`;
+                        }).join('')}
+                            </tbody>
+                        </table>`;
+                    })
+                    .catch(() => {
+                        container.innerHTML = '<p class="auto-style-127">Failed to load stats</p>';
+                    });
+            }
+        </script>
+
+</body>
+
+</html>
