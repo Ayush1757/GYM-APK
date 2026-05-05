@@ -1051,6 +1051,22 @@ app.post("/scanMemberQR", async (req, res) => {
         }
         await user.save();
 
+        // Points for attendance
+        user.points = (user.points || 0) + 10;
+        
+        // Streak Bonus
+        if (user.streak >= 7 && user.streak % 7 === 0) {
+            user.points += 50; // Weekly bonus
+            await Notification.create({
+                email: user.email,
+                title: "Streak Milestone! 🔥",
+                message: `Amazing! ${user.streak} day streak reached. +50 bonus points awarded!`,
+                type: "success"
+            });
+        }
+
+        await user.save();
+
         await Attendance.create({
             email: user.email,
             memberName: user.fullname,
@@ -1060,7 +1076,7 @@ app.post("/scanMemberQR", async (req, res) => {
 
         res.json({
             success: true,
-            message: "Attendance marked for " + user.fullname + ". Streak: " + user.streak + " 🔥"
+            message: "Attendance marked for " + user.fullname + ". Streak: " + user.streak + " 🔥. Points: " + user.points
         });
 
     } catch (err) {
@@ -1433,7 +1449,49 @@ app.post("/assign-task", async (req, res) => {
         };
 
         await User.findOneAndUpdate({ email: memberEmail }, { $push: { assignments: task } });
+        
+        // Notification
+        await Notification.create({
+            email: memberEmail,
+            title: "New Task Assigned 🎯",
+            message: `You have been assigned a new goal: ${title}. Complete it to earn ${points} points!`,
+            type: "info"
+        });
+
         res.json({ success: true, message: "Task assigned successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/assign-workout", async (req, res) => {
+    try {
+        const { adminEmail, memberEmail, exerciseName, sets, reps, duration, notes, date } = req.body;
+        const admin = await User.findOne({ email: adminEmail });
+        if (!admin || admin.role !== "admin") return res.status(403).json({ success: false, message: "Not authorised" });
+
+        const workout = new Workout({
+            memberEmail,
+            exerciseName,
+            sets,
+            reps,
+            duration,
+            notes,
+            date: date || new Date().toISOString().split("T")[0],
+            completed: false
+        });
+
+        await workout.save();
+
+        // Notification
+        await Notification.create({
+            email: memberEmail,
+            title: "New Workout Assigned 🏋️",
+            message: `A new workout (${exerciseName}) has been assigned for ${workout.date}.`,
+            type: "info"
+        });
+
+        res.json({ success: true, message: "Workout assigned successfully", workout });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
@@ -1452,18 +1510,56 @@ app.post("/complete-task", async (req, res) => {
         user.assignments[taskIndex].status = "Completed";
         user.points += (user.assignments[taskIndex].points || 0);
 
-        // Badge Awarding Logic
+        // Badge Awarding Logic (Beginner, Consistent, Advanced, Champion)
         const completedCount = user.assignments.filter(t => t.status === "Completed").length;
+        let badgeEarned = null;
+
         if (completedCount === 1) {
-            user.badges.push({ name: "Beginner", category: "Milestone", icon: "🥉" });
+            badgeEarned = { name: "Beginner 🟢", category: "Milestone", icon: "🥉" };
         } else if (completedCount === 5) {
-            user.badges.push({ name: "Consistent", category: "Milestone", icon: "🥈" });
+            badgeEarned = { name: "Consistent 🔵", category: "Milestone", icon: "🥈" };
         } else if (completedCount === 10) {
-            user.badges.push({ name: "Pro", category: "Milestone", icon: "🥇" });
+            badgeEarned = { name: "Advanced 🟣", category: "Milestone", icon: "🥇" };
+        } else if (completedCount === 20) {
+            badgeEarned = { name: "Champion 🏆", category: "Milestone", icon: "👑" };
         }
+
+        if (badgeEarned && !user.badges.some(b => b.name === badgeEarned.name)) {
+            user.badges.push(badgeEarned);
+            // Notification for Badge
+            await Notification.create({
+                email: user.email,
+                title: "Achievement Unlocked! 🏆",
+                message: `Congratulations! You've unlocked the ${badgeEarned.name} badge.`,
+                type: "success"
+            });
+        }
+
+        // Notification for Goal Completion
+        await Notification.create({
+            email: user.email,
+            title: "Goal Completed! 🎉",
+            message: `You earned ${user.assignments[taskIndex].points} points for completing: ${user.assignments[taskIndex].title}`,
+            type: "success"
+        });
 
         await user.save();
         res.json({ success: true, message: "Task completed! Points and badges awarded.", points: user.points });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.get("/my-workout", async (req, res) => {
+    try {
+        const { email, date } = req.query;
+        if (!email) return res.status(400).json({ success: false, message: "Email required" });
+        
+        const filter = { memberEmail: email };
+        if (date) filter.date = date;
+
+        const workouts = await Workout.find(filter).sort({ _id: -1 }).lean();
+        res.json({ success: true, workouts });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

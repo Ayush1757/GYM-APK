@@ -1848,8 +1848,11 @@
                     <div class="auto-style-3">
                         <h3 class="auto-style-4">Total Members List</h3>
                         <div style="display:flex; gap:10px;">
+                            <button class="btn btn-primary" onclick="openAssignWorkoutModal()">
+                                <i class="fas fa-dumbbell"></i> Assign Workout
+                            </button>
                             <button class="btn btn-primary" onclick="openAssignTaskModal()">
-                                <i class="fas fa-tasks"></i> Assign Task
+                                <i class="fas fa-tasks"></i> Assign Goal
                             </button>
                             <button class="btn btn-primary" onclick="openModal('addMemberModal')">
                                 <i class="fas fa-user-plus"></i> Add Member
@@ -2657,6 +2660,49 @@
                 </div>
             </div>
         </div>
+        <!-- ASSIGN WORKOUT MODAL -->
+        <div class="modal" id="assignWorkoutModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Assign Workout 🏋️</h3>
+                    <button class="close-btn" onclick="closeModal('assignWorkoutModal')">&times;</button>
+                </div>
+                <div class="form-group">
+                    <label>Select Member</label>
+                    <select id="workoutMemberEmail" class="auto-style-78">
+                        <option value="">Choose member...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Exercise Name</label>
+                    <input type="text" id="workoutExercise" placeholder="e.g. Bench Press" class="auto-style-78">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Sets</label>
+                        <input type="number" id="workoutSets" value="3" class="auto-style-78">
+                    </div>
+                    <div class="form-group">
+                        <label>Reps</label>
+                        <input type="text" id="workoutReps" placeholder="e.g. 10-12" class="auto-style-78">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Duration (optional)</label>
+                    <input type="text" id="workoutDuration" placeholder="e.g. 30 mins" class="auto-style-78">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="workoutNotes" placeholder="Any special instructions?" class="auto-style-78" style="height:80px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="workoutDate" class="auto-style-78">
+                </div>
+                <button class="btn btn-primary" style="width:100%;" onclick="submitWorkoutAssignment()">Assign Workout</button>
+            </div>
+        </div>
+
         <!-- ASSIGN TASK MODAL -->
         <div class="modal" id="assignTaskModal">
             <div class="modal-content">
@@ -3445,7 +3491,68 @@
                     .catch(() => showToast('Network error updating settings', 'error'));
             }
 
+            function openAssignWorkoutModal() {
+                populateMemberDropdown('workoutMemberEmail');
+                const dateEl = document.getElementById('workoutDate');
+                if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+                openModal('assignWorkoutModal');
+            }
+
+            function openAssignTaskModal() {
+                populateMemberDropdown('taskMemberEmail');
+                openModal('assignTaskModal');
+            }
+
+            function populateMemberDropdown(selectId) {
+                fetch('/getMembers')
+                    .then(r => r.json())
+                    .then(data => {
+                        const select = document.getElementById(selectId);
+                        if (data.success && data.members) {
+                            let html = '<option value="">Choose member...</option>';
+                            data.members.forEach(m => {
+                                html += `<option value="${m.email}">${m.fullname} (${m.email})</option>`;
+                            });
+                            select.innerHTML = html;
+                        }
+                    });
+            }
+
+            function submitWorkoutAssignment() {
+                const admin = JSON.parse(localStorage.getItem('user') || '{}');
+                const email = document.getElementById('workoutMemberEmail').value;
+                const exerciseName = document.getElementById('workoutExercise').value.trim();
+                const sets = document.getElementById('workoutSets').value;
+                const reps = document.getElementById('workoutReps').value.trim();
+                const duration = document.getElementById('workoutDuration').value.trim();
+                const notes = document.getElementById('workoutNotes').value.trim();
+                const date = document.getElementById('workoutDate').value;
+
+                if (!email || !exerciseName) return showToast('Member and exercise are required', 'error');
+
+                fetch('/assign-workout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        adminEmail: admin.email, 
+                        memberEmail: email, 
+                        exerciseName, sets, reps, duration, notes, date 
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Workout assigned!', 'success');
+                        closeModal('assignWorkoutModal');
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(() => showToast('Failed to assign workout', 'error'));
+            }
+
             function submitTask() {
+                const admin = JSON.parse(localStorage.getItem('user') || '{}');
                 const email = document.getElementById('taskMemberEmail').value;
                 const title = document.getElementById('taskTitle').value.trim();
                 const description = document.getElementById('taskDesc').value.trim();
@@ -3457,38 +3564,18 @@
                 fetch('/assign-task', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, title, description, points, category })
+                    body: JSON.stringify({ adminEmail: admin.email, memberEmail: email, title, description, points, category })
                 })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        showToast('Task assigned successfully!', 'success');
+                        showToast('Goal assigned successfully!', 'success');
                         closeModal('assignTaskModal');
                     } else {
                         showToast(data.message, 'error');
                     }
                 })
-                .catch(() => showToast('Failed to assign task', 'error'));
-            }
-
-            function openAssignTaskModal() {
-                populateTaskMemberDropdown();
-                openModal('assignTaskModal');
-            }
-
-            function populateTaskMemberDropdown() {
-                fetch('/getMembers')
-                    .then(r => r.json())
-                    .then(data => {
-                        const select = document.getElementById('taskMemberEmail');
-                        if (data.success && data.members) {
-                            let html = '<option value="">Choose member...</option>';
-                            data.members.forEach(m => {
-                                html += `<option value="${m.email}">${m.fullname} (${m.email})</option>`;
-                            });
-                            select.innerHTML = html;
-                        }
-                    });
+                .catch(() => showToast('Failed to assign goal', 'error'));
             }
 
             function updateGymDetails() {

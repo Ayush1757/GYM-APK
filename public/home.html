@@ -1437,6 +1437,42 @@
                     </div>
                 </div>
 
+                <!-- TODAY'S WORKOUTS -->
+                <div class="card" style="border-top: 4px solid #3b82f6;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">
+                        <i class="fas fa-dumbbell" style="color: #3b82f6; margin-right: 10px;"></i>Today's Assigned Workouts
+                    </h3>
+                    <div id="todayWorkoutsContainer">
+                        <p style="text-align: center; color: var(--text-muted); padding: 20px;">No workouts assigned for today.</p>
+                    </div>
+                </div>
+
+                <!-- 30 DAY PROGRESS TRACKER -->
+                <div class="card" style="border-top: 4px solid #10b981;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">
+                        <i class="fas fa-chart-line" style="color: #10b981; margin-right: 10px;"></i>Activity (Last 30 Days)
+                    </h3>
+                    <div class="stats-grid">
+                        <div class="stat-card" style="padding: 15px; background: #0b0b0b;">
+                            <div class="stat-label">Gym Visits</div>
+                            <div class="stat-value" id="monthlyVisits" style="font-size: 24px;">0</div>
+                        </div>
+                        <div class="stat-card" style="padding: 15px; background: #0b0b0b;">
+                            <div class="stat-label">Workouts</div>
+                            <div class="stat-value" id="monthlyWorkouts" style="font-size: 24px;">0</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                            <span style="color: var(--text-secondary);">Monthly Attendance Goal</span>
+                            <span style="color: #10b981;" id="monthlyProgressText">0/20 days</span>
+                        </div>
+                        <div style="height: 8px; background: #222; border-radius: 4px; overflow: hidden;">
+                            <div id="monthlyProgressBar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.5s;"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- QUICK ACTIONS -->
                 <div class="card">
                     <h3 style="color: var(--text-primary); margin-bottom: 15px;">Quick Actions</h3>
@@ -2690,6 +2726,10 @@
                 streakEl.textContent = (user.streak || 0) + ' 🔥';
             }
 
+            // Load Today's Workouts
+            loadTodayWorkouts();
+            loadMonthlyProgress();
+
             // Fetch extra progress stats for dashboard
             if (user.email) {
                 fetch('/getWorkoutProgress?email=' + encodeURIComponent(user.email))
@@ -2802,6 +2842,58 @@
                         container.innerHTML = html;
                     } else {
                         container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No records yet.</p>';
+                    }
+                });
+        }
+
+        function loadMonthlyProgress() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            fetch('/getMonthlyProgress?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const visits = data.attendanceCount || 0;
+                        const workouts = data.workoutsCount || 0;
+                        document.getElementById('monthlyVisits').textContent = visits;
+                        document.getElementById('monthlyWorkouts').textContent = workouts;
+                        
+                        const goal = 20;
+                        const percent = Math.min((visits / goal) * 100, 100);
+                        document.getElementById('monthlyProgressBar').style.width = percent + '%';
+                        document.getElementById('monthlyProgressText').textContent = `${visits}/${goal} days`;
+                    }
+                });
+        }
+
+        function loadTodayWorkouts() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const today = new Date().toISOString().split('T')[0];
+            
+            fetch(`/my-workout?email=${encodeURIComponent(user.email)}&date=${today}`)
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('todayWorkoutsContainer');
+                    if (data.success && data.workouts.length > 0) {
+                        let html = '';
+                        data.workouts.forEach(w => {
+                            html += `
+                                <div style="background:#0b0b0b; padding:15px; border-radius:12px; border:1px solid #222; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                                    <div>
+                                        <div style="font-weight:700; color:#3b82f6; font-size:16px;">${w.exerciseName}</div>
+                                        <div style="color:var(--text-secondary); font-size:13px; margin-top:4px;">
+                                            ${w.sets} Sets × ${w.reps} Reps ${w.duration ? ' | ' + w.duration : ''}
+                                        </div>
+                                        ${w.notes ? `<div style="font-size:12px; color:var(--text-muted); margin-top:8px; font-style:italic;">Note: ${w.notes}</div>` : ''}
+                                    </div>
+                                    <div style="display:flex; gap:10px; align-items:center;">
+                                        <span class="badge ${w.completed ? 'badge-success' : 'badge-warning'}">${w.completed ? 'Completed' : 'Pending'}</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 20px;">No workouts assigned for today.</p>';
                     }
                 });
         }
