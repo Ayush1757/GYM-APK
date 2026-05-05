@@ -1290,7 +1290,7 @@
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2>💪 GYMRATS</h2>
+            <h2>💪 TFC GYM</h2>
             <button class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
         </div>
         <div class="sidebar-menu">
@@ -1300,19 +1300,8 @@
             <div class="menu-item" onclick="switchPage('announcements')">
                 <i class="fas fa-bullhorn"></i> <span>Announcements</span>
             </div>
-            <div class="menu-item" onclick="switchPage('achievements')">
-                <i class="fas fa-trophy"></i>
-                <span>Achievements & Tasks</span>
-            </div>
-            <div class="menu-item" onclick="switchPage('bmi')">
-                <i class="fas fa-weight"></i>
-                <span>BMI Calculator</span>
-            </div>
             <div class="menu-item" onclick="switchPage('workouts')">
                 <i class="fas fa-dumbbell"></i> <span>Workout</span>
-            </div>
-            <div class="menu-item" onclick="switchPage('attendance')">
-                <i class="fas fa-calendar-check"></i> <span>Attendance History</span>
             </div>
             <div class="menu-item" onclick="window.location.href='/attendanceQR.html'">
                 <i class="fas fa-qrcode"></i> <span>My Attendance QR</span>
@@ -1325,6 +1314,17 @@
             </div>
             <div class="menu-item" onclick="switchPage('profile')">
                 <i class="fas fa-user"></i> <span>Profile</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('achievements')">
+                <i class="fas fa-trophy"></i>
+                <span>Achievements & Tasks</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('bmi')">
+                <i class="fas fa-weight"></i>
+                <span>BMI Calculator</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('attendance')">
+                <i class="fas fa-calendar-check"></i> <span>Attendance History</span>
             </div>
             <div class="menu-item" onclick="logout()" style="color: #e74c3c;">
                 <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
@@ -1440,17 +1440,20 @@
                 <!-- TODAY'S WORKOUTS -->
                 <div class="card" style="border-top: 4px solid #3b82f6;">
                     <h3 style="color: var(--text-primary); margin-bottom: 20px;">
-                        <i class="fas fa-dumbbell" style="color: #3b82f6; margin-right: 10px;"></i>Today's Assigned Workouts
+                        <i class="fas fa-dumbbell" style="color: #3b82f6; margin-right: 10px;"></i>Today's Assigned
+                        Workouts
                     </h3>
                     <div id="todayWorkoutsContainer">
-                        <p style="text-align: center; color: var(--text-muted); padding: 20px;">No workouts assigned for today.</p>
+                        <p style="text-align: center; color: var(--text-muted); padding: 20px;">No workouts assigned for
+                            today.</p>
                     </div>
                 </div>
 
                 <!-- 30 DAY PROGRESS TRACKER -->
                 <div class="card" style="border-top: 4px solid #10b981;">
                     <h3 style="color: var(--text-primary); margin-bottom: 20px;">
-                        <i class="fas fa-chart-line" style="color: #10b981; margin-right: 10px;"></i>Activity (Last 30 Days)
+                        <i class="fas fa-chart-line" style="color: #10b981; margin-right: 10px;"></i>Activity (Last 30
+                        Days)
                     </h3>
                     <div class="stats-grid">
                         <div class="stat-card" style="padding: 15px; background: #0b0b0b;">
@@ -1463,12 +1466,14 @@
                         </div>
                     </div>
                     <div style="margin-top: 20px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                        <div
+                            style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
                             <span style="color: var(--text-secondary);">Monthly Attendance Goal</span>
                             <span style="color: #10b981;" id="monthlyProgressText">0/20 days</span>
                         </div>
                         <div style="height: 8px; background: #222; border-radius: 4px; overflow: hidden;">
-                            <div id="monthlyProgressBar" style="width: 0%; height: 100%; background: #10b981; transition: width 0.5s;"></div>
+                            <div id="monthlyProgressBar"
+                                style="width: 0%; height: 100%; background: #10b981; transition: width 0.5s;"></div>
                         </div>
                     </div>
                 </div>
@@ -1495,15 +1500,18 @@
                 <!-- TRAINER & OWNER DETAILS -->
                 <div class="grid-2">
                     <div class="card" style="border-left: 4px solid #3b82f6;">
-                        <h3 style="color: var(--text-primary); margin-bottom: 15px;"><i class="fas fa-user-tie" style="color:#3b82f6; margin-right:10px;"></i>Your Trainer</h3>
+                        <h3 style="color: var(--text-primary); margin-bottom: 15px;"><i class="fas fa-user-tie"
+                                style="color:#3b82f6; margin-right:10px;"></i>Your Trainer</h3>
                         <div id="trainerInfo" style="color: var(--text-secondary);">
                             <p style="font-size: 16px; font-weight: bold;" id="trainerNameDisplay">Loading...</p>
                             <p id="trainerRoleDisplay" style="color: var(--text-muted); font-size: 13px;"></p>
-                            <p style="margin-top: 10px;"><i class="fas fa-phone-alt"></i> <span id="trainerPhoneDisplay"></span></p>
+                            <p style="margin-top: 10px;"><i class="fas fa-phone-alt"></i> <span
+                                    id="trainerPhoneDisplay"></span></p>
                         </div>
                     </div>
                     <div class="card" style="border-left: 4px solid #10b981;">
-                        <h3 style="color: var(--text-primary); margin-bottom: 15px;"><i class="fas fa-crown" style="color:#10b981; margin-right:10px;"></i>Gym Owner</h3>
+                        <h3 style="color: var(--text-primary); margin-bottom: 15px;"><i class="fas fa-crown"
+                                style="color:#10b981; margin-right:10px;"></i>Gym Owner</h3>
                         <div id="ownerInfo" style="color: var(--text-secondary);">
                             <p style="font-size: 16px; font-weight: bold;" id="gymOwnerDisplay">Loading...</p>
                             <p style="color: var(--text-muted); font-size: 13px;">Proprietor</p>
@@ -1566,7 +1574,7 @@
             <!-- ACHIEVEMENTS & TASKS PAGE -->
             <div class="page" id="achievements-page">
                 <h1 style="color: var(--text-primary); margin-bottom: 25px;">🏆 Tasks & Achievements</h1>
-                
+
                 <div class="grid-2">
                     <div class="card">
                         <h3 style="color: var(--text-primary); margin-bottom: 15px;">Badges Earned</h3>
@@ -1594,7 +1602,7 @@
             <!-- BMI CALCULATOR PAGE -->
             <div class="page" id="bmi-page">
                 <h1 style="color: var(--text-primary); margin-bottom: 25px;">⚖️ BMI Calculator</h1>
-                
+
                 <div class="grid-2">
                     <div class="card">
                         <h3 style="color: var(--text-primary); margin-bottom: 20px;">Calculate Your BMI</h3>
@@ -1609,8 +1617,9 @@
                         <button class="btn btn-primary" onclick="calculateBMI()" id="calcBMIBtn" style="width: 100%;">
                             Calculate & Save
                         </button>
-                        
-                        <div id="bmiResult" style="margin-top: 20px; display: none; padding: 15px; border-radius: 8px; text-align: center;">
+
+                        <div id="bmiResult"
+                            style="margin-top: 20px; display: none; padding: 15px; border-radius: 8px; text-align: center;">
                             <h2 id="bmiValue" style="font-size: 32px; font-weight: bold;"></h2>
                             <p id="bmiCategory" style="font-weight: 600; margin-top: 5px;"></p>
                         </div>
@@ -2740,7 +2749,7 @@
                             const badgesCount = document.getElementById('dashBadgesCount');
                             if (monthCount) monthCount.textContent = data.monthWorkoutCount || 0;
                             if (badgesCount) badgesCount.textContent = (data.user.badges || []).length;
-                            
+
                             // Update streak if provided by server
                             if (data.user.streak !== undefined && streakEl) {
                                 streakEl.textContent = data.user.streak + ' 🔥';
@@ -2749,6 +2758,9 @@
                     })
                     .catch(e => console.log("Dash progress fetch error", e));
             }
+
+            // Sync Trainer/Owner info
+            loadTrainerDetails();
         }
 
         /* ================= NEW FEATURES JS ================= */
@@ -2783,38 +2795,38 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: user.email, height, weight })
             })
-            .then(r => r.json())
-            .then(data => {
-                btn.disabled = false;
-                btn.innerText = 'Calculate & Save';
-                if (data.success) {
-                    const resDiv = document.getElementById('bmiResult');
-                    resDiv.style.display = 'block';
-                    resDiv.className = 'bmi-result-card ' + data.category.toLowerCase();
-                    document.getElementById('bmiValue').textContent = data.bmi;
-                    document.getElementById('bmiCategory').textContent = data.category;
-                    
-                    // Set color based on category
-                    let color = '#22c55e'; // Normal
-                    if (data.category === 'Underweight') color = '#3b82f6';
-                    if (data.category === 'Overweight') color = '#f97316';
-                    if (data.category === 'Obese') color = '#ef4444';
-                    resDiv.style.backgroundColor = color + '15';
-                    resDiv.style.border = '1px solid ' + color;
-                    document.getElementById('bmiValue').style.color = color;
-                    document.getElementById('bmiCategory').style.color = color;
+                .then(r => r.json())
+                .then(data => {
+                    btn.disabled = false;
+                    btn.innerText = 'Calculate & Save';
+                    if (data.success) {
+                        const resDiv = document.getElementById('bmiResult');
+                        resDiv.style.display = 'block';
+                        resDiv.className = 'bmi-result-card ' + data.category.toLowerCase();
+                        document.getElementById('bmiValue').textContent = data.bmi;
+                        document.getElementById('bmiCategory').textContent = data.category;
 
-                    showToast('BMI calculated and saved!', 'success');
-                    loadBMIRecords();
-                } else {
-                    showToast(data.message, 'error');
-                }
-            })
-            .catch(() => {
-                btn.disabled = false;
-                btn.innerText = 'Calculate & Save';
-                showToast('Failed to calculate BMI', 'error');
-            });
+                        // Set color based on category
+                        let color = '#22c55e'; // Normal
+                        if (data.category === 'Underweight') color = '#3b82f6';
+                        if (data.category === 'Overweight') color = '#f97316';
+                        if (data.category === 'Obese') color = '#ef4444';
+                        resDiv.style.backgroundColor = color + '15';
+                        resDiv.style.border = '1px solid ' + color;
+                        document.getElementById('bmiValue').style.color = color;
+                        document.getElementById('bmiCategory').style.color = color;
+
+                        showToast('BMI calculated and saved!', 'success');
+                        loadBMIRecords();
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerText = 'Calculate & Save';
+                    showToast('Failed to calculate BMI', 'error');
+                });
         }
 
         function loadBMIRecords() {
@@ -2856,7 +2868,7 @@
                         const workouts = data.workoutsCount || 0;
                         document.getElementById('monthlyVisits').textContent = visits;
                         document.getElementById('monthlyWorkouts').textContent = workouts;
-                        
+
                         const goal = 20;
                         const percent = Math.min((visits / goal) * 100, 100);
                         document.getElementById('monthlyProgressBar').style.width = percent + '%';
@@ -2868,7 +2880,7 @@
         function loadTodayWorkouts() {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             const today = new Date().toISOString().split('T')[0];
-            
+
             fetch(`/my-workout?email=${encodeURIComponent(user.email)}&date=${today}`)
                 .then(r => r.json())
                 .then(data => {
@@ -2906,7 +2918,7 @@
                     if (data.success && data.user) {
                         const u = data.user;
                         document.getElementById('userPointsDisplay').textContent = u.points || 0;
-                        
+
                         // Load Badges
                         const bCont = document.getElementById('badgesContainer');
                         if (u.badges && u.badges.length > 0) {
@@ -2938,10 +2950,10 @@
                                             <div style="font-size:11px; margin-top:5px;"><i class="fas fa-coins" style="color:#fbbf24;"></i> ${t.points} Points</div>
                                         </div>
                                         <div>
-                                            ${isDone ? 
-                                                '<span style="color:#22c55e; font-weight:700;"><i class="fas fa-check-circle"></i> Done</span>' : 
-                                                `<button class="btn btn-primary" onclick="completeTask('${t.id}')" style="padding:5px 12px; font-size:12px;">Complete</button>`
-                                            }
+                                            ${isDone ?
+                                        '<span style="color:#22c55e; font-weight:700;"><i class="fas fa-check-circle"></i> Done</span>' :
+                                        `<button class="btn btn-primary" onclick="completeTask('${t.id}')" style="padding:5px 12px; font-size:12px;">Complete</button>`
+                                    }
                                         </div>
                                     </div>
                                 `;
@@ -2961,17 +2973,17 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: user.email, taskId })
             })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    loadTasks(); // refresh
-                    loadDashboardData(); // update points/badges count
-                } else {
-                    showToast(data.message, 'error');
-                }
-            })
-            .catch(() => showToast('Failed to complete task', 'error'));
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        loadTasks(); // refresh
+                        loadDashboardData(); // update points/badges count
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(() => showToast('Failed to complete task', 'error'));
         }
 
         // Chart Initialization

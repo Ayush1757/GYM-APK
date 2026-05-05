@@ -1750,7 +1750,7 @@
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2> GYM GANG</h2>
+            <h2> </h2>
             <button class="toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar" onclick="toggleSidebar()"><i
                     class="fas fa-bars"></i></button>
         </div>
@@ -2338,23 +2338,26 @@
                         <button class="auto-style-49 btn btn-success" onclick="processPayment()">
                             <i class="fas fa-check"></i> Save Payment Record
                         </button>
-                                      <h3 class="auto-style-7">Gym & Trainer Info</h3>
+                        <h3 class="auto-style-7">Gym & Trainer Info</h3>
                         <div class="form-group">
                             <label>Admin Phone Number (for WhatsApp)</label>
                             <input type="text" id="adminPhoneInput" placeholder="91XXXXXXXXXX" class="auto-style-78">
                         </div>
                         <div class="form-group">
                             <label>Lead Trainer Name</label>
-                            <input type="text" id="trainerNameInput" placeholder="Enter trainer name" class="auto-style-78">
+                            <input type="text" id="trainerNameInput" placeholder="Enter trainer name"
+                                class="auto-style-78">
                         </div>
                         <div class="grid-2">
                             <div class="form-group">
                                 <label>Trainer Phone</label>
-                                <input type="text" id="trainerPhoneInput" placeholder="Enter phone" class="auto-style-78">
+                                <input type="text" id="trainerPhoneInput" placeholder="Enter phone"
+                                    class="auto-style-78">
                             </div>
                             <div class="form-group">
                                 <label>Trainer Role</label>
-                                <input type="text" id="trainerRoleInput" placeholder="e.g. Senior Coach" class="auto-style-78">
+                                <input type="text" id="trainerRoleInput" placeholder="e.g. Senior Coach"
+                                    class="auto-style-78">
                             </div>
                         </div>
                         <div class="form-group">
@@ -2365,9 +2368,10 @@
                             <label>UPI QR Code (for fees)</label>
                             <input type="file" id="upiQRFile" class="auto-style-78">
                         </div>
-                        <button class="auto-style-79 btn btn-primary" onclick="updateAdminSettings()" style="width: 100%;">
+                        <button class="auto-style-79 btn btn-primary" onclick="updateAdminSettings()"
+                            style="width: 100%;">
                             <i class="fas fa-save"></i> Save Gym Settings
-                        </button>                     <i class="fas fa-save"></i> Update Admin UPI Info
+                        </button> <i class="fas fa-save"></i> Update Admin UPI Info
                         </button>
                     </div>
                 </div>
@@ -2469,7 +2473,8 @@
                         <div>
                             <h4
                                 style="font-size:0.95rem;font-weight:600;margin-bottom:1rem;color:var(--primary,#e74c3c);">
-                                <i class="fas fa-user-shield" style="margin-right:6px;"></i>Admin Details</h4>
+                                <i class="fas fa-user-shield" style="margin-right:6px;"></i>Admin Details
+                            </h4>
                             <!-- Photo -->
                             <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
                                 <div id="adminPhotoPreviewHolder"
@@ -2693,13 +2698,15 @@
                 </div>
                 <div class="form-group">
                     <label>Notes</label>
-                    <textarea id="workoutNotes" placeholder="Any special instructions?" class="auto-style-78" style="height:80px;"></textarea>
+                    <textarea id="workoutNotes" placeholder="Any special instructions?" class="auto-style-78"
+                        style="height:80px;"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Date</label>
                     <input type="date" id="workoutDate" class="auto-style-78">
                 </div>
-                <button class="btn btn-primary" style="width:100%;" onclick="submitWorkoutAssignment()">Assign Workout</button>
+                <button class="btn btn-primary" style="width:100%;" onclick="submitWorkoutAssignment()">Assign
+                    Workout</button>
             </div>
         </div>
 
@@ -2722,7 +2729,8 @@
                 </div>
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea id="taskDesc" placeholder="What should the member do?" class="auto-style-78" style="height:80px;"></textarea>
+                    <textarea id="taskDesc" placeholder="What should the member do?" class="auto-style-78"
+                        style="height:80px;"></textarea>
                 </div>
                 <div class="grid-2">
                     <div class="form-group">
@@ -3453,13 +3461,13 @@
                         if (data.success && data.config) {
                             const c = data.config;
                             const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
-                            
+
                             setVal('adminPhoneInput', c.adminPhone);
                             setVal('trainerNameInput', c.trainerName);
                             setVal('trainerPhoneInput', c.trainerPhone);
                             setVal('trainerRoleInput', c.trainerRole);
                             setVal('gymOwnerInput', c.gymOwner);
-                            
+
                             if (c.upiQR && document.getElementById('adminUPIPreview')) {
                                 document.getElementById('adminUPIPreview').innerHTML = `<img src="${c.upiQR}" class="auto-style-111">`;
                             }
@@ -3474,7 +3482,7 @@
                 formData.append('trainerPhone', document.getElementById('trainerPhoneInput').value.trim());
                 formData.append('trainerRole', document.getElementById('trainerRoleInput').value.trim());
                 formData.append('gymOwner', document.getElementById('gymOwnerInput').value.trim());
-                
+
                 const upiFile = document.getElementById('upiQRFile');
                 if (upiFile && upiFile.files[0]) formData.append('upiQR', upiFile.files[0]);
 
@@ -3533,22 +3541,22 @@
                 fetch('/assign-workout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        adminEmail: admin.email, 
-                        memberEmail: email, 
-                        exerciseName, sets, reps, duration, notes, date 
+                    body: JSON.stringify({
+                        adminEmail: admin.email,
+                        memberEmail: email,
+                        exerciseName, sets, reps, duration, notes, date
                     })
                 })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast('Workout assigned!', 'success');
-                        closeModal('assignWorkoutModal');
-                    } else {
-                        showToast(data.message, 'error');
-                    }
-                })
-                .catch(() => showToast('Failed to assign workout', 'error'));
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Workout assigned!', 'success');
+                            closeModal('assignWorkoutModal');
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(() => showToast('Failed to assign workout', 'error'));
             }
 
             function submitTask() {
@@ -3566,16 +3574,16 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ adminEmail: admin.email, memberEmail: email, title, description, points, category })
                 })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast('Goal assigned successfully!', 'success');
-                        closeModal('assignTaskModal');
-                    } else {
-                        showToast(data.message, 'error');
-                    }
-                })
-                .catch(() => showToast('Failed to assign goal', 'error'));
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Goal assigned successfully!', 'success');
+                            closeModal('assignTaskModal');
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(() => showToast('Failed to assign goal', 'error'));
             }
 
             function updateGymDetails() {

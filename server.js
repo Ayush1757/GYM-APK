@@ -731,6 +731,66 @@ const otpSchema = new mongoose.Schema({
 
 const Otp = mongoose.model("Otp", otpSchema);
 
+/* ================= LOGIN OTP API ================= */
+
+app.post("/request-login-otp", async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ success: false, message: "Email is required" });
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ success: false, message: "No account found with this email" });
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Remove any existing OTPs for this email
+        await Otp.deleteMany({ email });
+        
+        // Save new OTP
+        await Otp.create({ email, otp });
+
+        // Send Email
+        await sendOTP(email, otp);
+
+        res.json({ success: true, message: "OTP sent to your email" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/verify-login-otp", async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        if (!email || !otp) return res.status(400).json({ success: false, message: "Email and OTP are required" });
+
+        const record = await Otp.findOne({ email, otp });
+        if (!record) return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+        // Clean up OTP
+        await Otp.deleteOne({ _id: record._id });
+
+        // Success - log them in
+        res.json({
+            success: true,
+            message: "Login successful via OTP",
+            user: {
+                fullname: user.fullname,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                expiry: user.expiry,
+                streak: user.streak,
+                points: user.points
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 
 /* ================= MULTER CONFIG ================= */
 
