@@ -143,6 +143,10 @@
             <input type="text" id="otpInput" maxlength="6" placeholder="000000"
                 style="text-align:center; font-size:24px; letter-spacing:10px; width:180px; margin:20px auto; display:block; background:rgba(255,255,255,0.05); border:1px solid #333;">
             <button onclick="verifyOTP()" id="verifyBtn">Verify & Create Account</button>
+            <div style="margin-top: 15px; font-size: 13px;">
+                <span style="color: #666;">Didn't receive code?</span>
+                <a href="#" onclick="resendRegisterOTP(event)" id="resendLink" style="color: #ff1a1a; text-decoration: none; font-weight: bold; margin-left: 5px;">Resend OTP</a>
+            </div>
             <p style="font-size: 12px; margin-top: 15px;"><a href="#" onclick="location.reload()"
                     style="color: #666; text-decoration:none;">Cancel</a></p>
         </div>
@@ -239,6 +243,51 @@
                 alert('Verification Error');
                 btn.innerText = originalText;
                 btn.disabled = false;
+            }
+        }
+        async function resendRegisterOTP(e) {
+            if (e) e.preventDefault();
+            const resendLink = document.getElementById('resendLink');
+            const originalText = resendLink.innerText;
+            
+            resendLink.innerText = 'Sending...';
+            resendLink.style.pointerEvents = 'none';
+            resendLink.style.opacity = '0.5';
+
+            try {
+                const response = await fetch('/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('A new OTP has been sent to your email.');
+                    // Disable for 30 seconds
+                    let timeLeft = 30;
+                    const interval = setInterval(() => {
+                        resendLink.innerText = `Resend in ${timeLeft}s`;
+                        timeLeft--;
+                        if (timeLeft < 0) {
+                            clearInterval(interval);
+                            resendLink.innerText = originalText;
+                            resendLink.style.pointerEvents = 'auto';
+                            resendLink.style.opacity = '1';
+                        }
+                    }, 1000);
+                } else {
+                    alert(result.message || 'Error resending OTP');
+                    resendLink.innerText = originalText;
+                    resendLink.style.pointerEvents = 'auto';
+                    resendLink.style.opacity = '1';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error connecting to server');
+                resendLink.innerText = originalText;
+                resendLink.style.pointerEvents = 'auto';
+                resendLink.style.opacity = '1';
             }
         }
     </script>

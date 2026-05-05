@@ -2671,6 +2671,10 @@
                         style="text-align:center; font-size:24px; letter-spacing:10px; width:180px; margin:20px auto; display:block; background:#111; border:1px solid #333; color:white; border-radius: 8px; padding: 10px;">
                     <button class="btn btn-primary" onclick="verifyMemberOTP()" id="adminVerifyBtn"
                         style="width: 100%; height: 45px; font-weight: bold;">Verify & Create Account</button>
+                    <div style="margin-top: 15px; font-size: 13px;">
+                        <span style="color: #666;">Didn't receive code?</span>
+                        <a href="#" onclick="resendAdminMemberOTP(event)" id="adminResendLink" style="color: #ff1a1a; text-decoration: none; font-weight: bold; margin-left: 5px; cursor: pointer;">Resend OTP</a>
+                    </div>
                     <button class="btn btn-secondary" onclick="closeModal('addMemberOTPModal')"
                         style="width: 100%; margin-top: 10px; background: transparent; border: none; font-size: 12px; color: #666;">Cancel</button>
                 </div>
@@ -3217,7 +3221,56 @@
                     });
             }
 
+            async function resendAdminMemberOTP(e) {
+                if (e) e.preventDefault();
+                if (typeof userEmailForOTP === 'undefined' || !userEmailForOTP) return showToast('Email missing', 'error');
+
+                const resendLink = document.getElementById('adminResendLink');
+                const originalText = resendLink.innerText;
+                
+                resendLink.innerText = 'Sending...';
+                resendLink.style.pointerEvents = 'none';
+                resendLink.style.opacity = '0.5';
+
+                try {
+                    const response = await fetch('/resend-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: userEmailForOTP })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        showToast('A new OTP has been sent to member email.', 'success');
+                        // Disable for 30 seconds
+                        let timeLeft = 30;
+                        const interval = setInterval(() => {
+                            resendLink.innerText = `Resend in ${timeLeft}s`;
+                            timeLeft--;
+                            if (timeLeft < 0) {
+                                clearInterval(interval);
+                                resendLink.innerText = originalText;
+                                resendLink.style.pointerEvents = 'auto';
+                                resendLink.style.opacity = '1';
+                            }
+                        }, 1000);
+                    } else {
+                        showToast(result.message || 'Error resending OTP', 'error');
+                        resendLink.innerText = originalText;
+                        resendLink.style.pointerEvents = 'auto';
+                        resendLink.style.opacity = '1';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('Error connecting to server', 'error');
+                    resendLink.innerText = originalText;
+                    resendLink.style.pointerEvents = 'auto';
+                    resendLink.style.opacity = '1';
+                }
+            }
+
             let allMembers = [];
+            let userEmailForOTP = '';
             function loadMembers() {
                 fetch('/getMembers')
                     .then(r => r.json())
