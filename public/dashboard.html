@@ -1541,7 +1541,7 @@
         }
 
         .auto-style-113 {
-            color: ' + (data.success ? ' #22c55e' : ' #ff4b5c') + '
+            color: #22c55e;
         }
 
         .auto-style-114 {
@@ -2798,45 +2798,11 @@
         <script>
 
 
-            // Initialize
-            document.addEventListener('DOMContentLoaded', function () {
-                // Load saved theme preference first
-                loadTheme();
-
-                const user = JSON.parse(localStorage.getItem('user'));
-                if (!user) {
-                    window.location.href = '/login.html';
-                    return;
-                }
-                // if a non-admin somehow landed on this page, bounce them out
-                if (user.role !== 'admin') {
-                    // you can comment out the redirect if you want them to stay here
-                    // and see only their QR image
-                    // window.location.href = '/home.html';
-                }
-
-                document.getElementById('userName').textContent = user.fullname;
-                document.getElementById('profileName').value = user.fullname;
-                document.getElementById('profileEmail').value = user.email;
-                document.getElementById('profilePhone').value = user.phone || '';
-                document.getElementById('profileRole').value = user.role === 'admin' ? 'Admin' : 'Member';
-
-                loadDashboardData();
-                loadMembers();
-                loadAnnouncements();
-                initCharts();
-                const attDate = document.getElementById('attendanceDate');
-                if (attDate) {
-                    attDate.value = new Date().toISOString().split('T')[0];
-                    attDate.addEventListener('change', (e) => loadAttendanceTable(e.target.value));
-                }
-                // adjustQrSection(); // Removed as it was undefined and causing page to stick
-            });
-
-            // Sidebar Toggle
+            // Core navigation functions (moved to top for stability)
             function toggleSidebar() {
                 const sidebar = document.getElementById('sidebar');
                 const main = document.getElementById('mainContainer');
+                if (!sidebar || !main) return;
                 sidebar.classList.toggle('active');
                 if (window.innerWidth > 768) {
                     sidebar.classList.toggle('collapsed');
@@ -2844,46 +2810,98 @@
                 }
             }
 
-            // Page Switching
             function switchPage(page) {
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                try {
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
 
-                const pageElement = document.getElementById(page + '-page');
-                if (pageElement) {
-                    pageElement.classList.add('active');
-
-                    // Refresh data based on page
-                    if (page === 'dashboard') { loadDashboardData(); loadAnnouncements(); }
-                    if (page === 'announcements') loadAnnouncements();
-                    if (page === 'attendance') {
-                        const dateInput = document.getElementById('attendanceDate');
-                        if (dateInput && !dateInput.value) {
-                            dateInput.value = new Date().toISOString().split('T')[0];
+                    const targetPage = document.getElementById(page + '-page');
+                    if (targetPage) {
+                        targetPage.classList.add('active');
+                        
+                        // Refresh data based on page
+                        if (page === 'dashboard') { loadDashboardData(); loadAnnouncements(); }
+                        if (page === 'announcements') loadAnnouncements();
+                        if (page === 'attendance') {
+                            const dateInput = document.getElementById('attendanceDate');
+                            if (dateInput && !dateInput.value) {
+                                dateInput.value = new Date().toISOString().split('T')[0];
+                            }
+                            loadAttendanceTable(dateInput ? dateInput.value : null);
                         }
-                        loadAttendanceTable(dateInput ? dateInput.value : null);
+                        if (page === 'payments') {
+                            loadPayments();
+                            loadAdminConfig();
+                            loadMembers();
+                        }
+                        if (page === 'generateQr') {
+                            populateGenQRDropdown();
+                        }
+                        if (page === 'workoutAssign') {
+                            populateWorkoutMemberDropdown();
+                            populateWorkoutHistoryFilter();
+                            loadWorkoutHistory();
+                            loadCompletionStats();
+                        }
                     }
-                    if (page === 'payments') {
-                        loadPayments();
-                        loadAdminConfig();
-                        loadMembers();
-                    }
-                    if (page === 'generateQr') {
-                        populateGenQRDropdown();
-                    }
-                    if (page === 'workoutAssign') {
-                        populateWorkoutMemberDropdown();
-                        populateWorkoutHistoryFilter();
-                        loadWorkoutHistory();
-                        loadCompletionStats();
-                    }
-                }
 
-                const menuItem = document.querySelector(`[onclick="switchPage('${page}')"]`);
-                if (menuItem) {
-                    menuItem.classList.add('active');
+                    // Highlight menu item
+                    document.querySelectorAll('.menu-item').forEach(item => {
+                        const onclick = item.getAttribute('onclick');
+                        if (onclick && onclick.includes(`'${page}'`)) {
+                            item.classList.add('active');
+                        }
+                    });
+
+                    // Close sidebar on mobile after selection
+                    if (window.innerWidth <= 768) {
+                        const sidebar = document.getElementById('sidebar');
+                        if (sidebar) sidebar.classList.remove('active');
+                    }
+                    
+                    // Handle QR Scanner specific logic
+                    if (typeof onPageSwitch === 'function') onPageSwitch(page);
+                } catch (e) {
+                    console.error("Page switch error:", e);
                 }
             }
+
+            // Initialize
+            document.addEventListener('DOMContentLoaded', function () {
+                try {
+                    // Load saved theme preference first
+                    loadTheme();
+
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (!user) {
+                        window.location.href = '/login.html';
+                        return;
+                    }
+
+                    document.getElementById('userName').textContent = user.fullname;
+                    document.getElementById('profileName').value = user.fullname;
+                    document.getElementById('profileEmail').value = user.email;
+                    document.getElementById('profilePhone').value = user.phone || '';
+                    document.getElementById('profileRole').value = user.role === 'admin' ? 'Admin' : 'Member';
+
+                    loadDashboardData();
+                    loadMembers();
+                    loadAnnouncements();
+                    initCharts();
+                    
+                    const attDate = document.getElementById('attendanceDate');
+                    if (attDate) {
+                        attDate.value = new Date().toISOString().split('T')[0];
+                        attDate.addEventListener('change', (e) => loadAttendanceTable(e.target.value));
+                    }
+                } catch (err) {
+                    console.error("Dashboard Init Error:", err);
+                }
+            });
+
+
+
+            // Consolidated switchPage logic (already moved to top)
 
             // Modal Functions
             function openModal(modalId) {
@@ -2990,6 +3008,10 @@
             setInterval(loadDashboardData, 10000);
             // Chart Initialization
             function initCharts() {
+                if (typeof Chart === 'undefined') {
+                    console.warn("Chart.js library not loaded yet.");
+                    return;
+                }
                 const attendanceCtx = document.getElementById('attendanceChart');
                 if (attendanceCtx) {
                     new Chart(attendanceCtx, {
@@ -4019,12 +4041,10 @@
             }
 
             // Stop camera if navigating away from QR Scanner page
-            var _origSwitchPage = switchPage;
-            switchPage = function (page) {
+            function onPageSwitch(page) {
                 if (page !== 'qrScanner' && scanStream) stopQrScanner();
                 if (page === 'qrScanner') loadRecentScans();
-                _origSwitchPage(page);
-            };
+            }
 
             // Close dropdowns on outside click
             document.addEventListener('click', function (e) {
