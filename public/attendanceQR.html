@@ -1,134 +1,86 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <meta charset="UTF-8">
-    <title>Attendance QR</title>
+<meta charset="UTF-8">
+<title>Attendance QR</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="responsive.css">
-    <style>
-        body {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(-45deg, #050505, #1a0000, #330000, #000000);
-            background-size: 400% 400%;
-            animation: gradientMove 10s ease infinite;
-            padding: 20px;
-        }
+<style>
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background: linear-gradient(-45deg, #000000, #220000, #440000, #ff0000);
+background-size:400% 400%;
+animation: gradientMove 10s ease infinite;
+color:white;
+font-family:'Segoe UI', sans-serif;
+}
 
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+@keyframes gradientMove{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
 
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 40px;
-            border-radius: 25px;
-            text-align: center;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 26, 26, 0.2);
-            border: 1px solid rgba(255, 26, 26, 0.3);
-        }
+.card{
+background: rgba(0,0,0,0.75);
+padding:40px;
+border-radius:25px;
+text-align:center;
+width:420px;
+box-shadow:0 0 40px rgba(255,0,0,0.35);
+}
 
-        h1 {
-            color: #ff1a1a;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(255, 26, 26, 0.3);
-            font-size: 24px;
-        }
+h1{
+color:#ff3333;
+margin-bottom:20px;
+}
 
-        #qrcode {
-            margin-top: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            display: inline-block;
-        }
-
-        #qrcode img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        @media (max-width: 480px) {
-            .card { padding: 30px 20px; }
-            h1 { font-size: 20px; }
-        }
-    </style>
+#qrcode{
+margin-top:20px;
+display:flex;
+justify-content:center;
+}
+</style>
 </head>
 
 <body>
 
-    <div class="card">
-        <div style="text-align: left; margin-bottom: 15px;">
-            <button onclick="window.history.back()"
-                style="background: none; border: 1px solid rgba(255,26,26,0.3); color: #ff1a1a; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s;">
-                <i class="fas fa-arrow-left"></i> Back
-            </button>
-        </div>
-        <h1>Your Attendance QR</h1>
-        <p style="color: #9ca3af; font-size: 14px;">Show this QR to Gym Staff for daily check-in</p>
-        <div id="qrcode"></div>
-        <div style="margin-top: 25px; font-size: 12px; color: #666;">
-            This code is unique to your account.
-        </div>
-    </div>
+<div class="card">
+<h1>Your Attendance QR</h1>
+<p>Show this QR to Gym Staff</p>
+<div id="qrcode"></div>
+</div>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>
 
-    <script>
+const user = JSON.parse(localStorage.getItem("user"));
 
-        const user = JSON.parse(localStorage.getItem("user"));
+if(!user){
+    alert("Please login first");
+    window.location.href = "/login.html";
+}
 
-        if (!user) {
-            alert("Please login first");
-            window.location.href = "/login.html";
-        } else {
-            // Generate QR code from email
-            const qrcodeContainer = document.getElementById("qrcode");
-            
-            // Check if there's an admin-uploaded QR image first
-            fetch("/getUserQR?email=" + encodeURIComponent(user.email))
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.qrImage) {
-                        // Show uploaded image
-                        qrcodeContainer.innerHTML = `<img src="${data.qrImage}" style="width:220px; height:220px; border-radius:8px;">`;
-                        qrcodeContainer.style.background = "none";
-                        qrcodeContainer.style.padding = "0";
-                    } else {
-                        // Fallback: Generate QR from email
-                        new QRCode(qrcodeContainer, {
-                            text: user.email,
-                            width: 220,
-                            height: 220,
-                            colorDark: "#000000",
-                            colorLight: "#ffffff",
-                            correctLevel: QRCode.CorrectLevel.H
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.error("Error fetching QR:", err);
-                    // Fallback: Generate QR from email
-                    new QRCode(qrcodeContainer, {
-                        text: user.email,
-                        width: 220,
-                        height: 220
-                    });
-                });
-        }
+fetch("/getUserQR?email=" + encodeURIComponent(user.email))
+.then(res => res.json())
+.then(data => {
+    const qrDiv = document.getElementById("qrcode");
+    if (data.success && data.qrImage) {
+        const img = document.createElement("img");
+        img.src = data.qrImage;
+        img.alt = "Your QR code";
+        img.style.maxWidth = "220px";
+        img.style.width = "100%";
+        qrDiv.appendChild(img);
+    } else {
+        qrDiv.innerHTML = "<p style='color:#9ca3af;'>No QR assigned. Ask admin to upload your QR.</p>";
+    }
+});
 
-    </script>
+</script>
 
 </body>
-
 </html>

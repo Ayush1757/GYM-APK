@@ -1,192 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Register</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Register</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="responsive.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-            --primary-red: #ff1a1a;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', sans-serif;
+}
 
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #050505 0%, #1a0000 50%, #000000 100%);
-            padding: 40px 20px;
-        }
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: linear-gradient(-45deg, #000000, #220000, #440000, #ff0000);
+    background-size:400% 400%;
+    animation: gradientMove 10s ease infinite;
+    overflow:hidden;
+}
 
-        .register-container {
-            width: 360px;
-            padding: 40px;
-            border-radius: 20px;
-            backdrop-filter: blur(15px);
-            background: rgba(0, 0, 0, 0.7);
-            box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
-            text-align: center;
-            color: white;
-        }
+@keyframes gradientMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
 
-        .avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            margin-bottom: 20px;
-            border: 3px solid #ff1a1a;
-            box-shadow: 0 0 20px #ff1a1a;
-        }
+.register-container{
+    width:360px;
+    padding:40px;
+    border-radius:20px;
+    backdrop-filter: blur(15px);
+    background: rgba(0,0,0,0.7);
+    box-shadow: 0 0 40px rgba(255,0,0,0.3);
+    text-align:center;
+    color:white;
+}
 
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: none;
-            outline: none;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.4);
-            color: white;
-            transition: 0.3s;
-        }
+.avatar{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    margin-bottom:20px;
+    border:3px solid #ff1a1a;
+    box-shadow:0 0 20px #ff1a1a;
+}
 
-        input:focus {
-            background: rgba(255, 0, 0, 0.25);
-            box-shadow: 0 0 10px #ff1a1a;
-        }
+input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:none;
+    outline:none;
+    border-radius:10px;
+    background:rgba(0,0,0,0.4);
+    color:white;
+    transition:0.3s;
+}
 
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            border: none;
-            border-radius: 10px;
-            background: #ff1a1a;
-            color: #ffffff;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+input:focus{
+    background:rgba(255,0,0,0.25);
+    box-shadow:0 0 10px #ff1a1a;
+}
 
-        button:hover {
-            background: #cc0000;
-            transform: scale(1.05);
-        }
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    background:#ff1a1a;
+    color:#ffffff;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
 
-        .footer {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #ccc;
-        }
+button:hover{
+    background:#cc0000;
+    transform:scale(1.05);
+}
 
-        .footer a {
-            color: #ff4d4d;
-            text-decoration: none;
-        }
-    </style>
+.footer{
+    margin-top:15px;
+    font-size:14px;
+    color:#ccc;
+}
+
+.footer a{
+    color:#ff4d4d;
+    text-decoration:none;
+}
+</style>
 </head>
 
 <body>
 
-    <div class="register-container">
+<div class="register-container">
 
-        <!-- Male Avatar -->
-        <img src="https://cdn-icons-png.flaticon.com/512/4140/4140051.png" class="avatar">
+    <!-- Male Avatar -->
+    <img src="https://cdn-icons-png.flaticon.com/512/4140/4140051.png" class="avatar">
 
-        <h2>Create Account</h2>
+    <h2>Create Account</h2>
 
-        <form action="/register" method="POST" id="regForm">
+    <form action="/register" method="POST">
+    
+    <input type="text" name="fullname" placeholder="Full Name" required>
 
-            <input type="text" name="fullname" placeholder="Full Name" required>
+    <input type="email" name="email" placeholder="Enter Email" required>
 
-            <input type="email" name="email" placeholder="Enter Email" required>
+    <input type="password" name="password" placeholder="Create Password" required>
 
-            <input type="password" name="password" placeholder="Create Password" required>
+    <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
 
-            <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
+    <label>Register as</label>
+    <select name="role" id="roleSelect">
+    <option value="user" selected>Member</option>
+    <option value="admin">Administrator</option>
+    </select>
 
-            <label>Register as</label>
-            <select name="role" id="roleSelect">
-                <option value="user" selected>Member</option>
-                <option value="admin">Administrator</option>
-            </select>
-
-            <div id="adminKeyContainer" style="display:none;">
-                <label>Admin key</label>
-                <input type="password" name="adminKey" placeholder="Secret code">
-            </div>
-
-            <button type="submit">Register</button>
-
-        </form>
-
-        <div class="footer">
-            Already have an account? <a href="/login.html">Login</a>
-        </div>
-
+    <div id="adminKeyContainer" style="display:none;">
+    <label>Admin key</label>
+    <input type="password" name="adminKey" placeholder="Secret code">
     </div>
 
-    <script>
-        // show/hide admin key input when role is changed
-        (function () {
-            const roleSelect = document.getElementById('roleSelect');
-            const adminContainer = document.getElementById('adminKeyContainer');
-            if (!roleSelect || !adminContainer) return;
-            function update() {
-                adminContainer.style.display = roleSelect.value === 'admin' ? 'block' : 'none';
-            }
-            roleSelect.addEventListener('change', update);
-            update();
-        })();
+    <button type="submit">Register</button>
 
-        // Handle Registration Form
-        document.getElementById('regForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-            btn.innerText = 'Creating Account...';
-            btn.disabled = true;
+</form>
 
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
+    <div class="footer">
+        Already have an account? <a href="/login.html">Login</a>
+    </div>
 
-            try {
-                const response = await fetch('/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+</div>
 
-                const result = await response.json();
-                if (result.success) {
-                    alert('Registration Successful!');
-                    if (result.user) {
-                        localStorage.setItem("user", JSON.stringify(result.user));
-                        const redirect = result.user.role === 'admin' ? '/dashboard.html' : '/home.html';
-                        window.location.href = redirect;
-                    } else {
-                        window.location.href = '/login.html';
-                    }
-                } else {
-                    alert(result.message || 'Error creating account');
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                }
-            } catch (err) {
-                alert('Registration Issue: ' + err.message);
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        });
-    </script>
+<script>
+    // show/hide admin key input when role is changed
+    (function(){
+        const roleSelect = document.getElementById('roleSelect');
+        const adminContainer = document.getElementById('adminKeyContainer');
+        if(!roleSelect || !adminContainer) return;
+        function update() {
+            adminContainer.style.display = roleSelect.value === 'admin' ? 'block' : 'none';
+        }
+        roleSelect.addEventListener('change', update);
+        // initialize on load
+        update();
+    })();
+</script>
 
 </body>
-
 </html>

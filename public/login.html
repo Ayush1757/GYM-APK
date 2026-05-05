@@ -1,226 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Sign In - Gym App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="responsive.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+<meta charset="UTF-8">
+<title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #080000;
-            padding: 20px;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
 
-        .login-container {
-            width: 100%;
-            max-width: 420px;
-            padding: 50px 40px;
-            background-color: #0d0202;
-            border-radius: 40px;
-            border: 1px solid #1a0505;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: linear-gradient(-45deg, #000000, #220000, #440000, #ff0000);
+    background-size: 400% 400%;
+    animation: gradientMove 10s ease infinite;
+    overflow:hidden;
+}
 
-        .avatar-circle {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            border: 2px solid #ff0000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 25px;
-            background-color: #000;
-        }
+/* Animated Background */
+@keyframes gradientMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
 
-        .avatar-circle svg {
-            width: 45px;
-            height: 45px;
-            fill: #111;
-            stroke: #000;
-            stroke-width: 1;
-        }
+/* Glass Card */
+.login-container{
+    width:360px;
+    padding:40px;
+    border-radius:20px;
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+    text-align:center;
+    color:white;
+}
 
-        h2 {
-            color: #ffffff;
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 35px;
-            letter-spacing: 0.5px;
-        }
+/* Avatar */
+.avatar{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    margin-bottom:20px;
+    border:3px solid #ff1a1a;
+    box-shadow:0 0 20px #ff1a1a;
+}
 
-        form {
-            width: 100%;
-        }
+/* Input Fields */
+input,select{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:none;
+    outline:none;
+    border-radius:10px;
+    background:rgba(0,0,0,0.4);
+    color:white;
+    transition:0.3s;
+}
 
-        .input-field {
-            width: 100%;
-            padding: 18px 20px;
-            margin-bottom: 12px;
-            border: none;
-            border-radius: 12px;
-            background-color: #e9efff;
-            color: #000;
-            font-size: 16px;
-            outline: none;
-            transition: 0.3s;
-        }
+input:focus,select:focus{
+    background:rgba(255,0,0,0.25);
+    box-shadow:0 0 10px #ff1a1a;
+}
 
-        .input-field::placeholder {
-            color: #666;
-        }
+/* Button */
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    background:#ff1a1a;
+    color:#ffffff;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
 
-        .role-label {
-            color: #8d8d8d;
-            font-size: 16px;
-            margin: 15px 0 10px;
-            display: block;
-        }
+button:hover{
+    background:#cc0000;
+    transform:scale(1.05);
+}
 
-        .role-select {
-            width: 100%;
-            padding: 15px 20px;
-            background-color: #0f0f0f;
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            margin-bottom: 25px;
-            appearance: none;
-            cursor: pointer;
-            text-align: center;
-            outline: none;
-        }
+/* Footer */
+.footer{
+    margin-top:15px;
+    font-size:14px;
+    color:#ccc;
+}
 
-        .login-btn {
-            background-color: #ffffff;
-            color: #000000;
-            padding: 5px 15px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: normal;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: 0.2s;
-        }
-
-        .login-btn:hover {
-            opacity: 0.9;
-        }
-
-        .footer {
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .footer a {
-            color: #7e57c2;
-            text-decoration: none;
-            margin-left: 5px;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Mobile specific adjustments */
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 40px 25px;
-                border-radius: 30px;
-            }
-            
-            h2 {
-                font-size: 24px;
-            }
-        }
-    </style>
+.footer a{
+    color:#ff4d4d;
+    text-decoration:none;
+}
+</style>
 </head>
 
 <body>
 
-    <div class="login-container">
-        <div class="avatar-circle">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 11c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm6-3.2c0-3.2-2.7-5.8-6-5.8s-6 2.6-6 5.8V10H5v11h14V10h-1V7.8zM12 4.2c2.1 0 3.8 1.6 3.8 3.6V10H8.2V7.8c0-2 1.7-3.6 3.8-3.6zM17 19H7v-7h10v7z"/>
-            </svg>
-        </div>
+<div class="login-container">
+    <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" class="avatar">
+    <h2>Sign In</h2>
 
-        <h2>Sign In</h2>
+    <form action="/login" method="POST">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
 
-        <form id="loginForm">
-            <input type="email" name="email" id="loginEmail" class="input-field" placeholder="Email" required>
-            <input type="password" name="password" id="loginPassword" class="input-field" placeholder="Password" required>
+        <label>Login as</label>
+        <select name="role" required>
+            <option value="user" selected>Member</option>
+            <option value="admin">Administrator</option>
+        </select>
 
-            <label class="role-label">Login as</label>
-            <select name="role" id="loginRole" class="role-select" required>
-                <option value="user" selected>Member</option>
-                <option value="admin">Administrator</option>
-            </select>
+        <button type="submit">Login</button>
+    </form>
 
-            <button type="submit" id="loginBtn" class="login-btn">Login</button>
-        </form>
-
-        <div class="footer">
-            Don't have an account? <a href="/register.html">Register</a>
-        </div>
+    <div class="footer">
+        Don't have an account?
+        <a href="/register.html">Register</a>
     </div>
-
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            const originalText = btn.innerText;
-            btn.innerText = '...';
-            btn.disabled = true;
-
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const role = document.getElementById('loginRole').value;
-
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, role })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    localStorage.setItem("user", JSON.stringify(result.user));
-                    window.location.href = result.redirect;
-                } else {
-                    alert(result.message || 'Login failed');
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Login Error. Please try again.');
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        });
-    </script>
+</div>
 
 </body>
-
 </html>
