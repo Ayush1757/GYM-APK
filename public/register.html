@@ -1,157 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Register</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Segoe UI', sans-serif;
-}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-body{
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background: linear-gradient(-45deg, #000000, #220000, #440000, #ff0000);
-    background-size:400% 400%;
-    animation: gradientMove 10s ease infinite;
-    overflow:hidden;
-}
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(-45deg, #000000, #220000, #440000, #ff0000);
+            background-size: 400% 400%;
+            animation: gradientMove 10s ease infinite;
+            overflow: hidden;
+        }
 
-@keyframes gradientMove{
-    0%{background-position:0% 50%;}
-    50%{background-position:100% 50%;}
-    100%{background-position:0% 50%;}
-}
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
 
-.register-container{
-    width:360px;
-    padding:40px;
-    border-radius:20px;
-    backdrop-filter: blur(15px);
-    background: rgba(0,0,0,0.7);
-    box-shadow: 0 0 40px rgba(255,0,0,0.3);
-    text-align:center;
-    color:white;
-}
+            50% {
+                background-position: 100% 50%;
+            }
 
-.avatar{
-    width:90px;
-    height:90px;
-    border-radius:50%;
-    margin-bottom:20px;
-    border:3px solid #ff1a1a;
-    box-shadow:0 0 20px #ff1a1a;
-}
+            100% {
+                background-position: 0% 50%;
+            }
+        }
 
-input{
-    width:100%;
-    padding:12px;
-    margin:10px 0;
-    border:none;
-    outline:none;
-    border-radius:10px;
-    background:rgba(0,0,0,0.4);
-    color:white;
-    transition:0.3s;
-}
+        .register-container {
+            width: 360px;
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
+            text-align: center;
+            color: white;
+        }
 
-input:focus{
-    background:rgba(255,0,0,0.25);
-    box-shadow:0 0 10px #ff1a1a;
-}
+        .avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 3px solid #ff1a1a;
+            box-shadow: 0 0 20px #ff1a1a;
+        }
 
-button{
-    width:100%;
-    padding:12px;
-    margin-top:15px;
-    border:none;
-    border-radius:10px;
-    background:#ff1a1a;
-    color:#ffffff;
-    font-weight:bold;
-    cursor:pointer;
-    transition:0.3s;
-}
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            outline: none;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            transition: 0.3s;
+        }
 
-button:hover{
-    background:#cc0000;
-    transform:scale(1.05);
-}
+        input:focus {
+            background: rgba(255, 0, 0, 0.25);
+            box-shadow: 0 0 10px #ff1a1a;
+        }
 
-.footer{
-    margin-top:15px;
-    font-size:14px;
-    color:#ccc;
-}
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #ff1a1a;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-.footer a{
-    color:#ff4d4d;
-    text-decoration:none;
-}
-</style>
+        button:hover {
+            background: #cc0000;
+            transform: scale(1.05);
+        }
+
+        .footer {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .footer a {
+            color: #ff4d4d;
+            text-decoration: none;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="register-container">
+    <div class="register-container">
 
-    <!-- Male Avatar -->
-    <img src="https://cdn-icons-png.flaticon.com/512/4140/4140051.png" class="avatar">
+        <!-- Male Avatar -->
+        <img src="https://cdn-icons-png.flaticon.com/512/4140/4140051.png" class="avatar">
 
-    <h2>Create Account</h2>
+        <h2>Create Account</h2>
 
-    <form action="/register" method="POST">
-    
-    <input type="text" name="fullname" placeholder="Full Name" required>
+        <form action="/register" method="POST" id="regForm">
 
-    <input type="email" name="email" placeholder="Enter Email" required>
+            <input type="text" name="fullname" placeholder="Full Name" required>
 
-    <input type="password" name="password" placeholder="Create Password" required>
+            <input type="email" name="email" placeholder="Enter Email" required>
 
-    <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
+            <input type="password" name="password" placeholder="Create Password" required>
 
-    <label>Register as</label>
-    <select name="role" id="roleSelect">
-    <option value="user" selected>Member</option>
-    <option value="admin">Administrator</option>
-    </select>
+            <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
 
-    <div id="adminKeyContainer" style="display:none;">
-    <label>Admin key</label>
-    <input type="password" name="adminKey" placeholder="Secret code">
+            <label>Register as</label>
+            <select name="role" id="roleSelect">
+                <option value="user" selected>Member</option>
+                <option value="admin">Administrator</option>
+            </select>
+
+            <div id="adminKeyContainer" style="display:none;">
+                <label>Admin key</label>
+                <input type="password" name="adminKey" placeholder="Secret code">
+            </div>
+
+            <button type="submit">Register</button>
+
+        </form>
+
+        <div class="footer">
+            Already have an account? <a href="/login.html">Login</a>
+        </div>
+
     </div>
 
-    <button type="submit">Register</button>
-
-</form>
-
-    <div class="footer">
-        Already have an account? <a href="/login.html">Login</a>
+    <div id="otpModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+        <div class="register-container" style="width:340px; padding:30px; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);">
+            <div style="font-size: 40px; color: #ff1a1a; margin-bottom: 20px;">📧</div>
+            <h3>Verify Your Email</h3>
+            <p style="font-size: 13px; color: #ccc; margin: 15px 0;">We've sent a 4-digit code to:<br><b
+                    id="otpEmailDisplay" style="color:#ff1a1a;"></b></p>
+            <input type="text" id="otpInput" maxlength="4" placeholder="0000"
+                style="text-align:center; font-size:24px; letter-spacing:10px; width:180px; margin:20px auto; display:block; background:rgba(255,255,255,0.05); border:1px solid #333;">
+            <button onclick="verifyOTP()" id="verifyBtn">Verify & Create Account</button>
+            <p style="font-size: 12px; margin-top: 15px;"><a href="#" onclick="location.reload()"
+                    style="color: #666; text-decoration:none;">Cancel</a></p>
+        </div>
     </div>
 
-</div>
+    <script>
+        let userEmail = '';
 
-<script>
-    // show/hide admin key input when role is changed
-    (function(){
-        const roleSelect = document.getElementById('roleSelect');
-        const adminContainer = document.getElementById('adminKeyContainer');
-        if(!roleSelect || !adminContainer) return;
-        function update() {
-            adminContainer.style.display = roleSelect.value === 'admin' ? 'block' : 'none';
+        // show/hide admin key input when role is changed
+        (function () {
+            const roleSelect = document.getElementById('roleSelect');
+            const adminContainer = document.getElementById('adminKeyContainer');
+            if (!roleSelect || !adminContainer) return;
+            function update() {
+                adminContainer.style.display = roleSelect.value === 'admin' ? 'block' : 'none';
+            }
+            roleSelect.addEventListener('change', update);
+            update();
+        })();
+
+        // Handle Registration Form
+        document.getElementById('regForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Sending OTP...';
+            btn.disabled = true;
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            userEmail = data.email;
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('otpEmailDisplay').innerText = userEmail;
+                    document.getElementById('otpModal').style.display = 'flex';
+                } else {
+                    alert(result.message || 'Error sending OTP');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                // Fallback if the server returns non-JSON (like "User already exists")
+                const text = await err.message || 'Error occurred';
+                alert('Registration Issue: ' + text);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        async function verifyOTP() {
+            const otp = document.getElementById('otpInput').value;
+            if (otp.length !== 4) return alert('Enter 4-digit code');
+
+            const btn = document.getElementById('verifyBtn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Verifying...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, otp })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    // Registration and verification successful
+                    // Log the user in automatically
+                    if (result.user) {
+                        localStorage.setItem("user", JSON.stringify(result.user));
+                        const redirect = result.user.role === 'admin' ? '/dashboard.html' : '/home.html';
+                        alert('Registration and Verification Successful! Logging you in...');
+                        window.location.href = redirect;
+                    } else {
+                        alert('Registration Successful! Please login.');
+                        window.location.href = '/login.html';
+                    }
+                } else {
+                    alert(result.message || 'Invalid OTP');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Verification Error');
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
-        roleSelect.addEventListener('change', update);
-        // initialize on load
-        update();
-    })();
-</script>
+    </script>
 
 </body>
+
 </html>

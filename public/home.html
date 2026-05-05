@@ -1,1301 +1,3560 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="UTF-8">
-<title>Gym Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #050505;
-    color: #f9fafb;
-}
-.sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 260px;
-    height: 100vh;
-    background: linear-gradient(135deg, #330000 0%, #990000 50%, #ff1a1a 100%);
-    color: white;
-    overflow-y: auto;
-    transition: all 0.3s ease;
-    z-index: 1000;
-}
-.sidebar.collapsed {
-    width: 80px;
-}
-.sidebar-header {
-    padding: 25px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.sidebar-header h2 {
-    font-size: 20px;
-    font-weight: bold;
-}
-.sidebar.collapsed .sidebar-header h2 {
-    display: none;
-}
-.toggle-btn {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font-size: 18px;
-}
-.sidebar-menu {
-    padding: 20px 0;
-}
-.menu-item {
-    padding: 15px 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    color: rgba(255,255,255,0.8);
-}
-.menu-item:hover {
-    background: rgba(255,255,255,0.1);
-    color: white;
-}
-.menu-item.active {
-    background: rgba(255,255,255,0.2);
-    border-left: 4px solid #fff;
-    color: white;
-}
-.menu-item i {
-    min-width: 25px;
-    text-align: center;
-    font-size: 18px;
-}
-.sidebar.collapsed .menu-item span {
-    display: none;
-}
-.sidebar.collapsed .menu-item {
-    justify-content: center;
-}
-.main-container {
-    margin-left: 260px;
-    transition: all 0.3s ease;
-    min-height: 100vh;
-}
-.main-container.collapsed {
-    margin-left: 80px;
-}
-.navbar {
-    background: #111111;
-    padding: 20px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-.navbar-left {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex: 1;
-}
-.search-bar {
-    flex: 1;
-    max-width: 300px;
-}
-.search-bar input {
-    width: 100%;
-    padding: 10px 15px;
-    border: 1px solid #660000;
-    border-radius: 8px;
-    background: #1a0000;
-    color: #f9fafb;
-}
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-.notification-bell, .user-avatar {
-    cursor: pointer;
-    font-size: 20px;
-    position: relative;
-}
-.notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ff4b5c;
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-}
-.content {
-    padding: 30px;
-}
-.page {
-    display: none;
-}
-.page.active {
-    display: block;
-    animation: fadeIn 0.3s ease;
-}
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-.stat-card {
-    background: #121212;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-    border-left: 4px solid #ff1a1a;
-}
-.stat-card.secondary {
-    border-left-color: #cc0000;
-}
-.stat-card.success {
-    border-left-color: #22c55e;
-}
-.stat-card.warning {
-    border-left-color: #f97316;
-}
-.stat-value {
-    font-size: 32px;
-    font-weight: bold;
-    color: #f9fafb;
-    margin: 10px 0;
-}
-.stat-label {
-    color: #d1d5db;
-    font-size: 14px;
-}
-.stat-icon {
-    font-size: 32px;
-    color: #ff4d4d;
-    margin-bottom: 10px;
-}
-.card {
-    background: #111111;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-    padding: 20px;
-    margin-bottom: 20px;
-}
-.form-group {
-    margin-bottom: 20px;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #f3f4f6;
-}
-.form-group input,
-.form-group textarea,
-.form-group select {
-    width: 100%;
-    padding: 10px 15px;
-    border: 1px solid #4b0000;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 14px;
-    background: #0b0b0b;
-    color: #f9fafb;
-}
-.form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-.btn-primary {
-    background: #ff1a1a;
-    color: white;
-}
-.btn-primary:hover {
-    background: #cc0000;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.35);
-}
-.btn-secondary {
-    background: #1f2933;
-    color: #f9fafb;
-}
-.btn-secondary:hover {
-    background: #111827;
-}
-.btn-danger {
-    background: #ff4b5c;
-    color: white;
-}
-.btn-danger:hover {
-    background: #ff1e38;
-}
-.btn-success {
-    background: #10b981;
-    color: white;
-}
-.btn-success:hover {
-    background: #059669;
-}
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
-.table th {
-    background: #f5f7fa;
-    padding: 15px;
-    text-align: left;
-    font-weight: 600;
-    color: #333;
-    border-bottom: 2px solid #e0e0e0;
-}
-.table td {
-    padding: 15px;
-    border-bottom: 1px solid #e0e0e0;
-}
-.table tr:hover {
-    background: #f9fafb;
-}
-.badge {
-    display: inline-block;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
-.badge-success {
-    background: #d1fae5;
-    color: #065f46;
-}
-.badge-danger {
-    background: #fee2e2;
-    color: #991b1b;
-}
-.badge-warning {
-    background: #fef3c7;
-    color: #92400e;
-}
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 2000;
-    justify-content: center;
-    align-items: center;
-}
-.modal.active {
-    display: flex;
-}
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-}
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e0e0e0;
-}
-.modal-header h3 {
-    margin: 0;
-    color: #333;
-}
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #999;
-}
-.toast {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    border-radius: 8px;
-    background: #667eea;
-    color: white;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    animation: slideIn 0.3s ease;
-    z-index: 3000;
-}
-.toast.success {
-    background: #10b981;
-}
-.toast.error {
-    background: #ff4b5c;
-}
-.toast.info {
-    background: #3b82f6;
-}
-@keyframes slideIn {
-    from {
-        transform: translateX(400px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-.grid-2 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-}
-.user-dropdown {
-    position: relative;
-}
-.dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    min-width: 200px;
-    margin-top: 10px;
-    display: none;
-    z-index: 1500;
-}
-.dropdown-menu.active {
-    display: block;
-}
-.dropdown-menu a {
-    display: block;
-    padding: 12px 20px;
-    color: #333;
-    text-decoration: none;
-    border-bottom: 1px solid #f0f0f0;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-.dropdown-menu a:hover {
-    background: #f5f5f5;
-    padding-left: 25px;
-}
-.dropdown-menu a:last-child {
-    border-bottom: none;
-}
-.chart-container {
-    position: relative;
-    height: 300px;
-    margin-top: 20px;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Gym Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #050505;
+            --bg-secondary: #111111;
+            --bg-card: #121212;
+            --bg-input: #0b0b0b;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --border-color: #4b0000;
+            --border-light: #660000;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --table-header-bg: #1a1a1a;
+            --table-header-text: #f9fafb;
+            --table-border: #333333;
+        }
+
+        body.light-theme {
+            --bg-primary: #050505;
+            --bg-secondary: #111111;
+            --bg-card: #121212;
+            --bg-input: #0b0b0b;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --border-color: #4b0000;
+            --border-light: #660000;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --table-header-bg: #1a1a1a;
+            --table-header-text: #f9fafb;
+            --table-border: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: linear-gradient(135deg, #330000 0%, #990000 50%, #ff1a1a 100%);
+            color: white;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .sidebar.collapsed .sidebar-header h2 {
+            display: none;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #fff;
+            color: white;
+        }
+
+        .menu-item i {
+            min-width: 25px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .sidebar.collapsed .menu-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+        }
+
+        .main-container {
+            margin-left: 260px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-container.collapsed {
+            margin-left: 80px;
+        }
+
+        .navbar {
+            background: var(--bg-secondary);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background 0.3s ease;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-bell,
+        .user-avatar {
+            cursor: pointer;
+            font-size: 20px;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4b5c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            border-left: 4px solid #ff1a1a;
+            transition: background 0.3s ease;
+        }
+
+        .stat-card.secondary {
+            border-left-color: #cc0000;
+        }
+
+        .stat-card.success {
+            border-left-color: #22c55e;
+        }
+
+        .stat-card.warning {
+            border-left-color: #f97316;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            color: #ff4d4d;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #ff1a1a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.35);
+        }
+
+        .btn-secondary {
+            background: #1f2933;
+            color: #f9fafb;
+        }
+
+        .btn-secondary:hover {
+            background: #111827;
+        }
+
+        .btn-danger {
+            background: #ff4b5c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff1e38;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .table th {
+            background: var(--table-header-bg);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--table-header-text);
+            border-bottom: 2px solid var(--table-border);
+        }
+
+        .table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--table-border);
+            color: var(--text-primary);
+        }
+
+        .table tr:hover {
+            background: #0b0b0b;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #052a15;
+            color: #065f46;
+        }
+
+        .badge-danger {
+            background: #2a0505;
+            color: #991b1b;
+        }
+
+        .badge-warning {
+            background: #2a1f05;
+            color: #92400e;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #121212;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+            z-index: 3000;
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        .toast.error {
+            background: #ff4b5c;
+        }
+
+        .toast.info {
+            background: #3b82f6;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #121212;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            margin-top: 10px;
+            display: none;
+            z-index: 1500;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dropdown-menu a:hover {
+            background: #0b0b0b;
+            padding-left: 25px;
+        }
+
+        .dropdown-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* ── Workout Cards (member view) ── */
+        .member-workout-card {
+            border-radius: 14px;
+            border: 1px solid #2a0000;
+            padding: 22px;
+            margin-bottom: 18px;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .member-workout-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+        }
+
+        .member-workout-card.today-card {
+            background: linear-gradient(135deg, #0d1a0d, #051a05);
+            border-color: #22c55e;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.12);
+        }
+
+        .member-workout-card.past-card {
+            background: linear-gradient(135deg, #0d0d0d, #1a0000);
+            border-color: #330000;
+        }
+
+        .today-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #052213;
+            color: #22c55e;
+            border: 1px solid #14532d;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .workout-category-pill {
+            display: inline-block;
+            background: #0a1a2a;
+            color: #60a5fa;
+            border: 1px solid #1e3a5f;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .workout-date-chip {
+            display: inline-block;
+            background: #1a0000;
+            color: #f87171;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .workout-exercise-text {
+            color: #e5e7eb;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+            padding: 14px;
+            margin: 12px 0;
+            font-family: inherit;
+            border-left: 3px solid #ff1a1a;
+        }
+
+        .member-workout-card.today-card .workout-exercise-text {
+            border-left-color: #22c55e;
+        }
+
+        .workout-trainer-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            background: rgba(251, 191, 36, 0.07);
+            border: 1px solid #3d3300;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #fbbf24;
+            margin-top: 10px;
+        }
+
+        /* ── Member Workout Log Table ── */
+        .wlog-section {
+            margin-top: 30px;
+        }
+
+        .wlog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .wlog-header h3 {
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wlog-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .wlog-card {
+            background: linear-gradient(135deg, #0d0d0d, #1a0000);
+            border: 1px solid #330000;
+            border-radius: 14px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .wlog-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 580px;
+        }
+
+        .wlog-table thead th {
+            background: #1a0000;
+            color: #f9fafb;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 2px solid #330000;
+        }
+
+        .wlog-table thead th:first-child {
+            text-align: center;
+            width: 50px;
+        }
+
+        .wlog-table thead th:nth-child(2) {
+            text-align: left;
+            width: 130px;
+        }
+
+        .wlog-table thead th:nth-child(3) {
+            text-align: left;
+        }
+
+        .wlog-table tbody tr {
+            border-bottom: 1px solid #1a0000;
+            transition: background 0.15s;
+        }
+
+        .wlog-table tbody tr:hover {
+            background: rgba(255, 26, 26, 0.04);
+        }
+
+        .wlog-table tbody td {
+            padding: 8px 6px;
+            vertical-align: middle;
+        }
+
+        .wlog-input {
+            background: #0b0b0b;
+            border: 1px solid #330000;
+            border-radius: 6px;
+            color: #f9fafb;
+            padding: 7px 10px;
+            font-size: 13px;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        .wlog-input:focus {
+            border-color: #ff1a1a;
+            outline: none;
+        }
+
+        .wlog-input-num {
+            width: 60px;
+            text-align: center;
+        }
+
+        .wlog-status-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .wlog-status-btn.completed {
+            background: #052a15;
+            color: #22c55e;
+            border-color: #14532d;
+        }
+
+        .wlog-status-btn.in-progress {
+            background: #1a0a00;
+            color: #f97316;
+            border-color: #7c3c00;
+        }
+
+        .wlog-remove-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+            transition: transform 0.15s;
+        }
+
+        .wlog-remove-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .wlog-add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #1a0000, #330000);
+            border: 1px dashed #660000;
+            border-radius: 8px;
+            color: #ff6b6b;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+
+        .wlog-add-btn:hover {
+            background: linear-gradient(135deg, #330000, #4d0000);
+            border-color: #ff1a1a;
+        }
+
+        .wlog-save-btn {
+            background: linear-gradient(135deg, #ff1a1a, #cc0000);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.15s;
+        }
+
+        .wlog-save-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .wlog-clear-btn {
+            background: none;
+            border: 1px solid #4b0000;
+            color: #f87171;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .wlog-saved-msg {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #22c55e;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .wlog-saved-msg.show {
+            opacity: 1;
+        }
+
+        /* ── Progress Tracker ── */
+        .progress-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .progress-page-header h1 {
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .progress-toggle-group {
+            display: flex;
+            background: #1a0000;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #330000;
+        }
+
+        .progress-toggle-btn {
+            padding: 8px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #9ca3af;
+            background: transparent;
+            transition: all 0.25s;
+        }
+
+        .progress-toggle-btn.active {
+            background: linear-gradient(135deg, #ff1a1a, #cc0000);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(255, 26, 26, 0.25);
+        }
+
+        .progress-stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .progress-stat-card {
+            background: linear-gradient(135deg, #0d0d0d, #1a0000);
+            border: 1px solid #330000;
+            border-radius: 14px;
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .progress-stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+        }
+
+        .progress-stat-card .psc-glow {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+
+        .progress-stat-card .psc-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .progress-stat-card .psc-value {
+            font-size: 34px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ff1a1a, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            margin-bottom: 4px;
+        }
+
+        .progress-stat-card .psc-label {
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .progress-stat-card.green .psc-value {
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-stat-card.orange .psc-value {
+            background: linear-gradient(90deg, #f97316, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-stat-card.purple .psc-value {
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Gamification UI ── */
+        .points-badge {
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3);
+        }
+
+        .points-badge i {
+            font-size: 16px;
+        }
+
+        .assignment-card {
+            background: #1a0000;
+            border: 1px solid #330000;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .assignment-card:hover {
+            border-color: #ff1a1a;
+            transform: scale(1.01);
+        }
+
+        .assignment-info h5 {
+            color: #fff;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .assignment-info p {
+            color: #9ca3af;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .assignment-meta {
+            text-align: right;
+        }
+
+        .asgn-points {
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .asgn-btn {
+            background: transparent;
+            border: 1px solid #ff1a1a;
+            color: #ff1a1a;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .asgn-btn:hover {
+            background: #ff1a1a;
+            color: #fff;
+        }
+
+        .asgn-btn.completed {
+            background: #051a0d;
+            border-color: #22c55e;
+            color: #22c55e;
+            cursor: default;
+        }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 16px;
+            margin-top: 15px;
+        }
+
+        .badge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 8px;
+        }
+
+        .badge-icon-wrap {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a1a1a, #000);
+            border: 2px solid #330000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .badge-item.earned .badge-icon-wrap {
+            border-color: #ff1a1a;
+            box-shadow: 0 0 15px rgba(255, 26, 26, 0.3);
+            background: linear-gradient(135deg, #330000, #1a0000);
+        }
+
+        .badge-name {
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 600;
+        }
+
+        .badge-item.earned .badge-name {
+            color: #fff;
+        }
+
+        .past-month-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .past-month-stat {
+            background: #0d0d0d;
+            border: 1px solid #1a0000;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .pms-val {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .pms-lbl {
+            color: #6b7280;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        @media (max-width: 900px) {
+            .progress-charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .progress-chart-card {
+            background: linear-gradient(135deg, #0d0d0d, #1a0000);
+            border: 1px solid #330000;
+            border-radius: 14px;
+            padding: 20px;
+            min-height: 300px;
+        }
+
+        .progress-chart-card h4 {
+            color: var(--text-primary);
+            font-size: 15px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-chart-card h4 i {
+            color: #ff6b6b;
+        }
+
+        .bp-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .bp-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bp-row .bp-name {
+            color: #d1d5db;
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .bp-row .bp-bar-track {
+            flex: 1;
+            height: 10px;
+            background: #1a0000;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .bp-row .bp-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, #ff1a1a, #ff6b6b);
+        }
+
+        .bp-row .bp-count {
+            color: #9ca3af;
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* Calendar Heatmap */
+        .progress-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            color: #6b7280;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 0;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            background: #0d0d0d;
+            border: 1px solid #1a0000;
+            transition: transform 0.15s, box-shadow 0.15s;
+            cursor: default;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.12);
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .calendar-day.has-workout {
+            background: linear-gradient(135deg, #1a0500, #330a00);
+            border-color: #660000;
+            color: #f87171;
+        }
+
+        .calendar-day.has-workout.all-complete {
+            background: linear-gradient(135deg, #051a0d, #0a3320);
+            border-color: #14532d;
+            color: #22c55e;
+        }
+
+        .calendar-day.today {
+            border-color: #ff1a1a;
+            box-shadow: 0 0 8px rgba(255, 26, 26, 0.2);
+        }
+
+        .calendar-day.empty {
+            background: transparent;
+            border: none;
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-stat-card .psc-value {
+            animation: countUp 0.5s ease-out;
+        }
+    </style>
 </head>
+
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <h2>💪 GymPro</h2>
-        <button class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-    </div>
-    <div class="sidebar-menu">
-        <div class="menu-item active" onclick="switchPage('dashboard')">
-            <i class="fas fa-home"></i> <span>Dashboard</span>
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>💪 GYMRATS</h2>
+            <button class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
         </div>
-        <div class="menu-item" onclick="switchPage('announcements')">
-            <i class="fas fa-bullhorn"></i> <span>Announcements</span>
-        </div>
-        <div class="menu-item" onclick="switchPage('workouts')">
-            <i class="fas fa-dumbbell"></i> <span>Workout Splits</span>
-        </div>
-        <div class="menu-item" onclick="switchPage('payments')">
-            <i class="fas fa-receipt"></i> <span>Fees & Payments</span>
-        </div>
-        <div class="menu-item" onclick="switchPage('qrScanner')">
-            <i class="fas fa-qrcode"></i> <span>QR Scanner</span>
-        </div>
-        <div class="menu-item" onclick="switchPage('profile')">
-            <i class="fas fa-user"></i> <span>Profile</span>
-        </div>
-        <div class="menu-item" onclick="logout()" style="color: #e74c3c;">
-            <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
-        </div>
-    </div>
-</div>
-
-<!-- MAIN CONTAINER -->
-<div class="main-container" id="mainContainer">
-    
-    <!-- NAVBAR -->
-    <div class="navbar">
-        <div class="navbar-left"></div>
-        <div class="navbar-right">
-            <div class="notification-bell" onclick="toggleNotifications()">
-                <i class="fas fa-bell"></i>
-                <div class="notification-badge">3</div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" onclick="switchPage('dashboard')">
+                <i class="fas fa-home"></i> <span>Dashboard</span>
             </div>
-            <div class="user-dropdown">
-                <div class="user-avatar" onclick="toggleUserMenu()">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="dropdown-menu" id="userMenu">
-                    <a onclick="switchPage('profile')">Profile Settings</a>
-                    <a onclick="toggleTheme()">Dark Mode</a>
-                    <a onclick="logout()">Logout</a>
-                </div>
+            <div class="menu-item" onclick="switchPage('announcements')">
+                <i class="fas fa-bullhorn"></i> <span>Announcements</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('workouts')">
+                <i class="fas fa-dumbbell"></i> <span>Workout</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('attendance')">
+                <i class="fas fa-calendar-check"></i> <span>Attendance History</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/attendanceQR.html'">
+                <i class="fas fa-qrcode"></i> <span>My Attendance QR</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('payments')">
+                <i class="fas fa-receipt"></i> <span>Fees & Payments</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('progress')">
+                <i class="fas fa-chart-bar"></i> <span>Progress</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('profile')">
+                <i class="fas fa-user"></i> <span>Profile</span>
+            </div>
+            <div class="menu-item" onclick="logout()" style="color: #e74c3c;">
+                <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
             </div>
         </div>
     </div>
 
-    <!-- CONTENT AREA -->
-    <div class="content">
+    <!-- MAIN CONTAINER -->
+    <div class="main-container" id="mainContainer">
 
-        <!-- DASHBOARD PAGE -->
-        <div class="page active" id="dashboard-page">
-            <h1 style="color: #333; margin-bottom: 30px;">Welcome back, <span id="userName">Member</span>! 👋</h1>
+        <!-- NAVBAR -->
+        <div class="navbar">
+            <div class="navbar-left"></div>
+            <div class="navbar-right">
+                <div class="notification-bell" onclick="toggleNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge" id="notificationBadge" style="display: none;">0</div>
 
-            <!-- STATS GRID -->
-            <div class="stats-grid">
-                <div class="stat-card success">
-                    <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
-                    <div class="stat-label">Membership Expiry Date</div>
-                    <div class="stat-value" id="membershipExpiry">--</div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
-                    <div class="stat-label">Days Remaining</div>
-                    <div class="stat-value" id="daysRemaining">--</div>
-                </div>
-            </div>
-
-            <!-- QUICK ACTIONS -->
-            <div class="card">
-                <h3 style="color: #333; margin-bottom: 15px;">Quick Actions</h3>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="switchPage('workouts')">
-                        <i class="fas fa-dumbbell"></i> View Workout Splits
-                    </button>
-                    <button class="btn btn-primary" onclick="switchPage('payments')">
-                        <i class="fas fa-receipt"></i> View Fees & Payments
-                    </button>
-                    <button class="btn btn-primary" onclick="switchPage('announcements')">
-                        <i class="fas fa-bullhorn"></i> View Announcements
-                    </button>
-                </div>
-            </div>
-
-            <!-- ANNOUNCEMENTS PREVIEW -->
-            <div class="card">
-                <h3 style="color: #333; margin-bottom: 15px;">Recent Announcements</h3>
-                <div id="announcementsPreview">
-                    <p style="color: #999; text-align: center; padding: 20px;">No announcements yet</p>
-                </div>
-            </div>
-
-            <!-- CHARTS -->
-            <div class="grid-2">
-                <div class="card">
-                    <h3 style="color: #333; margin-bottom: 20px;">Weekly Attendance Trend</h3>
-                    <div class="chart-container">
-                        <canvas id="attendanceChart"></canvas>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- ANNOUNCEMENTS PAGE -->
-        <div class="page" id="announcements-page">
-            <h1 style="color: #333; margin-bottom: 25px;">📢 Announcements</h1>
-            <div id="announcementsList">
-                <div class="card">
-                    <p style="text-align: center; color: #999;">Loading announcements...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- WORKOUT SPLITS PAGE -->
-        <div class="page" id="workouts-page">
-            <h1 style="color: #333; margin-bottom: 25px;">💪 Workout Splits</h1>
-            <button class="btn btn-primary" onclick="openModal('addWorkoutModal')" style="margin-bottom: 20px;">
-                <i class="fas fa-plus"></i> Add Workout Split
-            </button>
-            <div id="workoutsList">
-                <div class="card">
-                    <p style="text-align: center; color: #999;">No workouts added yet</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- PAYMENTS PAGE -->
-        <div class="page" id="payments-page">
-            <h1 style="color: #333; margin-bottom: 25px;">💳 Fees & Payments</h1>
-            <div class="stats-grid" style="margin-bottom: 30px;">
-                <div class="stat-card success">
-                    <div class="stat-value" id="totalPaid">₹0</div>
-                    <div class="stat-label">Total Paid</div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-value" id="pendingAmount">₹0</div>
-                    <div class="stat-label">Pending Amount</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="lastPaymentDate">-</div>
-                    <div class="stat-label">Last Payment</div>
-                </div>
-            </div>
-            <div class="card">
-                <h3 style="color: #333; margin-bottom: 15px;">Payment History</h3>
-                <table class="table" id="paymentsTable">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Method</th>
-                            <th>Status</th>
-                            <th>Invoice</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="5" style="text-align: center; color: #999;">Loading payments...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- QR SCANNER PAGE for members -->
-        <div class="page" id="qrScanner-page">
-            <!-- content replaced on load by adjustQrSection -->
-        </div>
-
-        <!-- PROFILE PAGE -->
-        <div class="page" id="profile-page">
-            <h1 style="color: #333; margin-bottom: 25px;">Profile Settings</h1>
-
-            <div class="grid-2">
-                <!-- PROFILE INFO -->
-                <div class="card">
-                    <h3 style="color: #333; margin-bottom: 20px;">Personal Information</h3>
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <div id="profilePhotoHolder" style="width: 100px; height: 100px; background: #667eea; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 40px;">
-                            <i class="fas fa-user"></i>
+                    <div class="dropdown-menu" id="notificationMenu"
+                        style="width: 320px; right: -10px; max-height: 400px; overflow-y: auto;">
+                        <div
+                            style="padding: 10px 20px; border-bottom: 1px solid var(--border-light); font-weight: bold; font-size: 14px; position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
+                            Notifications
                         </div>
-                        <button class="btn btn-secondary" onclick="document.getElementById('profilePhotoInput').click();">Upload Photo</button>
-                        <button class="btn btn-danger" style="margin-left:8px;" onclick="removeProfilePhoto();">Remove Photo</button>
-                        <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;" onchange="handleProfilePhotoUpload(event)" />
+                        <div id="notificationList">
+                            <a style="text-align: center; color: var(--text-muted); cursor: default;">Loading...</a>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="profileName" value="">
+                </div>
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserMenu()">
+                        <i class="fas fa-user-circle"></i>
                     </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="profileEmail" value="">
+                    <div class="dropdown-menu" id="userMenu">
+                        <a onclick="switchPage('profile')">Profile Settings</a>
+                        <a onclick="toggleTheme()" id="themeToggleLink">Light Mode</a>
+                        <a onclick="logout()">Logout</a>
                     </div>
-                    <div class="form-group">
-                        <label>Phone</label>
-                        <input type="tel" id="profilePhone" value="">
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div class="content">
+
+            <!-- DASHBOARD PAGE -->
+            <div class="page active" id="dashboard-page">
+                <h1 style="color: var(--text-primary); margin-bottom: 30px;">Welcome back, <span
+                        id="userName">Member</span>!👋</h1>
+
+                <!-- STATS GRID -->
+                <div class="stats-grid">
+                    <div class="stat-card success">
+                        <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="stat-label">Membership Expiry Date</div>
+                        <div class="stat-value" id="membershipExpiry">--</div>
                     </div>
-                    <div class="form-group">
-                        <label>Gender</label>
-                        <select id="profileGender">
-                            <option value="">Select</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
+                    <div class="stat-card warning">
+                        <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                        <div class="stat-label">Days Remaining</div>
+                        <div class="stat-value" id="daysRemaining">--</div>
                     </div>
-                    <div class="form-group">
-                        <label>Date of Birth</label>
-                        <input type="date" id="profileDob" value="">
+                    <div class="stat-card" style="border-left-color: #f97316;">
+                        <div class="stat-icon" style="color: #f97316;">🔥</div>
+                        <div class="stat-label">Attendance Streak</div>
+                        <div class="stat-value" id="attendanceStreak">0</div>
                     </div>
-                    <div class="form-group">
-                        <label>Height (cm)</label>
-                        <input type="number" id="profileHeight" step="0.1" value="">
-                    </div>
-                    <div class="form-group">
-                        <label>Weight (kg)</label>
-                        <input type="number" id="profileWeight" step="0.1" value="">
-                    </div>
-                    <div class="form-group">
-                        <label>Blood Group</label>
-                        <select id="profileBloodGroup">
-                            <option value="">Select</option>
-                            <option>A+</option>
-                            <option>A-</option>
-                            <option>B+</option>
-                            <option>B-</option>
-                            <option>O+</option>
-                            <option>O-</option>
-                            <option>AB+</option>
-                            <option>AB-</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Role</label>
-                        <input type="text" id="profileRole" value="Admin" readonly style="background: #f5f5f5;">
-                    </div>
-                    <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="saveProfile()">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
                 </div>
 
-                <!-- SECURITY SETTINGS -->
+                <!-- DAILY PROGRESS SUMMARY -->
+                <div class="card" style="border-top: 4px solid #ff1a1a;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="color: var(--text-primary); margin: 0;"><i class="fas fa-chart-line"
+                                style="color: #ff1a1a; margin-right: 10px;"></i>Daily Progress Summary</h3>
+                        <span id="dashboardDate" style="color: var(--text-muted); font-size: 14px;">Today</span>
+                    </div>
+
+                    <div class="grid-2" style="gap: 15px;">
+                        <div
+                            style="background: rgba(255,26,26,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,26,26,0.1);">
+                            <div
+                                style="color: var(--text-muted); font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                                Workouts This Month</div>
+                            <div style="font-size: 24px; font-weight: 800; color: #ff1a1a;" id="dashMonthWorkouts">0
+                            </div>
+                        </div>
+                        <div
+                            style="background: rgba(255,26,26,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,26,26,0.1);">
+                            <div
+                                style="color: var(--text-muted); font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                                Badges Earned</div>
+                            <div style="font-size: 24px; font-weight: 800; color: #ff1a1a;" id="dashBadgesCount">0</div>
+                        </div>
+                    </div>
+
+                    <div
+                        style="margin-top: 20px; padding: 15px; background: #0b0b0b; border-radius: 12px; display: flex; align-items: center; gap: 15px;">
+                        <div
+                            style="background: #ff1a1a; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--text-primary);">Personal Attendance QR</div>
+                            <div style="color: var(--text-muted); font-size: 12px;">Show this at the desk for check-in
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="window.location.href='/attendanceQR.html'"
+                            style="padding: 8px 15px; font-size: 13px;">View QR</button>
+                    </div>
+                </div>
+
+                <!-- QUICK ACTIONS -->
                 <div class="card">
-                    <h3 style="color: #333; margin-bottom: 20px;">Security</h3>
-                    <div style="margin-bottom: 20px;">
-                        <h4 style="color: #555; margin-bottom: 10px;">Change Password</h4>
-                        <div class="form-group">
-                            <label>Current Password</label>
-                            <input type="password" id="currentPassword">
-                        </div>
-                        <div class="form-group">
-                            <label>New Password</label>
-                            <input type="password" id="newPassword">
-                        </div>
-                        <div class="form-group">
-                            <label>Confirm Password</label>
-                            <input type="password" id="confirmPassword">
-                        </div>
-                        <button class="btn btn-primary" style="width: 100%; justify-content: center;">
-                            <i class="fas fa-lock"></i> Update Password
+                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">Quick Actions</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="switchPage('workouts')">
+                            <i class="fas fa-dumbbell"></i> View Workout
+                        </button>
+                        <button class="btn btn-primary" onclick="switchPage('payments')">
+                            <i class="fas fa-receipt"></i> View Fees & Payments
+                        </button>
+                        <button class="btn btn-primary" onclick="switchPage('announcements')">
+                            <i class="fas fa-bullhorn"></i> View Announcements
                         </button>
                     </div>
-                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
-                    <h4 style="color: #555; margin-bottom: 10px;">Two-Factor Authentication</h4>
-                    <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Enhance your account security</p>
-                    <button class="btn btn-secondary" style="width: 100%; justify-content: center;">
-                        <i class="fas fa-mobile-alt"></i> Enable 2FA
+                </div>
+
+                <!-- ANNOUNCEMENTS PREVIEW -->
+                <div class="card">
+                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">Recent Announcements</h3>
+                    <div id="announcementsPreview">
+                        <p style="color: var(--text-muted); text-align: center; padding: 20px;">No announcements yet</p>
+                    </div>
+                </div>
+
+                <!-- CHARTS -->
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">Weekly Attendance Trend</h3>
+                        <div class="chart-container">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ANNOUNCEMENTS PAGE -->
+            <div class="page" id="announcements-page">
+                <h1 style="color: var(--text-primary); margin-bottom: 25px;">📢 Announcements</h1>
+                <div id="announcementsList">
+                    <div class="card">
+                        <p style="text-align: center; color: var(--text-muted);">Loading announcements...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ATTENDANCE PAGE -->
+            <div class="page" id="attendance-page">
+                <h1 style="color: var(--text-primary); margin-bottom: 25px;">📅 My Attendance (This Month)</h1>
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time / Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userAttendanceTbody">
+                            <tr>
+                                <td colspan="2" style="text-align: center; color: var(--text-muted);">Loading
+                                    attendance...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- WORKOUT PAGE -->
+            <div class="page" id="workouts-page">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                    <div>
+                        <h1 style="color:var(--text-primary);">&#127947; My Workouts</h1>
+                        <p style="color:var(--text-muted); margin-top:5px; font-size:14px;">Workout plans assigned by
+                            your trainer</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadMyWorkouts()" style="gap:8px;">
+                        <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
+
+                <!-- ═══════════════ MY WORKOUT LOG (member self-track) ═══════════════ -->
+                <div class="wlog-section" style="margin-bottom: 30px;">
+                    <div class="wlog-header">
+                        <h3><i class="fas fa-clipboard-list"></i> My Workout Log <span
+                                style="color:#9ca3af; font-weight:400; font-size:13px;">&mdash; Today</span></h3>
+                        <div class="wlog-actions">
+                            <span id="wlogSavedMsg" class="wlog-saved-msg"><i class="fas fa-check-circle"></i>
+                                Saved</span>
+                            <button class="wlog-save-btn" onclick="saveWorkoutLog()"><i class="fas fa-save"></i>
+                                Save</button>
+                            <button class="wlog-clear-btn" onclick="clearWorkoutLog()"><i class="fas fa-eraser"></i>
+                                Clear All</button>
+                        </div>
+                    </div>
+
+                    <div class="wlog-card">
+                        <table class="wlog-table" id="wlogTable">
+                            <thead>
+                                <tr>
+                                    <th>Sr.</th>
+                                    <th>Body Part</th>
+                                    <th>Exercise</th>
+                                    <th>Sets</th>
+                                    <th>Reps</th>
+                                    <th>Wt.(kg)</th>
+                                    <th>RPE</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="wlogBody">
+                                <!-- rows injected by JS -->
+                            </tbody>
+                        </table>
+                        <button class="wlog-add-btn" onclick="addWorkoutLogRow()"><i class="fas fa-plus"></i> Add
+                            Exercise</button>
+                    </div>
+                </div>
+
+                <!-- TODAY'S WORKOUT HIGHLIGHT -->
+                <div id="todayWorkoutSection" style="margin-bottom:28px; display:none;">
+                    <h3 style="color:#22c55e; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-fire" style="color:#f97316;"></i> Today's Workout
+                    </h3>
+                    <div id="todayWorkoutCard"></div>
+                </div>
+
+                <!-- NO WORKOUT TODAY -->
+                <div id="noTodayWorkout" style="display:none; margin-bottom:24px;">
+                    <div class="member-workout-card"
+                        style="border-color:#2a1a00; background:linear-gradient(135deg,#0d0d00,#1a1000); text-align:center; padding:30px;">
+                        <i class="fas fa-dumbbell"
+                            style="font-size:36px; color:#4b3300; display:block; margin-bottom:12px;"></i>
+                        <p style="color:#9ca3af; font-size:15px;">No workout assigned for today yet.</p>
+                        <p style="color:#6b7280; font-size:13px; margin-top:5px;">Check back later or contact your
+                            trainer.</p>
+                    </div>
+                </div>
+
+                <!-- ANALYTICS DASHBOARD -->
+                <div style="margin-bottom:28px;">
+                    <h3
+                        style="color:var(--text-primary); margin-bottom:14px; border-bottom:1px solid #2a0000; padding-bottom:10px;">
+                        <i class="fas fa-chart-line"></i> Analytics & Insights
+                    </h3>
+                    <div class="grid-2">
+                        <div class="card" style="background:#0d0d00; border-color:#2a1a00;">
+                            <h4 style="color:var(--text-primary); text-align:center; margin-bottom:10px;">Volume
+                                Distribution</h4>
+                            <div style="height:200px; padding:10px;">
+                                <canvas id="volumePieChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card" style="background:#0d0d00; border-color:#2a1a00;">
+                            <h4 style="color:var(--text-primary); text-align:center; margin-bottom:10px;">Est. 1RM Train
+                                Progression</h4>
+                            <div style="height:200px; padding:10px;">
+                                <canvas id="oneRMChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WORKOUT HISTORY -->
+                <div>
+                    <h3
+                        style="color:var(--text-primary); margin-bottom:14px; border-bottom:1px solid #2a0000; padding-bottom:10px;">
+                        &#128203; Workout History</h3>
+                    <div id="workoutHistorySection">
+                        <p style="color:var(--text-muted); text-align:center; padding:30px;">Loading your workouts...
+                        </p>
+                    </div>
+                </div>
+
+
+
             </div>
 
-            <!-- NOTIFICATION PREFERENCES -->
-            <div class="card" style="margin-top: 20px;">
-                <h3 style="color: #333; margin-bottom: 20px;">Notification Preferences</h3>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #e0e0e0;">
-                    <div>
-                        <h4 style="color: #555; margin-bottom: 5px;">Email Notifications</h4>
-                        <p style="color: #999; font-size: 14px;">Receive updates via email</p>
+
+            <!-- PAYMENTS PAGE -->
+            <div class="page" id="payments-page">
+                <h1 style="color: var(--text-primary); margin-bottom: 25px;">💳 Fees & Payments</h1>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="color: var(--text-primary); margin-bottom: 15px;">Fee Summary</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="stat-card"
+                                style="background: #051a0a; border: 1px solid #c6f6d5; padding: 15px; border-radius: 12px; text-align: center;">
+                                <div class="stat-value" id="totalPaidUser"
+                                    style="color: #2f855a; font-size: 20px; font-weight: bold;">?0</div>
+                                <div class="stat-label" style="color: #2f855a; font-size: 12px;">Total Paid</div>
+                            </div>
+                            <div class="stat-card"
+                                style="background: #1a0505; border: 1px solid #fed7d7; padding: 15px; border-radius: 12px; text-align: center;">
+                                <div class="stat-value" id="feesStatusUser"
+                                    style="color: #c53030; font-size: 20px; font-weight: bold;">Pending</div>
+                                <div class="stat-label" style="color: #c53030; font-size: 12px;">Fees Status</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 15px; font-size: 13px; color: var(--text-muted);">Last Payment: <span
+                                id="lastPaymentDateUser">--</span></p>
                     </div>
-                    <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;" checked>
+
+                    <div class="card" id="adminUPICard" style="text-align: center;">
+                        <h3 style="color: var(--text-primary); margin-bottom: 15px;">Pay via UPI</h3>
+                        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">Scan the QR or use
+                            the number
+                            below:</p>
+                        <div id="userSideUPIQR" style="display: flex; justify-content: center; margin: 10px 0;">
+                            <p style="color: var(--text-muted); padding: 10px;">Loading QR...</p>
+                        </div>
+                        <p style="margin-top: 10px; font-weight: bold; color: #333;">Admin Phone: <span
+                                id="userSideAdminPhone">--</span></p>
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #e0e0e0;">
-                    <div>
-                        <h4 style="color: #555; margin-bottom: 5px;">SMS Notifications</h4>
-                        <p style="color: #999; font-size: 14px;">Receive updates via SMS</p>
-                    </div>
-                    <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
-                    <div>
-                        <h4 style="color: #555; margin-bottom: 5px;">Payment Reminders</h4>
-                        <p style="color: #999; font-size: 14px;">Get reminded about due payments</p>
-                    </div>
-                    <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;" checked>
+
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">Payment History</h3>
+                    <table class="table" id="paymentsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Plan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userPaymentTbody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted);">No payment history
+                                    found</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- THEME & LANGUAGE -->
-            <div class="card" style="margin-top: 20px;">
-                <h3 style="color: #333; margin-bottom: 20px;">Preferences</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group">
-                        <label>Theme</label>
-                        <select id="themeSelect">
-                            <option value="light">Light Mode</option>
-                            <option value="dark">Dark Mode</option>
-                            <option value="auto">Auto</option>
-                        </select>
+            <!-- PROGRESS TRACKER PAGE -->
+            <div class="page" id="progress-page">
+                <div class="progress-page-header">
+                    <div>
+                        <h1>📊 Workout Progress</h1>
+                        <p style="color:var(--text-muted); margin-top:5px; font-size:14px;">Track your weekly & monthly
+                            workout consistency</p>
                     </div>
-                    <div class="form-group">
-                        <label>Language</label>
-                        <select id="languageSelect">
-                            <option value="en">English</option>
-                            <option value="hi">Hindi</option>
-                            <option value="es">Spanish</option>
-                        </select>
+                    <div style="display:flex; align-items:center; gap:20px;">
+                        <div class="points-badge">
+                            <i class="fas fa-coins"></i> <span id="userTotalPoints">0</span> PTS
+                        </div>
+                        <div class="progress-toggle-group">
+                            <button class="progress-toggle-btn active" id="progressWeekBtn"
+                                onclick="switchProgressView('week')">Weekly</button>
+                            <button class="progress-toggle-btn" id="progressMonthBtn"
+                                onclick="switchProgressView('month')">Monthly</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STAT CARDS -->
+                <div class="progress-stats-row">
+                    <div class="progress-stat-card">
+                        <div class="psc-glow" style="background: #ff1a1a;"></div>
+                        <div class="psc-icon">🏋️</div>
+                        <div class="psc-value" id="progressWorkoutCount">0</div>
+                        <div class="psc-label" id="progressWorkoutLabel">Workouts This Week</div>
+                    </div>
+                    <div class="progress-stat-card green">
+                        <div class="psc-glow" style="background: #22c55e;"></div>
+                        <div class="psc-icon">✅</div>
+                        <div class="psc-value" id="progressCompletionRate">0%</div>
+                        <div class="psc-label">Completion Rate</div>
+                    </div>
+                    <div class="progress-stat-card orange">
+                        <div class="psc-glow" style="background: #f97316;"></div>
+                        <div class="psc-icon">🔥</div>
+                        <div class="psc-value" id="progressStreak">0</div>
+                        <div class="psc-label">Best Streak (All Time)</div>
+                    </div>
+                    <div class="progress-stat-card purple">
+                        <div class="psc-glow" style="background: #8b5cf6;"></div>
+                        <div class="psc-icon">💪</div>
+                        <div class="psc-value" id="progressTotalWorkouts">0</div>
+                        <div class="psc-label">Total All-Time Workouts</div>
+                    </div>
+                </div>
+
+                <div class="progress-charts-grid">
+                    <!-- LEFT COLUMN: ASSIGNMENTS & ACHIEVEMENTS -->
+                    <div style="display:flex; flex-direction:column; gap:20px;">
+                        <!-- WEEKLY ASSIGNMENTS -->
+                        <div class="progress-chart-card">
+                            <h4 style="margin-bottom:15px;"><i class="fas fa-tasks"></i> Weekly Assignments</h4>
+                            <div id="progressAssignmentsList">
+                                <p style="color:var(--text-muted); text-align:center; padding:20px;">No active
+                                    assignments.</p>
+                            </div>
+                        </div>
+
+                        <!-- PAST MONTH RECORD -->
+                        <div class="progress-chart-card">
+                            <h4 style="margin-bottom:15px;"><i class="fas fa-history"></i> Past Month Record</h4>
+                            <div class="past-month-row">
+                                <div class="past-month-stat">
+                                    <span class="pms-val" id="pmWorkouts">0</span>
+                                    <span class="pms-lbl">Workouts</span>
+                                </div>
+                                <div class="past-month-stat">
+                                    <span class="pms-val" id="pmPRs">0</span>
+                                    <span class="pms-lbl">New PRs</span>
+                                </div>
+                                <div class="past-month-stat">
+                                    <span class="pms-val" id="pmVolume">0k</span>
+                                    <span class="pms-lbl">Total Vol</span>
+                                </div>
+                            </div>
+                            <p style="color:var(--text-muted); font-size:12px; margin-top:12px; text-align:center;">
+                                Your stats from the previous calendar month.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN: BADGES -->
+                    <div class="progress-chart-card">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h4 style="margin:0;"><i class="fas fa-award"></i> Badges & Achievements</h4>
+                            <span style="color:#fbbf24; font-size:12px; font-weight:600;" id="badgeCountLabel">0
+                                Earned</span>
+                        </div>
+                        <div class="badge-grid" id="progressBadgeGrid">
+                            <!-- Badges injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHARTS ROW -->
+                <div class="progress-charts-grid">
+                    <div class="progress-chart-card">
+                        <h4><i class="fas fa-chart-line"></i> <span id="progressTrendTitle">Weekly Trend (Last 12
+                                Weeks)</span></h4>
+                        <div style="height: 230px;">
+                            <canvas id="progressTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="progress-chart-card">
+                        <h4><i class="fas fa-calendar-alt"></i> Workout Calendar (This Month)</h4>
+                        <div id="progressCalendar" class="progress-calendar">
+                            <p style="color: var(--text-muted); text-align:center; padding:30px; grid-column: span 7;">
+                                Loading...</p>
+                        </div>
+                        <div style="margin-top:14px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+                            <span style="display:flex; align-items:center; gap:5px; font-size:11px; color:#6b7280;">
+                                <span
+                                    style="width:12px;height:12px;border-radius:3px;background:#0d0d0d;border:1px solid #1a0000;"></span>
+                                No Workout
+                            </span>
+                            <span style="display:flex; align-items:center; gap:5px; font-size:11px; color:#6b7280;">
+                                <span
+                                    style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#1a0500,#330a00);border:1px solid #660000;"></span>
+                                Workout Done
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-charts-grid">
+                    <div class="progress-chart-card">
+                        <h4><i class="fas fa-chart-pie"></i> Body Part Distribution</h4>
+                        <div style="height: 230px;">
+                            <canvas id="progressBodyPieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="progress-chart-card">
+                        <h4><i class="fas fa-th-large"></i> Body Part Breakdown</h4>
+                        <div class="bp-breakdown" id="progressBodyBreakdown">
+                            <p style="color: var(--text-muted); text-align:center; padding:30px;">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BODY PART BAR CHART -->
+                <div class="progress-chart-card" style="margin-bottom:28px;">
+                    <h4><i class="fas fa-chart-bar"></i> Volume by Body Part (kg)</h4>
+                    <div style="height: 260px;">
+                        <canvas id="progressVolumeBarChart"></canvas>
                     </div>
                 </div>
             </div>
+
+            <!-- QR SCANNER PAGE for members -->
+            <div class="page" id="qrScanner-page">
+                <!-- content replaced on load by adjustQrSection -->
+            </div>
+
+            <!-- PROFILE PAGE -->
+            <div class="page" id="profile-page">
+                <h1 style="color: var(--text-primary); margin-bottom: 25px;">Profile Settings</h1>
+
+                <div class="grid-2">
+                    <!-- PROFILE INFO -->
+                    <div class="card">
+                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">Personal Information</h3>
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div id="profilePhotoHolder"
+                                style="width: 100px; height: 100px; background: #667eea; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 40px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <button class="btn btn-secondary"
+                                onclick="document.getElementById('profilePhotoInput').click();">Upload Photo</button>
+                            <button class="btn btn-danger" style="margin-left:8px;"
+                                onclick="removeProfilePhoto();">Remove Photo</button>
+                            <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;"
+                                onchange="handleProfilePhotoUpload(event)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="profileName" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="profileEmail" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="profilePhone" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select id="profileGender">
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="profileDob" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Height (cm)</label>
+                            <input type="number" id="profileHeight" step="0.1" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Weight (kg)</label>
+                            <input type="number" id="profileWeight" step="0.1" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Blood Group</label>
+                            <select id="profileBloodGroup">
+                                <option value="">Select</option>
+                                <option>A+</option>
+                                <option>A-</option>
+                                <option>B+</option>
+                                <option>B-</option>
+                                <option>O+</option>
+                                <option>O-</option>
+                                <option>AB+</option>
+                                <option>AB-</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <input type="text" id="profileRole" value="Admin" readonly style="background: #0b0b0b;">
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                            onclick="saveProfile()">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+
+                    <!-- SECURITY SETTINGS -->
+                    <div class="card">
+                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">Security</h3>
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="color: #555; margin-bottom: 10px;">Change Password</h4>
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" id="currentPassword">
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" id="newPassword">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm Password</label>
+                                <input type="password" id="confirmPassword">
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                                onclick="updatePassword()">
+                                <i class="fas fa-lock"></i> Update Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NOTIFICATION PREFERENCES -->
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">Notification Preferences</h3>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #e0e0e0;">
+                        <div>
+                            <h4 style="color: #555; margin-bottom: 5px;">Email Notifications</h4>
+                            <p style="color: var(--text-muted); font-size: 14px;">Receive updates via email</p>
+                        </div>
+                        <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;" checked>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #e0e0e0;">
+                        <div>
+                            <h4 style="color: #555; margin-bottom: 5px;">SMS Notifications</h4>
+                            <p style="color: var(--text-muted); font-size: 14px;">Receive updates via SMS</p>
+                        </div>
+                        <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
+                        <div>
+                            <h4 style="color: #555; margin-bottom: 5px;">Payment Reminders</h4>
+                            <p style="color: var(--text-muted); font-size: 14px;">Get reminded about due payments</p>
+                        </div>
+                        <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;" checked>
+                    </div>
+                </div>
+
+                <!-- THEME & LANGUAGE -->
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">Preferences</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>Theme</label>
+                            <select id="themeSelect">
+                                <option value="light">Light Mode</option>
+                                <option value="dark">Dark Mode</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Language</label>
+                            <select id="languageSelect">
+                                <option value="en">English</option>
+                                <option value="hi">Hindi</option>
+                                <option value="es">Spanish</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
-
     </div>
-</div>
 
-<!-- MODALS -->
+    <!-- MODALS -->
 
-<!-- ADD ANNOUNCEMENT MODAL -->
-<div class="modal" id="addAnnouncementModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Create Announcement</h3>
-            <button class="close-btn" onclick="closeModal('addAnnouncementModal')">×</button>
-        </div>
-        <div class="form-group">
-            <label>Title</label>
-            <input type="text" id="announcementTitle" placeholder="Announcement title">
-        </div>
-        <div class="form-group">
-            <label>Content</label>
-            <textarea id="announcementContent" placeholder="Write your announcement..."></textarea>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+    <!-- ADD ANNOUNCEMENT MODAL -->
+    <div class="modal" id="addAnnouncementModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Announcement</h3>
+                <button class="close-btn" onclick="closeModal('addAnnouncementModal')">�</button>
+            </div>
             <div class="form-group">
-                <label>Priority Level</label>
-                <select id="announcementPriority">
-                    <option value="low">Low</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="high">High</option>
+                <label>Title</label>
+                <input type="text" id="announcementTitle" placeholder="Announcement title">
+            </div>
+            <div class="form-group">
+                <label>Content</label>
+                <textarea id="announcementContent" placeholder="Write your announcement..."></textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Priority Level</label>
+                    <select id="announcementPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <select id="announcementTarget">
+                        <option value="all">All Members</option>
+                        <option value="active">Active Members</option>
+                        <option value="specific">Specific Group</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Expiration Date</label>
+                <input type="date" id="announcementExpiry">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="flex: 1; justify-content: center;"
+                    onclick="addAnnouncement()">Create</button>
+                <button class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                    onclick="closeModal('addAnnouncementModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD MEMBER MODAL -->
+    <div class="modal" id="addMemberModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Member</h3>
+                <button class="close-btn" onclick="closeModal('addMemberModal')">�</button>
+            </div>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="memberName" placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="memberEmail" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="memberPhone" placeholder="Enter phone number">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="addMember()">Add
+                    Member</button>
+                <button class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                    onclick="closeModal('addMemberModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MARK ATTENDANCE MODAL -->
+    <div class="modal" id="markAttendanceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Mark Attendance</h3>
+                <button class="close-btn" onclick="closeModal('markAttendanceModal')">�</button>
+            </div>
+            <div class="form-group">
+                <label>Select Member</label>
+                <select id="attendanceMember">
+                    <option value="">Choose member...</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Target Audience</label>
-                <select id="announcementTarget">
-                    <option value="all">All Members</option>
-                    <option value="active">Active Members</option>
-                    <option value="specific">Specific Group</option>
+                <label>Date</label>
+                <input type="date" id="attendanceMarkDate">
+            </div>
+            <div class="form-group">
+                <label>Check-in Time</label>
+                <input type="time" id="checkInTime">
+            </div>
+            <div class="form-group">
+                <label>Check-out Time</label>
+                <input type="time" id="checkOutTime">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="attendanceStatus">
+                    <option value="present">Present</option>
+                    <option value="absent">Absent</option>
+                    <option value="late">Late</option>
                 </select>
             </div>
-        </div>
-        <div class="form-group">
-            <label>Expiration Date</label>
-            <input type="date" id="announcementExpiry">
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="addAnnouncement()">Create</button>
-            <button class="btn btn-secondary" style="flex: 1; justify-content: center;" onclick="closeModal('addAnnouncementModal')">Cancel</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="flex: 1; justify-content: center;"
+                    onclick="markAttendance()">Save</button>
+                <button class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                    onclick="closeModal('markAttendanceModal')">Cancel</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- ADD MEMBER MODAL -->
-<div class="modal" id="addMemberModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Add New Member</h3>
-            <button class="close-btn" onclick="closeModal('addMemberModal')">×</button>
-        </div>
-        <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" id="memberName" placeholder="Enter full name">
-        </div>
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="memberEmail" placeholder="Enter email">
-        </div>
-        <div class="form-group">
-            <label>Phone</label>
-            <input type="tel" id="memberPhone" placeholder="Enter phone number">
-        </div>
-        <div class="form-group">
-            <label>Membership Plan</label>
-            <select id="membershipPlan">
-                <option value="">Select plan...</option>
-                <option value="monthly">Monthly - ₹500</option>
-                <option value="quarterly">Quarterly - ₹1200</option>
-                <option value="yearly">Yearly - ₹4000</option>
-            </select>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="addMember()">Add Member</button>
-            <button class="btn btn-secondary" style="flex: 1; justify-content: center;" onclick="closeModal('addMemberModal')">Cancel</button>
+    <!-- COLLECT PAYMENT MODAL -->
+    <div class="modal" id="collectPaymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Collect Payment</h3>
+                <button class="close-btn" onclick="closeModal('collectPaymentModal')">�</button>
+            </div>
+            <div class="form-group">
+                <label>Member Name</label>
+                <select id="modalPaymentMember">
+                    <option value="">Select member...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Membership Plan</label>
+                <select id="modalPaymentPlan"
+                    onchange="document.getElementById('paymentAmount').value = this.options[this.selectedIndex].getAttribute('data-price') || '';">
+                    <option value="" data-price="">Select plan...</option>
+                    <option value="monthly" data-price="500">Monthly - ?500</option>
+                    <option value="quarterly" data-price="1200">Quarterly - ?1200</option>
+                    <option value="yearly" data-price="4000">Yearly - ?4000</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" id="paymentAmount" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select id="modalPaymentMethod">
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="online">Online</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-success" style="flex: 1; justify-content: center;"
+                    onclick="savePayment()">Collect Payment</button>
+                <button class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                    onclick="closeModal('collectPaymentModal')">Cancel</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- MARK ATTENDANCE MODAL -->
-<div class="modal" id="markAttendanceModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Mark Attendance</h3>
-            <button class="close-btn" onclick="closeModal('markAttendanceModal')">×</button>
-        </div>
-        <div class="form-group">
-            <label>Select Member</label>
-            <select id="attendanceMember">
-                <option value="">Choose member...</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="attendanceMarkDate">
-        </div>
-        <div class="form-group">
-            <label>Check-in Time</label>
-            <input type="time" id="checkInTime">
-        </div>
-        <div class="form-group">
-            <label>Check-out Time</label>
-            <input type="time" id="checkOutTime">
-        </div>
-        <div class="form-group">
-            <label>Status</label>
-            <select id="attendanceStatus">
-                <option value="present">Present</option>
-                <option value="absent">Absent</option>
-                <option value="late">Late</option>
-            </select>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="markAttendance()">Save</button>
-            <button class="btn btn-secondary" style="flex: 1; justify-content: center;" onclick="closeModal('markAttendanceModal')">Cancel</button>
+    <!-- ADD WORKOUT MODAL -->
+    <div class="modal" id="addWorkoutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Workout</h2>
+                <span class="close" onclick="closeModal('addWorkoutModal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Week Starting Date</label>
+                <input type="date" id="workoutWeekStart" required>
+            </div>
+            <div class="form-group">
+                <label>Trainer Name</label>
+                <input type="text" id="workoutTrainer" placeholder="e.g., John Smith">
+            </div>
+            <div class="form-group">
+                <label>Notes / Exercises</label>
+                <textarea id="workoutNotes" placeholder="Monday: Chest, Tuesday: Back..."
+                    style="height: 150px;"></textarea>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="saveWorkout()">
+                <i class="fas fa-save"></i> Save Workout
+            </button>
         </div>
     </div>
-</div>
 
-<!-- COLLECT PAYMENT MODAL -->
-<div class="modal" id="collectPaymentModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Collect Payment</h3>
-            <button class="close-btn" onclick="closeModal('collectPaymentModal')">×</button>
-        </div>
-        <div class="form-group">
-            <label>Member Name</label>
-            <select id="modalPaymentMember">
-                <option value="">Select member...</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Amount</label>
-            <input type="number" id="paymentAmount" placeholder="0">
-        </div>
-        <div class="form-group">
-            <label>Payment Method</label>
-            <select id="modalPaymentMethod">
-                <option value="cash">Cash</option>
-                <option value="card">Card</option>
-                <option value="online">Online</option>
-            </select>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-success" style="flex: 1; justify-content: center;" onclick="savePayment()">Collect Payment</button>
-            <button class="btn btn-secondary" style="flex: 1; justify-content: center;" onclick="closeModal('collectPaymentModal')">Cancel</button>
-        </div>
-    </div>
-</div>
+    <!-- NO OTP MODAL -->
 
-<!-- ADD WORKOUT MODAL -->
-<div class="modal" id="addWorkoutModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Add Workout Split</h2>
-            <span class="close" onclick="closeModal('addWorkoutModal')">&times;</span>
-        </div>
-        <div class="form-group">
-            <label>Week Starting Date</label>
-            <input type="date" id="workoutWeekStart" required>
-        </div>
-        <div class="form-group">
-            <label>Trainer Name</label>
-            <input type="text" id="workoutTrainer" placeholder="e.g., John Smith">
-        </div>
-        <div class="form-group">
-            <label>Notes / Exercises</label>
-            <textarea id="workoutNotes" placeholder="Monday: Chest, Tuesday: Back..." style="height: 150px;"></textarea>
-        </div>
-        <button class="btn btn-primary" style="width: 100%;" onclick="saveWorkout()">
-            <i class="fas fa-save"></i> Save Workout Split
-        </button>
-    </div>
-</div>
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load saved theme preference first
+            loadTheme();
 
-<script>
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
-            window.location.href = '/login.html';
-            return;
-        }
-        
-        // ✅ BOUNCE ADMINS AWAY
-        if (user.role === 'admin') {
-            // you can replace this with a proper check (existing admin,
-            // invite code, environment variable, etc.)
-            if (adminKey !== process.env.ADMIN_KEY) {
-                return res.send("Invalid admin key");
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                window.location.href = '/login.html';
+                return;
             }
-        }
 
-        document.getElementById('userName').textContent = user.fullname;
-        document.getElementById('profileName').value = user.fullname;
-        document.getElementById('profileEmail').value = user.email;
-        document.getElementById('profilePhone').value = user.phone || '';
-        document.getElementById('profileGender').value = user.gender || '';
-        document.getElementById('profileDob').value = user.dob || '';
-        document.getElementById('profileHeight').value = user.height || '';
-        document.getElementById('profileWeight').value = user.weight || '';
-        document.getElementById('profileBloodGroup').value = user.bloodGroup || '';
-        
-        // ✅ SHOW CORRECT ROLE (not hardcoded "Admin")
-        document.getElementById('profileRole').value = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-        
-        // ✅ Hide admin-only menu items and buttons
-        hideAdminFeatures();
-        
-        loadDashboardData();
-        initCharts();
-    });
+            // BOUNCE ADMINS AWAY
+            if (user.role === 'admin') {
+                // you can replace this with a proper check (existing admin,
+                // invite code, environment variable, etc.)
+                if (adminKey !== process.env.ADMIN_KEY) {
+                    return res.send("Invalid admin key");
+                }
+            }
 
-    // ✅ NEW: Hide only admin features
-    function hideAdminFeatures() {
-        // Hide admin menu items from sidebar
-        const adminMenuItems = ['announcements', 'attendance', 'workout', 'membership', 'payments'];
-        adminMenuItems.forEach(item => {
-            const menuItem = document.querySelector(`[onclick="switchPage('${item}')"]`);
-            if (menuItem) menuItem.style.display = 'none';
+            document.getElementById('userName').textContent = user.fullname;
+            document.getElementById('profileName').value = user.fullname;
+            document.getElementById('profileEmail').value = user.email;
+            document.getElementById('profilePhone').value = user.phone || '';
+            document.getElementById('profileGender').value = user.gender || '';
+            document.getElementById('profileDob').value = user.dob || '';
+            document.getElementById('profileHeight').value = user.height || '';
+            document.getElementById('profileWeight').value = user.weight || '';
+            document.getElementById('profileBloodGroup').value = user.bloodGroup || '';
+
+            // SHOW CORRECT ROLE (not hardcoded "Admin")
+            document.getElementById('profileRole').value = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+
+            // Hide admin-only menu items and buttons
+            hideAdminFeatures();
+
+            loadDashboardData();
+            loadAnnouncements();
+            initCharts();
+
+            // Load fresh profile data from server
+            loadUserProfile();
+
+            fetchNotifications();
         });
 
-        // Hide admin buttons in Quick Actions
-        const quickActionsBtns = document.querySelectorAll('.page.active .card:nth-of-type(1) .btn');
-        quickActionsBtns.forEach(btn => {
-            // Hide: New Announcement, Add Member, Collect Payment, Scan QR
-            if (btn.textContent.includes('Announcement') || 
-                btn.textContent.includes('Member') || 
-                btn.textContent.includes('Payment') || 
-                btn.textContent.includes('Scan')) {
-                btn.style.display = 'none';
-            }
-        });
+        // Hide only admin features
+        function hideAdminFeatures() {
+            // Hide admin menu items from sidebar
+            const adminMenuItems = ['workout', 'membership'];
+            adminMenuItems.forEach(item => {
+                const menuItem = document.querySelector(`[onclick="switchPage('${item}')"]`);
+                if (menuItem) menuItem.style.display = 'none';
+            });
 
-        // Replace QR Scanner page content with just image
-        adjustQrSection();
-    }
+            // Hide admin buttons in Quick Actions
+            const quickActionsBtns = document.querySelectorAll('.page.active .card:nth-of-type(1) .btn');
+            quickActionsBtns.forEach(btn => {
+                // Hide: New Announcement, Add Member, Collect Payment, Scan QR
+                if (btn.textContent.includes('Announcement') ||
+                    btn.textContent.includes('Member') ||
+                    btn.textContent.includes('Payment') ||
+                    btn.textContent.includes('Scan')) {
+                    btn.style.display = 'none';
+                }
+            });
 
-    function adjustQrSection() {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const qrPage = document.getElementById('qrScanner-page');
-        if (!qrPage || !user) return;
-        qrPage.innerHTML = '<h1 style="color: #333; margin-bottom: 25px;">Your QR Code</h1><div class="card" style="text-align: center;"><p style="color: #666; margin-bottom: 20px;">Loading...</p><div id="memberQrContainer"></div></div>';
-        fetch('/getUserQR?email=' + encodeURIComponent(user.email))
-            .then(r => r.json())
-            .then(data => {
-                const container = document.getElementById('memberQrContainer');
-                if (!container) return;
-                if (data.success && data.qrImage) {
-                    container.innerHTML = `
-                        <p style="color: #666; margin-bottom: 20px;">Show this QR code at the front desk when you enter the gym.</p>
-                        <img src="${data.qrImage}" alt="Your QR code" style="max-width: 250px; width: 100%; border-radius: 8px; border: 2px solid #ff1a1a;">
-                        <p style="color: #999; font-size: 12px; margin-top: 15px;">Your unique QR – managed by administrator.</p>
+            // Replace QR Scanner page content with just image
+            adjustQrSection();
+        }
+
+        function adjustQrSection() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const qrPage = document.getElementById('qrScanner-page');
+            if (!qrPage || !user) return;
+            qrPage.innerHTML = '<h1 style="color: var(--text-primary); margin-bottom: 25px;">Your QR Code</h1><div class="card" style="text-align: center;"><p style="color: var(--text-muted); margin-bottom: 20px;">Loading...</p><div id="memberQrContainer"></div></div>';
+            fetch('/getUserQR?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('memberQrContainer');
+                    if (!container) return;
+                    if (data.success && data.qrImage) {
+                        const expiryStr = user.expiry;
+                        let expiryInfo = '';
+                        if (expiryStr) {
+                            const expDate = new Date(expiryStr);
+                            const today = new Date();
+                            const daysLeft = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+                            if (daysLeft <= 0) {
+                                expiryInfo = '<p style="color: #ef4444; font-size: 13px; margin-top: 12px; font-weight: 600;"><i class="fas fa-exclamation-circle"></i> Membership expired on ' + expDate.toLocaleDateString() + '. QR scan will not work until renewed.</p>';
+                            } else if (daysLeft <= 5) {
+                                expiryInfo = '<p style="color: #f59e0b; font-size: 13px; margin-top: 12px; font-weight: 600;"><i class="fas fa-exclamation-triangle"></i> Membership expiring in ' + daysLeft + ' day(s) on ' + expDate.toLocaleDateString() + '</p>';
+                            } else {
+                                expiryInfo = '<p style="color: #22c55e; font-size: 13px; margin-top: 12px;">Active until ' + expDate.toLocaleDateString() + ' (' + daysLeft + ' days remaining)</p>';
+                            }
+                        }
+                        container.innerHTML = `
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Show this QR code at the front desk every day to mark your attendance.</p>
+                        <img src="${data.qrImage}" alt="Your QR code" style="display: block; margin: 0 auto; max-width: 250px; width: 100%; border-radius: 8px; border: 2px solid #ff1a1a;">
+                        <p style="color: var(--text-muted); font-size: 12px; margin-top: 15px;">Your permanent QR – scan it daily at the gym entrance.</p>
+                        ${expiryInfo}
                     `;
-                } else {
-                    container.innerHTML = '<p style="color: #9ca3af;">No QR code assigned yet. Ask your administrator to upload your QR.</p>';
-                }
-            })
-            .catch(() => {
-                const container = document.getElementById('memberQrContainer');
-                if (container) container.innerHTML = '<p style="color: #9ca3af;">Could not load QR. Ask your administrator to upload your QR.</p>';
-            });
-    }
-
-
-
-    // Sidebar Toggle
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const container = document.getElementById('mainContainer');
-        sidebar.classList.toggle('collapsed');
-        container.classList.toggle('collapsed');
-    }
-
-    // Page Switching
-    function switchPage(page) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-        
-        const pageElement = document.getElementById(page + '-page');
-        if (pageElement) {
-            pageElement.classList.add('active');
-            
-            // Load data when switching pages
-            if (page === 'announcements') loadAnnouncements();
-            if (page === 'workouts') loadWorkouts();
-            if (page === 'payments') loadPayments();
+                    } else {
+                        container.innerHTML = '<p style="color: var(--text-muted);">No QR code assigned yet. Ask your administrator to generate your QR.</p>';
+                    }
+                })
+                .catch(() => {
+                    const container = document.getElementById('memberQrContainer');
+                    if (container) container.innerHTML = '<p style="color: var(--text-muted);">Could not load QR. Please try again later.</p>';
+                });
         }
-        
-        const menuItem = document.querySelector(`[onclick="switchPage('${page}')"]`);
-        if (menuItem) {
-            menuItem.classList.add('active');
+
+
+
+        // Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const container = document.getElementById('mainContainer');
+            sidebar.classList.toggle('collapsed');
+            container.classList.toggle('collapsed');
         }
-    }
 
-    // Modal Functions
-    function openModal(modalId) {
-        document.getElementById(modalId).classList.add('active');
-    }
+        // Page Switching
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
 
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.remove('active');
-    }
+            const pageElement = document.getElementById(page + '-page');
+            if (pageElement) {
+                pageElement.classList.add('active');
 
-    // User Menu Toggle
-    function toggleUserMenu() {
-        document.getElementById('userMenu').classList.toggle('active');
-    }
-
-    // Logout
-    function logout() {
-        localStorage.removeItem('user');
-        window.location.href = '/login.html';
-    }
-
-    // Profile photo upload/remove
-    function handleProfilePhotoUpload(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            const holder = document.getElementById('profilePhotoHolder');
-            holder.innerHTML = `<img src="${evt.target.result}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>`;
-            // TODO: optionally send to server via fetch for persistence
-            showToast('Photo loaded (not saved).', 'success');
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function removeProfilePhoto() {
-        const holder = document.getElementById('profilePhotoHolder');
-        holder.innerHTML = '<i class="fas fa-user"></i>';
-        document.getElementById('profilePhotoInput').value = '';
-        // TODO: optionally notify server to remove stored image
-        showToast('Photo removed.', 'info');
-    }
-
-    // collect profile fields and persist locally (placeholder implementation)
-    function saveProfile() {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        user.fullname = document.getElementById('profileName').value;
-        user.email = document.getElementById('profileEmail').value;
-        user.phone = document.getElementById('profilePhone').value;
-        user.gender = document.getElementById('profileGender').value;
-        user.dob = document.getElementById('profileDob').value;
-        user.height = document.getElementById('profileHeight').value;
-        user.weight = document.getElementById('profileWeight').value;
-        user.bloodGroup = document.getElementById('profileBloodGroup').value;
-        // persist locally; real app should send to server
-        localStorage.setItem('user', JSON.stringify(user));
-        showToast('Profile saved locally.', 'success');
-    }
-
-    // Notifications Toggle
-    function toggleNotifications() {
-        showToast('3 new notifications!', 'info');
-    }
-
-    // Theme Toggle
-    function toggleTheme() {
-        document.body.style.filter = 'invert(1)';
-        showToast('Dark mode enabled!', 'success');
-    }
-
-    // Toast Notification
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-
-    // Dashboard Data Loading
-    function loadDashboardData() {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const expiryEl = document.getElementById('membershipExpiry');
-        const daysEl = document.getElementById('daysRemaining');
-        const expiryStr = user.expiry;
-        if (expiryStr) {
-            const expiryDate = new Date(expiryStr);
-            expiryEl.textContent = expiryDate.toLocaleDateString();
-            const today = new Date();
-            const timeDiff = expiryDate - today;
-            const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-            if (daysRemaining <= 0) {
-                daysEl.textContent = 'Expired';
-                daysEl.style.color = '#ef4444';
-            } else if (daysRemaining <= 5) {
-                daysEl.textContent = daysRemaining + ' Days';
-                daysEl.style.color = '#f97316';
-            } else {
-                daysEl.textContent = daysRemaining + ' Days';
-                daysEl.style.color = '';
+                // Load data when switching pages
+                if (page === 'announcements') loadAnnouncements();
+                if (page === 'workouts') loadMyWorkouts();
+                if (page === 'payments') loadPayments();
+                if (page === 'attendance') loadUserAttendance();
+                if (page === 'progress') loadProgressTracker();
+                if (page === 'profile') loadUserProfile();
             }
-        } else {
-            expiryEl.textContent = '--';
-            daysEl.textContent = '--';
-        }
-    }
 
-    // Chart Initialization
-    function initCharts() {
-        const attendanceCtx = document.getElementById('attendanceChart');
-        if (attendanceCtx) {
-            new Chart(attendanceCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Attendance',
-                        data: [35, 38, 42, 40, 45, 43, 28],
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: true } }
+            const menuItem = document.querySelector(`[onclick="switchPage('${page}')"]`);
+            if (menuItem) {
+                menuItem.classList.add('active');
+            }
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // User Menu Toggle
+        function toggleUserMenu() {
+            document.getElementById('userMenu').classList.toggle('active');
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+
+        // Profile photo upload/remove
+        function handleProfilePhotoUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                const holder = document.getElementById('profilePhotoHolder');
+                holder.innerHTML = `<img src="${evt.target.result}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>`;
+                // TODO: optionally send to server via fetch for persistence
+                showToast('Photo loaded (not saved).', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeProfilePhoto() {
+            const holder = document.getElementById('profilePhotoHolder');
+            holder.innerHTML = '<i class="fas fa-user"></i>';
+            document.getElementById('profilePhotoInput').value = '';
+            // TODO: optionally notify server to remove stored image
+            showToast('Photo removed.', 'info');
+        }
+
+        // collect profile fields and persist to MongoDB
+        function saveProfile() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const fullname = document.getElementById('profileName').value.trim();
+            const newEmail = document.getElementById('profileEmail').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+            const gender = document.getElementById('profileGender').value;
+            const dob = document.getElementById('profileDob').value;
+            const height = document.getElementById('profileHeight').value;
+            const weight = document.getElementById('profileWeight').value;
+            const bloodGroup = document.getElementById('profileBloodGroup').value;
+
+            if (!fullname || !newEmail) {
+                showToast('Name and email are required', 'error');
+                return;
+            }
+
+            fetch('/updateProfile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: user.email,
+                    requesterEmail: user.email,
+                    fullname,
+                    newEmail,
+                    phone,
+                    gender,
+                    dob,
+                    height,
+                    weight,
+                    bloodGroup
+                })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        // Update localStorage with new user data
+                        const updatedUser = { ...user, ...data.user };
+                        localStorage.setItem('user', JSON.stringify(updatedUser));
+                        // Update form fields with new values
+                        document.getElementById('userName').textContent = updatedUser.fullname;
+                        document.getElementById('profileName').value = updatedUser.fullname;
+                        document.getElementById('profileEmail').value = updatedUser.email;
+                        document.getElementById('profilePhone').value = updatedUser.phone || '';
+                        document.getElementById('profileGender').value = updatedUser.gender || '';
+                        document.getElementById('profileDob').value = updatedUser.dob || '';
+                        document.getElementById('profileHeight').value = updatedUser.height || '';
+                        document.getElementById('profileWeight').value = updatedUser.weight || '';
+                        document.getElementById('profileBloodGroup').value = updatedUser.bloodGroup || '';
+                    } else {
+                        showToast(data.message || 'Error updating profile', 'error');
+                    }
+                })
+                .catch(err => {
+                    showToast('Failed to update profile', 'error');
+                });
+        }
+
+        // Load fresh user profile from server
+        function loadUserProfile() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.email) return;
+
+            fetch('/getUserInfo?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.user) {
+                        const u = data.user;
+                        // Update localStorage with fresh data
+                        const updatedUser = {
+                            ...user,
+                            fullname: u.fullname,
+                            email: u.email,
+                            phone: u.phone || '',
+                            gender: u.gender || '',
+                            dob: u.dob || '',
+                            height: u.height || '',
+                            weight: u.weight || '',
+                            bloodGroup: u.bloodGroup || '',
+                            role: u.role,
+                            streak: u.streak || 0,
+                            expiry: u.expiry || null
+                        };
+                        localStorage.setItem('user', JSON.stringify(updatedUser));
+
+                        // Update form fields
+                        document.getElementById('userName').textContent = u.fullname;
+                        document.getElementById('profileName').value = u.fullname || '';
+                        document.getElementById('profileEmail').value = u.email || '';
+                        document.getElementById('profilePhone').value = u.phone || '';
+                        document.getElementById('profileGender').value = u.gender || '';
+                        document.getElementById('profileDob').value = u.dob || '';
+                        document.getElementById('profileHeight').value = u.height || '';
+                        document.getElementById('profileWeight').value = u.weight || '';
+                        document.getElementById('profileBloodGroup').value = u.bloodGroup || '';
+                        document.getElementById('profileRole').value = (u.role || 'user').charAt(0).toUpperCase() + (u.role || 'user').slice(1);
+
+                        // Update UI seamlessly
+                        loadDashboardData();
+                    }
+                })
+                .catch(err => console.error('Failed to load profile:', err));
+        }
+
+        // Notifications Toggle
+        function toggleNotifications() {
+            document.getElementById('notificationMenu').classList.toggle('active');
+            document.getElementById('notificationBadge').style.display = 'none'; // hide badge when opened
+        }
+
+        // Fetch Notifications
+        function fetchNotifications() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.email) return;
+
+            fetch('/getUserNotifications?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    const listDiv = document.getElementById('notificationList');
+                    const badge = document.getElementById('notificationBadge');
+
+                    if (data.success && data.notifications.length > 0) {
+                        badge.style.display = 'flex';
+                        badge.textContent = data.notifications.length;
+
+                        let html = '';
+                        data.notifications.forEach(n => {
+                            let iconColor = '#3b82f6';
+                            let iconClass = 'fa-info-circle';
+                            if (n.type === 'danger') { iconColor = '#ef4444'; iconClass = 'fa-exclamation-circle'; }
+                            if (n.type === 'warning') { iconColor = '#f59e0b'; iconClass = 'fa-exclamation-triangle'; }
+                            if (n.type === 'success') { iconColor = '#10b981'; iconClass = 'fa-check-circle'; }
+
+                            html += `
+                                <a style="display: flex; gap: 10px; align-items: flex-start; padding: 12px 15px;">
+                                    <i class="fas ${iconClass}" style="color: ${iconColor}; margin-top: 3px;"></i>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary); font-size: 13px; margin-bottom: 3px;">${n.title}</div>
+                                        <div style="color: var(--text-muted); font-size: 12px; line-height: 1.4; white-space: normal;">${n.message}</div>
+                                        <div style="color: #666; font-size: 10px; margin-top: 5px;">${new Date(n.date).toLocaleDateString()}</div>
+                                    </div>
+                                </a>
+                            `;
+                        });
+                        listDiv.innerHTML = html;
+                    } else {
+                        badge.style.display = 'none';
+                        listDiv.innerHTML = '<a style="text-align: center; color: var(--text-muted); cursor: default;">No new notifications</a>';
+                    }
+                })
+                .catch(err => console.log('Error fetching notifications', err));
+        }
+
+        // Hide notification menu when clicking outside
+        document.addEventListener('click', function (e) {
+            const bell = document.querySelector('.notification-bell');
+            if (bell && !bell.contains(e.target)) {
+                const menu = document.getElementById('notificationMenu');
+                if (menu) menu.classList.remove('active');
+            }
+        });
+
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const isLight = body.classList.toggle('light-theme');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            updateThemeToggleText();
+            showToast(isLight ? 'Light mode enabled!' : 'Dark mode enabled!', 'success');
+        }
+
+        function updateThemeToggleText() {
+            const link = document.getElementById('themeToggleLink');
+            if (link) {
+                const isLight = document.body.classList.contains('light-theme');
+                link.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+            }
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+            }
+            updateThemeToggleText();
+        }
+
+        // Toast Notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Dashboard Data Loading
+        function loadDashboardData() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const expiryEl = document.getElementById('membershipExpiry');
+            const daysEl = document.getElementById('daysRemaining');
+            const streakEl = document.getElementById('attendanceStreak');
+            const dashDate = document.getElementById('dashboardDate');
+
+            if (dashDate) dashDate.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            const expiryStr = user.expiry;
+            if (expiryStr) {
+                const expiryDate = new Date(expiryStr);
+                expiryEl.textContent = expiryDate.toLocaleDateString();
+                const today = new Date();
+                const timeDiff = expiryDate - today;
+                const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                if (daysRemaining <= 0) {
+                    daysEl.textContent = 'Expired';
+                    daysEl.style.color = '#ef4444';
+                } else if (daysRemaining <= 5) {
+                    daysEl.textContent = daysRemaining + ' Days';
+                    daysEl.style.color = '#f97316';
+                } else {
+                    daysEl.textContent = daysRemaining + ' Days';
+                    daysEl.style.color = '';
                 }
+            } else {
+                expiryEl.textContent = '--';
+                daysEl.textContent = '--';
+            }
+
+            if (streakEl) {
+                streakEl.textContent = (user.streak || 0) + ' 🔥';
+            }
+
+            // Fetch extra progress stats for dashboard
+            if (user.email) {
+                fetch('/getWorkoutProgress?email=' + encodeURIComponent(user.email))
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            const monthCount = document.getElementById('dashMonthWorkouts');
+                            const badgesCount = document.getElementById('dashBadgesCount');
+                            if (monthCount) monthCount.textContent = data.monthWorkoutCount || 0;
+                            if (badgesCount) badgesCount.textContent = (data.user.badges || []).length;
+                        }
+                    })
+                    .catch(e => console.log("Dash progress fetch error", e));
+            }
+        }
+
+        // Chart Initialization
+        function initCharts() {
+            const attendanceCtx = document.getElementById('attendanceChart');
+            if (attendanceCtx) {
+                new Chart(attendanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Attendance',
+                            data: [35, 38, 42, 40, 45, 43, 28],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: true } }
+                    }
+                });
+            }
+
+
+        }
+
+        // Announcement Functions
+        function loadAnnouncements() {
+            fetch('/getAnnouncements')
+                .then(r => r.json())
+                .then(data => {
+                    const listDiv = document.getElementById('announcementsList');
+                    const previewDiv = document.getElementById('announcementsPreview');
+
+                    const escapeHtml = (s) => {
+                        const div = document.createElement('div');
+                        div.textContent = s;
+                        return div.innerHTML;
+                    };
+
+                    if (data.success && data.announcements.length > 0) {
+                        let fullList = '';
+                        let previews = '';
+                        data.announcements.forEach((a, i) => {
+                            const htmlBlock = `
+                            <div style="background: #121212; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid ${a.priority === 'high' ? '#ef4444' : '#f59e0b'};">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <h3 style="color: var(--text-primary); margin: 0;">${escapeHtml(a.title)}</h3>
+                                    <span class="badge badge-${a.priority === 'high' ? 'danger' : a.priority === 'low' ? 'success' : 'warning'}">${a.priority}</span>
+                                </div>
+                                <p style="color: var(--text-muted); font-size: 15px; line-height: 1.5; margin-bottom: 0;">${escapeHtml(a.content)}</p>
+                                <div style="margin-top: 15px; font-size: 12px; color: var(--text-muted);">
+                                    Posted on: ${new Date(a.createdAt).toLocaleDateString()}
+                                </div>
+                            </div>
+                        `;
+                            fullList += htmlBlock;
+                            if (i < 3) {
+                                previews += `
+                            <div style="background: #0b0b0b; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${a.priority === 'high' ? '#ef4444' : '#f59e0b'};">
+                                <h4 style="color: var(--text-primary); margin-bottom: 5px;">${escapeHtml(a.title)}</h4>
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 5px;">${escapeHtml(a.content)}</p>
+                                <span style="font-size: 11px; color: var(--text-muted);">Posted: ${new Date(a.createdAt).toLocaleDateString()}</span>
+                            </div>`;
+                            }
+                        });
+                        if (listDiv) listDiv.innerHTML = fullList;
+                        if (previewDiv) previewDiv.innerHTML = previews;
+                    } else {
+                        if (listDiv) listDiv.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 30px;">No announcements available</p>';
+                        if (previewDiv) previewDiv.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No announcements yet</p>';
+                    }
+                })
+                .catch(err => console.log('Error fetching announcements', err));
+        }
+
+        // Member Functions
+        function addMember() {
+            const name = document.getElementById('memberName').value;
+            const email = document.getElementById('memberEmail').value;
+
+            if (!name || !email) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+
+            showToast('Member added successfully!', 'success');
+            closeModal('addMemberModal');
+            document.getElementById('memberName').value = '';
+            document.getElementById('memberEmail').value = '';
+        }
+
+        // Attendance Functions
+        function loadUserAttendance() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user || !user.email) return;
+
+            const tbody = document.getElementById('userAttendanceTbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--text-muted);">Loading attendance...</td></tr>';
+
+            fetch('/getUserAttendance?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.records) {
+                        if (data.records.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--text-muted);">No attendance records for this month</td></tr>';
+                            return;
+                        }
+
+                        const rows = data.records.map(record => {
+                            let timeStr = record.checkInTime || 'N/A';
+                            if (record.checkOutTime) timeStr += ` - ${record.checkOutTime}`;
+                            const statusBadge = record.status === 'absent' ? '<span class="badge badge-danger">Absent</span>' : '<span class="badge badge-success">Present</span>';
+                            const icon = record.status === 'absent' ? '\u274C' : '\u2705';
+                            return `<tr>
+                            <td>${icon} ${record.date || ''}</td>
+                            <td>${timeStr} &nbsp; ${statusBadge}</td>
+                        </tr>`;
+                        }).join('');
+
+                        if (tbody) tbody.innerHTML = rows;
+                    } else {
+                        if (tbody) tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #ff4b5c;">' + (data.message || 'Error loading records') + '</td></tr>';
+                    }
+                })
+                .catch(() => {
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #ff4b5c;">Network error</td></tr>';
+                });
+        }
+
+        function markAttendance() {
+            showToast('Attendance marked successfully!', 'success');
+            closeModal('markAttendanceModal');
+        }
+
+        function exportAttendance() {
+            showToast('Exporting attendance...', 'success');
+        }
+
+        // Payment Functions
+        function loadPayments() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user || !user.email) return;
+
+            // Fetch User Info for Fees Status
+            fetch('/getUserInfo?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.user) {
+                        document.getElementById('totalPaidUser').textContent = '₹' + (data.user.totalPaid || 0);
+                        document.getElementById('feesStatusUser').textContent = data.user.feesStatus || 'Pending';
+                        document.getElementById('lastPaymentDateUser').textContent = data.user.lastPaymentDate || '--';
+
+                        // Style status
+                        const statusVal = document.getElementById('feesStatusUser');
+                        if (data.user.feesStatus === 'Paid') {
+                            statusVal.parentElement.style.background = '#f0fff4';
+                            statusVal.style.color = '#2f855a';
+                        } else {
+                            statusVal.parentElement.style.background = '#fff5f5';
+                            statusVal.style.color = '#c53030';
+                        }
+                    }
+                });
+
+            // Fetch Admin Config for UPI
+            fetch('/getAdminConfig')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.config) {
+                        document.getElementById('userSideAdminPhone').textContent = data.config.adminPhone || '--';
+                        const qrDiv = document.getElementById('userSideUPIQR');
+                        if (data.config.upiQR) {
+                            qrDiv.innerHTML = `<img src="${data.config.upiQR}" style="max-width:180px; border:1px solid #eee; border-radius:8px; margin-top:10px;">`;
+                        } else {
+                            qrDiv.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">Admin has not uploaded UPI QR yet.</p>';
+                        }
+                    }
+                });
+
+            // Fetch Payment History
+            fetch('/getPaymentsByEmail?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    const tbody = document.getElementById('userPaymentTbody');
+                    if (data.success && data.payments) {
+                        if (data.payments.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No record found</td></tr>';
+                            return;
+                        }
+                        tbody.innerHTML = data.payments.map(p => `
+                            <tr>
+                                <td>${p.date}</td>
+                                <td>₹${p.amount}</td>
+                                <td>${p.method}</td>
+                                <td><span class="badge badge-success">Paid</span></td>
+                                <td style="font-size: 13px; color: var(--text-muted);">${p.plan ? p.plan.replace(/_/g, ' ') : '--'}</td>
+                            </tr>
+                        `).join('');
+                    }
+                });
+        }
+
+        function collectPayment() {
+            showToast('Payment collected!', 'success');
+        }
+
+        function savePayment() {
+            showToast('Payment saved successfully!', 'success');
+            closeModal('collectPaymentModal');
+        }
+
+        // Workout Functions
+        function addWorkout() {
+            showToast('Workout plan created!', 'success');
+            closeModal('addWorkoutModal');
+        }
+
+        // QR Functions
+        function generateMemberQR() {
+            const memberValue = document.getElementById('memberSelect').value;
+            if (!memberValue) {
+                showToast('Please select a member', 'error');
+                return;
+            }
+
+            const qrPreview = document.getElementById('qrPreview');
+            qrPreview.innerHTML = '';
+
+            new QRCode(qrPreview, {
+                text: 'GYM-' + memberValue + '-' + Date.now(),
+                width: 200,
+                height: 200,
+                colorDark: '#667eea',
+                colorLight: '#ffffff'
+            });
+
+            showToast('QR code generated!', 'success');
+        }
+
+        function manualScan() {
+            const qrCode = document.getElementById('manualQRCode').value;
+            if (!qrCode) {
+                showToast('Please enter QR code', 'error');
+                return;
+            }
+            showToast('QR code scanned successfully!', 'success');
+            document.getElementById('manualQRCode').value = '';
+        }
+
+        // Close dropdowns on outside click
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.user-dropdown')) {
+                document.getElementById('userMenu').classList.remove('active');
+            }
+        });
+
+        // Password Update Logic (No OTP)
+        function updatePassword() {
+            const currentPassword = document.getElementById('currentPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('Please fill all password fields', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showToast('New passwords do not match', 'error');
+                return;
+            }
+
+            fetch('/updatePassword', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email, currentPassword, newPassword })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        document.getElementById('currentPassword').value = '';
+                        document.getElementById('newPassword').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                    } else {
+                        showToast(data.message || 'Error updating password', 'error');
+                    }
+                })
+                .catch(err => {
+                    showToast('Failed to update password', 'error');
+                });
+        }
+
+        /* ===== MY WORKOUTS (member view) ===== */
+        function loadMyWorkouts() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user || !user.email) return;
+
+            const today = new Date().toISOString().split('T')[0];
+            const todaySection = document.getElementById('todayWorkoutSection');
+            const noTodayDiv = document.getElementById('noTodayWorkout');
+            const todayCard = document.getElementById('todayWorkoutCard');
+            const historySection = document.getElementById('workoutHistorySection');
+
+            if (historySection) historySection.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+
+            fetch('/getMyWorkouts?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success || !data.workouts || !data.workouts.length) {
+                        if (todaySection) todaySection.style.display = 'none';
+                        if (noTodayDiv) noTodayDiv.style.display = 'block';
+                        if (historySection) historySection.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">No workouts assigned yet. Check back later!</p>';
+                        return;
+                    }
+
+                    const todayWorkout = data.workouts.find(w => w.date === today);
+                    const pastWorkouts = data.workouts.filter(w => w.date !== today);
+
+                    // Render Today's workout
+                    if (todayWorkout) {
+                        if (todaySection) todaySection.style.display = 'block';
+                        if (noTodayDiv) noTodayDiv.style.display = 'none';
+                        if (todayCard) todayCard.innerHTML = buildWorkoutCard(todayWorkout, true);
+                    } else {
+                        if (todaySection) todaySection.style.display = 'none';
+                        if (noTodayDiv) noTodayDiv.style.display = 'block';
+                    }
+
+                    // Render history
+                    if (historySection) {
+                        if (pastWorkouts.length) {
+                            historySection.innerHTML = pastWorkouts.map(w => buildWorkoutCard(w, false)).join('');
+                        } else {
+                            historySection.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">No past workouts yet.</p>';
+                        }
+                    }
+                })
+                .catch(() => {
+                    if (historySection) historySection.innerHTML = '<p style="color:#ef4444; text-align:center; padding:20px;">Failed to load workouts. Please refresh.</p>';
+                });
+        }
+
+        function buildWorkoutCard(w, isToday) {
+            const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            const dateLabel = isToday ? '&#128197; Today' : w.date;
+            const isCompleted = w.completed;
+            const completedTime = w.completedAt ? new Date(w.completedAt).toLocaleDateString() : '';
+
+            const statusBadge = isCompleted
+                ? `<span style="display:inline-flex;align-items:center;gap:4px;background:#052a15;color:#22c55e;border:1px solid #14532d;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700;">&#10003; Completed</span>`
+                : `<span style="display:inline-flex;align-items:center;gap:4px;background:#1a0a00;color:#f97316;border:1px solid #7c3c00;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700;">&#9899; Pending</span>`;
+
+            return `<div class="member-workout-card ${isToday ? 'today-card' : 'past-card'}" style="border-left: 3px solid ${isCompleted ? '#22c55e' : (isToday ? '#22c55e' : '#ff1a1a')};">
+                ${isToday ? '<div class="today-label"><i class="fas fa-fire" style="color:#f97316;"></i> Today</div>' : ''}
+                <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                    <span class="workout-date-chip">${dateLabel}</span>
+                    <span class="workout-category-pill">${esc(w.category || 'General')}</span>
+                    ${statusBadge}
+                </div>
+                <pre class="workout-exercise-text">${esc(w.workout)}</pre>
+                ${w.notes ? `<div class="workout-trainer-note"><i class="fas fa-comment-dots"></i><span><strong>Trainer Note:</strong> ${esc(w.notes)}</span></div>` : ''}
+                ${isCompleted ? `<div style="margin-top:8px;padding:8px 12px;background:#052a15;border-radius:8px;color:#22c55e;font-size:12px;"><i class="fas fa-check-circle"></i> Trainer marked this workout as completed on ${completedTime}</div>` : ''}
+            </div>`;
+        }
+
+        // Alias for the existing switchPage call
+        function loadWorkouts() { loadMyWorkouts(); loadWorkoutLog(); loadWorkoutAnalytics(); }
+
+        let volumePieInstance = null;
+        let oneRMChartInstance = null;
+
+        function loadWorkoutAnalytics() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.email) return;
+
+            fetch('/getWorkoutAnalytics?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        // 1. Render Pie Chart
+                        const ctxPie = document.getElementById('volumePieChart').getContext('2d');
+                        if (volumePieInstance) volumePieInstance.destroy();
+
+                        const pieData = data.volumePie || { chest: 0, back: 0, legs: 0, shoulders: 0, arms: 0, core: 0 };
+                        volumePieInstance = new Chart(ctxPie, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core'],
+                                datasets: [{
+                                    data: [pieData.chest, pieData.back, pieData.legs, pieData.shoulders, pieData.arms, pieData.core],
+                                    backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#9ca3af', font: { size: 10 } } } } }
+                        });
+
+                        // 2. Render 1RM Chart 
+                        const ctxLine = document.getElementById('oneRMChart').getContext('2d');
+                        if (oneRMChartInstance) oneRMChartInstance.destroy();
+
+                        const colors = ['#f97316', '#3b82f6', '#10b981'];
+                        const datasets = [];
+                        let colorIdx = 0;
+
+                        const exercises = Object.keys(data.oneRMHistory || {});
+                        exercises.sort((a, b) => data.oneRMHistory[b].length - data.oneRMHistory[a].length);
+                        const topExprs = exercises.slice(0, 3);
+
+                        const allDatesStr = new Set();
+                        topExprs.forEach(ex => data.oneRMHistory[ex].forEach(pt => allDatesStr.add(pt.x)));
+                        const labels = Array.from(allDatesStr).sort();
+
+                        for (let ex of topExprs) {
+                            const yData = labels.map(date => {
+                                const match = data.oneRMHistory[ex].find(pt => pt.x === date);
+                                return match ? match.y : null;
+                            });
+
+                            datasets.push({
+                                label: ex,
+                                data: yData,
+                                borderColor: colors[colorIdx % colors.length],
+                                backgroundColor: 'transparent',
+                                tension: 0.3, spanGaps: true, pointRadius: 3
+                            });
+                            colorIdx++;
+                        }
+
+                        oneRMChartInstance = new Chart(ctxLine, {
+                            type: 'line',
+                            data: { labels, datasets },
+                            options: {
+                                responsive: true, maintainAspectRatio: false,
+                                scales: {
+                                    x: { ticks: { color: '#9ca3af' }, grid: { display: false } },
+                                    y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' }, title: { display: true, text: '1RM (kg)', color: '#6b7280' } }
+                                },
+                                plugins: { legend: { labels: { color: '#9ca3af', font: { size: 10 } } } }
+                            }
+                        });
+                    }
+                })
+                .catch(err => console.log('Error loading analytics:', err));
+        }
+
+        /* ═══════════════ MEMBER WORKOUT LOG (self-tracking) ═══════════════ */
+
+        const BODY_PARTS = ['Chest', 'Back', 'Legs', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Cardio', 'Full Body', 'Other'];
+
+        function addWorkoutLogRow(data) {
+            const tbody = document.getElementById('wlogBody');
+            if (!tbody) return;
+            const idx = tbody.rows.length + 1;
+            const row = document.createElement('tr');
+
+            const bpOptions = BODY_PARTS.map(bp =>
+                `<option value="${bp}" ${data && data.bodyPart === bp ? 'selected' : ''}>${bp}</option>`
+            ).join('');
+
+            row.innerHTML = `
+                <td style="text-align:center; color:#9ca3af; font-weight:700; font-size:13px;" class="wlog-sr">${idx}</td>
+                <td>
+                    <select class="wlog-input wlog-bp">
+                        <option value="">Select</option>
+                        ${bpOptions}
+                    </select>
+                </td>
+                <td><input type="text" class="wlog-input wlog-ex" placeholder="e.g. Bench Press" value="${data ? (data.exerciseName || '') : ''}"></td>
+                <td><input type="number" class="wlog-input wlog-input-num wlog-sets" min="0" placeholder="0" value="${data ? (data.sets || 0) : 0}"></td>
+                <td><input type="number" class="wlog-input wlog-input-num wlog-reps" min="0" placeholder="0" value="${data ? (data.repetition || data.reps || 0) : 0}"></td>
+                <td><input type="number" class="wlog-input wlog-input-num wlog-weight" min="0" placeholder="0" value="${data ? (data.weight || 0) : ''}" style="width:60px;"></td>
+                <td><input type="number" class="wlog-input wlog-input-num wlog-rpe" min="0" max="10" placeholder="RPE" value="${data ? (data.rpe || '') : ''}" style="width:50px;"></td>
+                <td style="text-align:center;">
+                    <button type="button" class="wlog-status-btn ${data && data.status === 'Completed' ? 'completed' : 'in-progress'}" onclick="toggleWlogStatus(this)">
+                        <i class="fas ${data && data.status === 'Completed' ? 'fa-check-circle' : 'fa-clock'}"></i>
+                        ${data && data.status === 'Completed' ? 'Completed' : 'In Progress'}
+                    </button>
+                </td>
+                <td style="text-align:center;">
+                    <button class="wlog-remove-btn" onclick="removeWorkoutLogRow(this)" title="Remove"><i class="fas fa-times"></i></button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function removeWorkoutLogRow(btn) {
+            const row = btn.closest('tr');
+            if (row) row.remove();
+            renumberWlogRows();
+        }
+
+        function renumberWlogRows() {
+            const tbody = document.getElementById('wlogBody');
+            if (!tbody) return;
+            Array.from(tbody.rows).forEach((r, i) => {
+                const srCell = r.querySelector('.wlog-sr');
+                if (srCell) srCell.textContent = i + 1;
             });
         }
 
-
-    }
-
-    // Announcement Functions
-    function addAnnouncement() {
-        const title = document.getElementById('announcementTitle').value;
-        const content = document.getElementById('announcementContent').value;
-        
-        if (!title || !content) {
-            showToast('Please fill all fields', 'error');
-            return;
+        function toggleWlogStatus(btn) {
+            const isCompleted = btn.classList.contains('completed');
+            if (isCompleted) {
+                btn.classList.remove('completed');
+                btn.classList.add('in-progress');
+                btn.innerHTML = '<i class="fas fa-clock"></i> In Progress';
+            } else {
+                btn.classList.remove('in-progress');
+                btn.classList.add('completed');
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Completed';
+            }
         }
 
-        showToast('Announcement created successfully!', 'success');
-        closeModal('addAnnouncementModal');
-        document.getElementById('announcementTitle').value = '';
-        document.getElementById('announcementContent').value = '';
-    }
-
-    // Member Functions
-    function addMember() {
-        const name = document.getElementById('memberName').value;
-        const email = document.getElementById('memberEmail').value;
-        
-        if (!name || !email) {
-            showToast('Please fill all fields', 'error');
-            return;
+        function collectWorkoutLogData() {
+            const tbody = document.getElementById('wlogBody');
+            if (!tbody) return [];
+            return Array.from(tbody.rows).map((row, i) => {
+                const isCompleted = row.querySelector('.wlog-status-btn.completed');
+                return {
+                    srNo: i + 1,
+                    bodyPart: row.querySelector('.wlog-bp') ? row.querySelector('.wlog-bp').value : '',
+                    exerciseName: row.querySelector('.wlog-ex') ? row.querySelector('.wlog-ex').value.trim() : '',
+                    sets: parseInt(row.querySelector('.wlog-sets') ? row.querySelector('.wlog-sets').value : 0) || 0,
+                    repetition: parseInt(row.querySelector('.wlog-reps') ? row.querySelector('.wlog-reps').value : 0) || 0,
+                    weight: parseFloat(row.querySelector('.wlog-weight') ? row.querySelector('.wlog-weight').value : 0) || 0,
+                    rpe: parseInt(row.querySelector('.wlog-rpe') ? row.querySelector('.wlog-rpe').value : 0) || null,
+                    status: isCompleted ? 'Completed' : 'In Progress'
+                };
+            }).filter(e => e.bodyPart || e.exerciseName);
         }
 
-        showToast('Member added successfully!', 'success');
-        closeModal('addMemberModal');
-        document.getElementById('memberName').value = '';
-        document.getElementById('memberEmail').value = '';
-    }
+        function saveWorkoutLog() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.email) { showToast('Please log in again', 'error'); return; }
 
-    // Attendance Functions
-    function markAttendance() {
-        showToast('Attendance marked successfully!', 'success');
-        closeModal('markAttendanceModal');
-    }
+            const exercises = collectWorkoutLogData();
+            if (!exercises.length) { showToast('Add at least one exercise', 'error'); return; }
 
-    function exportAttendance() {
-        showToast('Exporting attendance...', 'success');
-    }
+            const today = new Date().toISOString().split('T')[0];
 
-    // Payment Functions
-    function collectPayment() {
-        showToast('Payment collected!', 'success');
-    }
+            fetch('/saveMemberWorkoutLog', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email, date: today, exercises })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const msg = document.getElementById('wlogSavedMsg');
+                        if (msg) { msg.classList.add('show'); setTimeout(() => msg.classList.remove('show'), 2500); }
 
-    function savePayment() {
-        showToast('Payment saved successfully!', 'success');
-        closeModal('collectPaymentModal');
-    }
-
-    // Workout Functions
-    function addWorkout() {
-        showToast('Workout plan created!', 'success');
-        closeModal('addWorkoutModal');
-    }
-
-    // QR Functions
-    function generateMemberQR() {
-        const memberValue = document.getElementById('memberSelect').value;
-        if (!memberValue) {
-            showToast('Please select a member', 'error');
-            return;
+                        if (data.prUpdates && data.prUpdates.length > 0) {
+                            showToast('🎉 New Personal Record Achieved!', 'success');
+                            loadWorkoutAnalytics(); // Refresh graphs!
+                        } else {
+                            showToast('Workout log saved!', 'success');
+                        }
+                    } else {
+                        showToast(data.message || 'Save failed', 'error');
+                    }
+                })
+                .catch(() => showToast('Network error', 'error'));
         }
-        
-        const qrPreview = document.getElementById('qrPreview');
-        qrPreview.innerHTML = '';
-        
-        new QRCode(qrPreview, {
-            text: 'GYM-' + memberValue + '-' + Date.now(),
-            width: 200,
-            height: 200,
-            colorDark: '#667eea',
-            colorLight: '#ffffff'
-        });
-        
-        showToast('QR code generated!', 'success');
-    }
 
-    function manualScan() {
-        const qrCode = document.getElementById('manualQRCode').value;
-        if (!qrCode) {
-            showToast('Please enter QR code', 'error');
-            return;
-        }
-        showToast('QR code scanned successfully!', 'success');
-        document.getElementById('manualQRCode').value = '';
-    }
+        function loadWorkoutLog() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.email) return;
 
-    // Close dropdowns on outside click
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.user-dropdown')) {
-            document.getElementById('userMenu').classList.remove('active');
+            const today = new Date().toISOString().split('T')[0];
+            const tbody = document.getElementById('wlogBody');
+            if (!tbody) return;
+
+            fetch('/getMemberWorkoutLog?email=' + encodeURIComponent(user.email) + '&date=' + today)
+                .then(r => r.json())
+                .then(data => {
+                    tbody.innerHTML = '';
+                    if (data.success && data.log && data.log.exercises && data.log.exercises.length) {
+                        data.log.exercises.forEach(ex => addWorkoutLogRow(ex));
+                    } else {
+                        // Start with one empty row
+                        addWorkoutLogRow();
+                    }
+                })
+                .catch(() => {
+                    tbody.innerHTML = '';
+                    addWorkoutLogRow();
+                });
         }
-    });
-</script>
+
+        function clearWorkoutLog() {
+            if (!confirm('Clear all exercises for today? This cannot be undone.')) return;
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.email) return;
+
+            const today = new Date().toISOString().split('T')[0];
+
+            fetch('/clearMemberWorkoutLog?email=' + encodeURIComponent(user.email) + '&date=' + today, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const tbody = document.getElementById('wlogBody');
+                        if (tbody) tbody.innerHTML = '';
+                        addWorkoutLogRow();
+                        showToast('Workout log cleared', 'success');
+                    } else {
+                        showToast(data.message || 'Clear failed', 'error');
+                    }
+                })
+                .catch(() => showToast('Network error', 'error'));
+        }
+
+        /* ═══════════════ PROGRESS TRACKER ═══════════════ */
+
+        let _progressData = null;
+        let _progressView = 'week'; // 'week' or 'month'
+        let _progressTrendChart = null;
+        let _progressPieChart = null;
+        let _progressVolumeBar = null;
+
+        function switchProgressView(view) {
+            _progressView = view;
+            document.getElementById('progressWeekBtn').classList.toggle('active', view === 'week');
+            document.getElementById('progressMonthBtn').classList.toggle('active', view === 'month');
+            if (_progressData) renderProgressUI(_progressData);
+        }
+
+        function loadProgressTracker() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.email) return;
+
+            fetch('/getWorkoutProgress?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        _progressData = data;
+                        renderProgressUI(data);
+                    } else {
+                        showToast(data.message || 'Failed to load progress', 'error');
+                    }
+                })
+                .catch(() => showToast('Network error loading progress', 'error'));
+        }
+
+        function renderProgressUI(data) {
+            const isWeek = _progressView === 'week';
+
+            // ── Gamification ──
+            if (data.user) {
+                document.getElementById('userTotalPoints').textContent = data.user.points || 0;
+                renderAssignments(data.user.assignments || []);
+                renderBadges(data.user.badges || []);
+            }
+            if (data.lastMonthStats) {
+                renderPastMonthStats(data.lastMonthStats);
+            }
+
+            // ── Stat cards ──
+            const countEl = document.getElementById('progressWorkoutCount');
+            const labelEl = document.getElementById('progressWorkoutLabel');
+            countEl.textContent = isWeek ? data.weekWorkoutCount : data.monthWorkoutCount;
+            labelEl.textContent = isWeek ? 'Workouts This Week' : 'Workouts This Month';
+
+            document.getElementById('progressCompletionRate').textContent = (data.completionRate || 0) + '%';
+            document.getElementById('progressStreak').textContent = (data.bestStreak || 0) + ' days';
+            document.getElementById('progressTotalWorkouts').textContent = data.totalWorkouts || 0;
+
+            // ── Trend Chart ──
+            const trendTitle = document.getElementById('progressTrendTitle');
+            trendTitle.textContent = isWeek ? 'Weekly Trend (Last 12 Weeks)' : 'Monthly Trend (Last 6 Months)';
+
+            const trendCtx = document.getElementById('progressTrendChart').getContext('2d');
+            if (_progressTrendChart) _progressTrendChart.destroy();
+
+            const trendData = isWeek ? data.weeklyTrend : data.monthlyTrend;
+            if (trendData && trendData.length > 0) {
+                _progressTrendChart = new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: trendData.map(t => t.label),
+                        datasets: [{
+                            label: 'Workouts',
+                            data: trendData.map(t => t.count),
+                            borderColor: '#ff1a1a',
+                            backgroundColor: (ctx) => {
+                                const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 230);
+                                g.addColorStop(0, 'rgba(255,26,26,0.25)');
+                                g.addColorStop(1, 'rgba(255,26,26,0)');
+                                return g;
+                            },
+                            borderWidth: 2.5,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#ff1a1a',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 1.5,
+                            pointRadius: 4,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { color: '#6b7280', font: { size: 10 } }, grid: { display: false } },
+                            y: { beginAtZero: true, ticks: { color: '#6b7280', stepSize: 1, font: { size: 10 } }, grid: { color: '#1f1f1f' } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // ── Body Part Pie ──
+            const bpData = isWeek ? (data.weekBodyPartCount || {}) : (data.bodyPartCount || {});
+            const bpLabels = Object.keys(bpData);
+            const bpValues = Object.values(bpData);
+            const bpColors = {
+                'Chest': '#ef4444', 'Back': '#3b82f6', 'Legs': '#10b981',
+                'Shoulders': '#f59e0b', 'Biceps': '#8b5cf6', 'Triceps': '#ec4899',
+                'Core': '#06b6d4', 'Cardio': '#14b8a6', 'Full Body': '#f97316', 'Other': '#6b7280'
+            };
+
+            const pieCtx = document.getElementById('progressBodyPieChart').getContext('2d');
+            if (_progressPieChart) _progressPieChart.destroy();
+
+            if (bpLabels.length === 0) {
+                _progressPieChart = new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: { labels: ['No Data'], datasets: [{ data: [1], backgroundColor: ['#1a0000'], borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            } else {
+                _progressPieChart = new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: bpLabels,
+                        datasets: [{
+                            data: bpValues,
+                            backgroundColor: bpLabels.map(l => bpColors[l] || '#6b7280'),
+                            borderWidth: 0,
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        cutout: '55%',
+                        plugins: {
+                            legend: { position: 'right', labels: { color: '#9ca3af', font: { size: 11 }, padding: 8, usePointStyle: true, pointStyleWidth: 8 } }
+                        }
+                    }
+                });
+            }
+
+            // ── Body Part Breakdown Bars ──
+            const breakdownDiv = document.getElementById('progressBodyBreakdown');
+            if (bpLabels.length === 0) {
+                breakdownDiv.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">No workout data logged yet.</p>';
+            } else {
+                const maxCount = Math.max(...bpValues, 1);
+                breakdownDiv.innerHTML = bpLabels.map((bp, i) => {
+                    const pct = Math.round((bpValues[i] / maxCount) * 100);
+                    const color = bpColors[bp] || '#6b7280';
+                    return `<div class="bp-row">
+                        <span class="bp-name">${bp}</span>
+                        <div class="bp-bar-track">
+                            <div class="bp-bar-fill" style="width:${pct}%; background: linear-gradient(90deg, ${color}, ${color}aa);"></div>
+                        </div>
+                        <span class="bp-count">${bpValues[i]}</span>
+                    </div>`;
+                }).join('');
+            }
+
+            // ── Volume Bar Chart ──
+            const volData = data.bodyPartVolume || {};
+            const volLabels = Object.keys(volData);
+            const volValues = Object.values(volData);
+
+            const volCtx = document.getElementById('progressVolumeBarChart').getContext('2d');
+            if (_progressVolumeBar) _progressVolumeBar.destroy();
+
+            if (volLabels.length === 0) {
+                _progressVolumeBar = new Chart(volCtx, {
+                    type: 'bar',
+                    data: { labels: ['No Data'], datasets: [{ data: [0], backgroundColor: '#1a0000' }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            } else {
+                _progressVolumeBar = new Chart(volCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: volLabels,
+                        datasets: [{
+                            label: 'Volume (kg)',
+                            data: volValues,
+                            backgroundColor: volLabels.map(l => (bpColors[l] || '#6b7280') + 'cc'),
+                            borderColor: volLabels.map(l => bpColors[l] || '#6b7280'),
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { color: '#9ca3af', font: { size: 11 } }, grid: { display: false } },
+                            y: { beginAtZero: true, ticks: { color: '#6b7280', font: { size: 10 } }, grid: { color: '#1f1f1f' }, title: { display: true, text: 'Volume (kg)', color: '#6b7280', font: { size: 11 } } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // ── Calendar Heatmap ──
+            renderProgressCalendar(data.dailyLog || {});
+        }
+
+        function renderAssignments(list) {
+            const container = document.getElementById('progressAssignmentsList');
+            if (!container) return;
+            if (!list.length) {
+                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">No active assignments.</p>';
+                return;
+            }
+            container.innerHTML = list.map(a => `
+                <div class="assignment-card">
+                    <div class="assignment-info">
+                        <h5>${a.title}</h5>
+                        <p>${a.description}</p>
+                    </div>
+                    <div class="assignment-meta">
+                        <span class="asgn-points">+${a.points} PTS</span>
+                        ${a.status === 'Completed'
+                    ? '<button class="asgn-btn completed"><i class="fas fa-check"></i> Done</button>'
+                    : `<button class="asgn-btn" onclick="completeAssignment('${a.id}')">Claim</button>`}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function completeAssignment(id) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+            fetch('/completeAssignment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email, assignmentId: id })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        loadProgressData(); // Refresh UI
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                });
+        }
+
+        function renderBadges(earned) {
+            const container = document.getElementById('progressBadgeGrid');
+            const countLabel = document.getElementById('badgeCountLabel');
+            if (!container) return;
+
+            const allBadges = [
+                { name: "7-Day Streak", icon: "🔥", category: "Consistency" },
+                { name: "Workout Warrior", icon: "📅", category: "Consistency" },
+                { name: "Night Owl", icon: "🌙", category: "Consistency" },
+                { name: "Plate Picker", icon: "💪", category: "Strength" },
+                { name: "Bodyweight Champion", icon: "🏋️", category: "Strength" },
+                { name: "1000lb Club", icon: "🔱", category: "Strength" },
+                { name: "Volume Victim", icon: "📊", category: "Volume" },
+                { name: "10k Club", icon: "⚡", category: "Volume" },
+                { name: "Factory Worker", icon: "🏭", category: "Volume" },
+                { name: "PR Breaker", icon: "🎯", category: "Milestones" },
+                { name: "Time Keeper", icon: "⏱️", category: "Milestones" },
+                { name: "Comeback King", icon: "🔄", category: "Milestones" }
+            ];
+
+            const earnedNames = earned.map(b => b.name);
+            countLabel.textContent = `${earned.length} Earned`;
+
+            container.innerHTML = allBadges.map(b => {
+                const isEarned = earnedNames.includes(b.name);
+                return `
+                    <div class="badge-item ${isEarned ? 'earned' : ''}">
+                        <div class="badge-icon-wrap" title="${b.category}">
+                            ${b.icon}
+                        </div>
+                        <span class="badge-name">${b.name}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPastMonthStats(stats) {
+            document.getElementById('pmWorkouts').textContent = stats.workouts || 0;
+            document.getElementById('pmPRs').textContent = stats.prs || 0;
+            const vol = stats.volume || 0;
+            document.getElementById('pmVolume').textContent = vol >= 1000 ? Math.round(vol / 1000) + 'k' : vol;
+        }
+
+        function renderProgressCalendar(dailyLog) {
+            const cal = document.getElementById('progressCalendar');
+            if (!cal) return;
+
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDayIdx = new Date(year, month, 1).getDay(); // 0=Sun
+            // Shift so Mon=0
+            const startOffset = firstDayIdx === 0 ? 6 : firstDayIdx - 1;
+
+            const dayHeaders = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            let html = dayHeaders.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+
+            // Empty slots before first day
+            for (let i = 0; i < startOffset; i++) {
+                html += '<div class="calendar-day empty"></div>';
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const log = dailyLog[dateStr];
+                let cls = 'calendar-day';
+                let title = '';
+                if (dateStr === todayStr) cls += ' today';
+                if (log) {
+                    cls += ' has-workout';
+                    title = `${log.completed}/${log.total} exercises completed`;
+                    if (log.completed === log.total && log.total > 0) cls += ' all-complete';
+                }
+                html += `<div class="${cls}" title="${title}">${d}</div>`;
+            }
+
+            cal.innerHTML = html;
+        }
+
+    </script>
 
 </body>
+
 </html>
