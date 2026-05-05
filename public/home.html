@@ -1300,6 +1300,14 @@
             <div class="menu-item" onclick="switchPage('announcements')">
                 <i class="fas fa-bullhorn"></i> <span>Announcements</span>
             </div>
+            <div class="menu-item" onclick="switchPage('achievements')">
+                <i class="fas fa-trophy"></i>
+                <span>Achievements & Tasks</span>
+            </div>
+            <div class="menu-item" onclick="switchPage('bmi')">
+                <i class="fas fa-weight"></i>
+                <span>BMI Calculator</span>
+            </div>
             <div class="menu-item" onclick="switchPage('workouts')">
                 <i class="fas fa-dumbbell"></i> <span>Workout</span>
             </div>
@@ -1436,12 +1444,35 @@
                         <button class="btn btn-primary" onclick="switchPage('workouts')">
                             <i class="fas fa-dumbbell"></i> View Workout
                         </button>
+                        <button class="btn btn-primary" onclick="switchPage('achievements')">
+                            <i class="fas fa-tasks"></i> My Tasks
+                        </button>
+                        <button class="btn btn-primary" onclick="switchPage('bmi')">
+                            <i class="fas fa-calculator"></i> BMI Check
+                        </button>
                         <button class="btn btn-primary" onclick="switchPage('payments')">
                             <i class="fas fa-receipt"></i> View Fees & Payments
                         </button>
-                        <button class="btn btn-primary" onclick="switchPage('announcements')">
-                            <i class="fas fa-bullhorn"></i> View Announcements
-                        </button>
+                    </div>
+                </div>
+
+                <!-- TRAINER & OWNER DETAILS -->
+                <div class="grid-2">
+                    <div class="card" style="border-left: 4px solid #3b82f6;">
+                        <h3 style="color: var(--text-primary); margin-bottom: 15px;"><i class="fas fa-user-tie" style="color:#3b82f6; margin-right:10px;"></i>Your Trainer</h3>
+                        <div id="trainerInfo" style="color: var(--text-secondary);">
+                            <p style="font-size: 16px; font-weight: bold;" id="trainerNameDisplay">Loading...</p>
+                            <p id="trainerRoleDisplay" style="color: var(--text-muted); font-size: 13px;"></p>
+                            <p style="margin-top: 10px;"><i class="fas fa-phone-alt"></i> <span id="trainerPhoneDisplay"></span></p>
+                        </div>
+                    </div>
+                    <div class="card" style="border-left: 4px solid #10b981;">
+                        <h3 style="color: var(--text-primary); margin-bottom: 15px;"><i class="fas fa-crown" style="color:#10b981; margin-right:10px;"></i>Gym Owner</h3>
+                        <div id="ownerInfo" style="color: var(--text-secondary);">
+                            <p style="font-size: 16px; font-weight: bold;" id="gymOwnerDisplay">Loading...</p>
+                            <p style="color: var(--text-muted); font-size: 13px;">Proprietor</p>
+                            <p style="margin-top: 10px;"><i class="fas fa-envelope"></i> Contact via Admin</p>
+                        </div>
                     </div>
                 </div>
 
@@ -1496,7 +1527,67 @@
                 </div>
             </div>
 
-            <!-- WORKOUT PAGE -->
+            <!-- ACHIEVEMENTS & TASKS PAGE -->
+            <div class="page" id="achievements-page">
+                <h1 style="color: var(--text-primary); margin-bottom: 25px;">🏆 Tasks & Achievements</h1>
+                
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="color: var(--text-primary); margin-bottom: 15px;">Badges Earned</h3>
+                        <div id="badgesContainer" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <!-- Badges will appear here -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--text-primary); margin-bottom: 15px;">Gamification Points</h3>
+                        <div style="font-size: 36px; font-weight: 800; color: #fbbf24;">
+                            <i class="fas fa-coins"></i> <span id="userPointsDisplay">0</span>
+                        </div>
+                        <p style="color: var(--text-muted); margin-top: 5px;">Keep completing tasks to earn more!</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">Current Assignments</h3>
+                    <div id="tasksContainer">
+                        <p style="text-align: center; color: var(--text-muted);">No active tasks assigned.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BMI CALCULATOR PAGE -->
+            <div class="page" id="bmi-page">
+                <h1 style="color: var(--text-primary); margin-bottom: 25px;">⚖️ BMI Calculator</h1>
+                
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">Calculate Your BMI</h3>
+                        <div class="form-group">
+                            <label>Height (cm)</label>
+                            <input type="number" id="bmiHeight" placeholder="e.g. 175">
+                        </div>
+                        <div class="form-group">
+                            <label>Weight (kg)</label>
+                            <input type="number" id="bmiWeight" placeholder="e.g. 70">
+                        </div>
+                        <button class="btn btn-primary" onclick="calculateBMI()" id="calcBMIBtn" style="width: 100%;">
+                            Calculate & Save
+                        </button>
+                        
+                        <div id="bmiResult" style="margin-top: 20px; display: none; padding: 15px; border-radius: 8px; text-align: center;">
+                            <h2 id="bmiValue" style="font-size: 32px; font-weight: bold;"></h2>
+                            <p id="bmiCategory" style="font-weight: 600; margin-top: 5px;"></p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">BMI History</h3>
+                        <div id="bmiHistory" style="max-height: 400px; overflow-y: auto;">
+                            <p style="text-align: center; color: var(--text-muted);">No records yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="page" id="workouts-page">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
                     <div>
@@ -2217,6 +2308,11 @@
             loadUserProfile();
 
             fetchNotifications();
+
+            // New features init
+            loadTrainerDetails();
+            loadTasks();
+            loadBMIRecords();
         });
 
         // Hide only admin features
@@ -2604,10 +2700,186 @@
                             const badgesCount = document.getElementById('dashBadgesCount');
                             if (monthCount) monthCount.textContent = data.monthWorkoutCount || 0;
                             if (badgesCount) badgesCount.textContent = (data.user.badges || []).length;
+                            
+                            // Update streak if provided by server
+                            if (data.user.streak !== undefined && streakEl) {
+                                streakEl.textContent = data.user.streak + ' 🔥';
+                            }
                         }
                     })
                     .catch(e => console.log("Dash progress fetch error", e));
             }
+        }
+
+        /* ================= NEW FEATURES JS ================= */
+
+        function loadTrainerDetails() {
+            fetch('/getAdminConfig')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.config) {
+                        const c = data.config;
+                        document.getElementById('trainerNameDisplay').textContent = c.trainerName || 'Not Set';
+                        document.getElementById('trainerRoleDisplay').textContent = c.trainerRole || 'Gym Trainer';
+                        document.getElementById('trainerPhoneDisplay').textContent = c.trainerPhone || 'N/A';
+                        document.getElementById('gymOwnerDisplay').textContent = c.gymOwner || 'Owner';
+                    }
+                });
+        }
+
+        function calculateBMI() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const height = document.getElementById('bmiHeight').value;
+            const weight = document.getElementById('bmiWeight').value;
+            const btn = document.getElementById('calcBMIBtn');
+
+            if (!height || !weight) return showToast('Please enter height and weight', 'error');
+
+            btn.disabled = true;
+            btn.innerText = 'Calculating...';
+
+            fetch('/calculate-bmi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email, height, weight })
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerText = 'Calculate & Save';
+                if (data.success) {
+                    const resDiv = document.getElementById('bmiResult');
+                    resDiv.style.display = 'block';
+                    resDiv.className = 'bmi-result-card ' + data.category.toLowerCase();
+                    document.getElementById('bmiValue').textContent = data.bmi;
+                    document.getElementById('bmiCategory').textContent = data.category;
+                    
+                    // Set color based on category
+                    let color = '#22c55e'; // Normal
+                    if (data.category === 'Underweight') color = '#3b82f6';
+                    if (data.category === 'Overweight') color = '#f97316';
+                    if (data.category === 'Obese') color = '#ef4444';
+                    resDiv.style.backgroundColor = color + '15';
+                    resDiv.style.border = '1px solid ' + color;
+                    document.getElementById('bmiValue').style.color = color;
+                    document.getElementById('bmiCategory').style.color = color;
+
+                    showToast('BMI calculated and saved!', 'success');
+                    loadBMIRecords();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.innerText = 'Calculate & Save';
+                showToast('Failed to calculate BMI', 'error');
+            });
+        }
+
+        function loadBMIRecords() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            fetch('/getBMIRecords?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('bmiHistory');
+                    if (data.success && data.records.length > 0) {
+                        let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+                        data.records.forEach(r => {
+                            html += `
+                                <div style="background:#0b0b0b; padding:12px; border-radius:8px; border:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
+                                    <div>
+                                        <div style="font-weight:700; color:var(--text-primary);">BMI: ${r.bmi}</div>
+                                        <div style="font-size:12px; color:var(--text-muted);">${r.date}</div>
+                                    </div>
+                                    <div style="font-size:11px; font-weight:800; padding:2px 8px; border-radius:4px; background:rgba(255,26,26,0.1); color:#ff1a1a;">
+                                        ${r.category}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No records yet.</p>';
+                    }
+                });
+        }
+
+        function loadTasks() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            fetch('/getUserInfo?email=' + encodeURIComponent(user.email))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.user) {
+                        const u = data.user;
+                        document.getElementById('userPointsDisplay').textContent = u.points || 0;
+                        
+                        // Load Badges
+                        const bCont = document.getElementById('badgesContainer');
+                        if (u.badges && u.badges.length > 0) {
+                            let bHtml = '';
+                            u.badges.forEach(b => {
+                                bHtml += `
+                                    <div class="badge-card" title="${b.category}" style="text-align:center; background:#1a1a1a; padding:10px; border-radius:12px; border:1px solid #333; width:80px;">
+                                        <div style="font-size:24px;">${b.icon || '🏅'}</div>
+                                        <div style="font-size:10px; font-weight:700; margin-top:5px; color:#fff;">${b.name}</div>
+                                    </div>
+                                `;
+                            });
+                            bCont.innerHTML = bHtml;
+                        } else {
+                            bCont.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">No badges yet.</p>';
+                        }
+
+                        // Load Tasks
+                        const tCont = document.getElementById('tasksContainer');
+                        if (u.assignments && u.assignments.length > 0) {
+                            let tHtml = '';
+                            u.assignments.forEach(t => {
+                                const isDone = t.status === 'Completed';
+                                tHtml += `
+                                    <div style="background:#0b0b0b; padding:15px; border-radius:12px; border:1px solid ${isDone ? '#052a15' : '#2a0000'}; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                                        <div>
+                                            <div style="font-weight:700; color:${isDone ? '#22c55e' : '#ff1a1a'};">${t.title}</div>
+                                            <div style="font-size:12px; color:var(--text-muted);">${t.description}</div>
+                                            <div style="font-size:11px; margin-top:5px;"><i class="fas fa-coins" style="color:#fbbf24;"></i> ${t.points} Points</div>
+                                        </div>
+                                        <div>
+                                            ${isDone ? 
+                                                '<span style="color:#22c55e; font-weight:700;"><i class="fas fa-check-circle"></i> Done</span>' : 
+                                                `<button class="btn btn-primary" onclick="completeTask('${t.id}')" style="padding:5px 12px; font-size:12px;">Complete</button>`
+                                            }
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            tCont.innerHTML = tHtml;
+                        } else {
+                            tCont.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No active tasks assigned.</p>';
+                        }
+                    }
+                });
+        }
+
+        function completeTask(taskId) {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            fetch('/complete-task', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email, taskId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    loadTasks(); // refresh
+                    loadDashboardData(); // update points/badges count
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(() => showToast('Failed to complete task', 'error'));
         }
 
         // Chart Initialization

@@ -103,10 +103,28 @@ const Payment = mongoose.model("Payment", paymentSchema);
 
 const adminConfigSchema = new mongoose.Schema({
     adminPhone: String,
-    upiQR: String
+    upiQR: String,
+    trainerName: { type: String, default: "John Doe" },
+    trainerPhone: { type: String, default: "9876543210" },
+    trainerRole: { type: String, default: "Head Trainer" },
+    gymOwner: { type: String, default: "Mr. Fitness" }
 });
 
 const AdminConfig = mongoose.model("AdminConfig", adminConfigSchema);
+
+/* ================= BMI RECORD SCHEMA ================= */
+
+const bmiRecordSchema = new mongoose.Schema({
+    email: { type: String, required: true },
+    height: Number, // in cm
+    weight: Number, // in kg
+    bmi: Number,
+    category: String,
+    date: { type: String, default: () => new Date().toISOString().split("T")[0] },
+    createdAt: { type: Date, default: Date.now }
+});
+
+const BMIRecord = mongoose.model("BMIRecord", bmiRecordSchema);
 
 
 /* ================= ATTENDANCE SCHEMA ================= */
@@ -1018,6 +1036,21 @@ app.post("/scanMemberQR", async (req, res) => {
             return res.json({ success: false, message: "Already marked today for " + user.fullname });
         }
 
+        // Calculate Streak
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        const hadYesterday = await Attendance.findOne({ email: user.email, date: yesterdayStr });
+        
+        if (hadYesterday) {
+            user.streak = (user.streak || 0) + 1;
+        } else {
+            // Check if they already marked today (prevent double increment) - wait, we already checked 'existing'
+            user.streak = 1; 
+        }
+        await user.save();
+
         await Attendance.create({
             email: user.email,
             memberName: user.fullname,
@@ -1027,7 +1060,7 @@ app.post("/scanMemberQR", async (req, res) => {
 
         res.json({
             success: true,
-            message: "Attendance marked for " + user.fullname
+            message: "Attendance marked for " + user.fullname + ". Streak: " + user.streak + " 🔥"
         });
 
     } catch (err) {
@@ -1057,6 +1090,22 @@ app.post("/markAttendanceManual", async (req, res) => {
             return res.json({ success: true, message: "Attendance updated for " + user.fullname });
         } else {
             // Create new record
+            // Calculate Streak for manual as well (if date is today)
+            const todayStr = new Date().toISOString().split("T")[0];
+            if (date === todayStr) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split("T")[0];
+                const hadYesterday = await Attendance.findOne({ email: user.email, date: yesterdayStr });
+                
+                if (hadYesterday) {
+                    user.streak = (user.streak || 0) + 1;
+                } else {
+                    user.streak = 1;
+                }
+                await user.save();
+            }
+
             await Attendance.create({
                 email,
                 memberName: user.fullname,
@@ -1310,15 +1359,134 @@ app.get("/getAdminConfig", async (req, res) => {
 
 app.post("/updateAdminConfig", upload.single("upiQR"), async (req, res) => {
     try {
-        const { adminPhone } = req.body;
+        const { adminPhone, trainerName, trainerPhone, trainerRole, gymOwner } = req.body;
         let config = await AdminConfig.findOne();
         if (!config) config = new AdminConfig();
 
         if (adminPhone) config.adminPhone = adminPhone;
+        if (trainerName) config.trainerName = trainerName;
+        if (trainerPhone) config.trainerPhone = trainerPhone;
+        if (trainerRole) config.trainerRole = trainerRole;
+        if (gymOwner) config.gymOwner = gymOwner;
         if (req.file) config.upiQR = "/uploads/" + req.file.filename;
 
         await config.save();
         res.json({ success: true, message: "Admin config updated successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+/* ================= BMI API ================= */
+
+app.post("/calculate-bmi", async (req, res) => {
+    try {
+        const { email, height, weight } = req.body;
+        if (!email || !height || !weight) return res.status(400).json({ success: false, message: "Missing fields" });
+
+        const h_m = height / 100;
+        const bmi = (weight / (h_m * h_m)).toFixed(1);
+        let category = "Normal";
+        if (bmi < 18.5) category = "Underweight";
+        else if (bmi >= 25 && bmi < 30) category = "Overweight";
+        else if (bmi >= 30) category = "Obese";
+
+        const record = new BMIRecord({ email, height, weight, bmi, category });
+        await record.save();
+
+        // Also update user's current height/weight
+        await User.findOneAndUpdate({ email }, { height, weight });
+
+        res.json({ success: true, bmi, category, date: record.date });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.get("/getBMIRecords", async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ success: false, message: "Email required" });
+        const records = await BMIRecord.find({ email }).sort({ _id: -1 }).limit(10).lean();
+        res.json({ success: true, records });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+/* ================= TASKS & ACHIEVEMENTS API ================= */
+
+app.post("/assign-task", async (req, res) => {
+    try {
+        const { adminEmail, memberEmail, title, description, points, category } = req.body;
+        const admin = await User.findOne({ email: adminEmail });
+        if (!admin || admin.role !== "admin") return res.status(403).json({ success: false, message: "Not authorised" });
+
+        const task = {
+            id: Date.now().toString(),
+            title,
+            description,
+            points: Number(points || 10),
+            category: category || "Workout",
+            status: "Pending",
+            assignedDate: new Date()
+        };
+
+        await User.findOneAndUpdate({ email: memberEmail }, { $push: { assignments: task } });
+        res.json({ success: true, message: "Task assigned successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/complete-task", async (req, res) => {
+    try {
+        const { email, taskId } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+        const taskIndex = user.assignments.findIndex(t => t.id === taskId);
+        if (taskIndex === -1) return res.status(404).json({ success: false, message: "Task not found" });
+        if (user.assignments[taskIndex].status === "Completed") return res.status(400).json({ success: false, message: "Task already completed" });
+
+        user.assignments[taskIndex].status = "Completed";
+        user.points += (user.assignments[taskIndex].points || 0);
+
+        // Badge Awarding Logic
+        const completedCount = user.assignments.filter(t => t.status === "Completed").length;
+        if (completedCount === 1) {
+            user.badges.push({ name: "Beginner", category: "Milestone", icon: "🥉" });
+        } else if (completedCount === 5) {
+            user.badges.push({ name: "Consistent", category: "Milestone", icon: "🥈" });
+        } else if (completedCount === 10) {
+            user.badges.push({ name: "Pro", category: "Milestone", icon: "🥇" });
+        }
+
+        await user.save();
+        res.json({ success: true, message: "Task completed! Points and badges awarded.", points: user.points });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.get("/getMonthlyProgress", async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ success: false, message: "Email required" });
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const dateStr = thirtyDaysAgo.toISOString().split("T")[0];
+
+        const attendanceCount = await Attendance.countDocuments({ email, date: { $gte: dateStr } });
+        const workoutsCount = await Workout.countDocuments({ memberEmail: email, date: { $gte: dateStr }, completed: true });
+        
+        res.json({ 
+            success: true, 
+            attendanceCount, 
+            workoutsCount,
+            period: "Last 30 Days"
+        });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

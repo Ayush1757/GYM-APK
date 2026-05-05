@@ -584,7 +584,6 @@
             object-fit: cover;
             border-radius: 8px;
             display: none;
-            transform: scaleX(-1);
         }
 
         #qrCanvas {
@@ -1848,9 +1847,14 @@
                 <div class="card">
                     <div class="auto-style-3">
                         <h3 class="auto-style-4">Total Members List</h3>
-                        <button class="btn btn-primary" onclick="openModal('addMemberModal')">
-                            <i class="fas fa-user-plus"></i> Add Member
-                        </button>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-primary" onclick="openAssignTaskModal()">
+                                <i class="fas fa-tasks"></i> Assign Task
+                            </button>
+                            <button class="btn btn-primary" onclick="openModal('addMemberModal')">
+                                <i class="fas fa-user-plus"></i> Add Member
+                            </button>
+                        </div>
                     </div>
                     <div class="auto-style-5">
                         <table class="table" id="dashboardMemberTable">
@@ -2331,24 +2335,36 @@
                         <button class="auto-style-49 btn btn-success" onclick="processPayment()">
                             <i class="fas fa-check"></i> Save Payment Record
                         </button>
-                    </div>
-
-                    <!-- ADMIN UPI SETTINGS -->
-                    <div class="card">
-                        <h3 class="auto-style-7">Admin UPI Settings</h3>
+                                      <h3 class="auto-style-7">Gym & Trainer Info</h3>
                         <div class="form-group">
-                            <label>Admin Phone Number</label>
-                            <input type="text" id="adminPhoneInput" placeholder="Enter phone for UPI">
+                            <label>Admin Phone Number (for WhatsApp)</label>
+                            <input type="text" id="adminPhoneInput" placeholder="91XXXXXXXXXX" class="auto-style-78">
                         </div>
                         <div class="form-group">
-                            <label>UPI QR Code Image</label>
-                            <input type="file" id="adminUPIFile" accept="image/*">
+                            <label>Lead Trainer Name</label>
+                            <input type="text" id="trainerNameInput" placeholder="Enter trainer name" class="auto-style-78">
                         </div>
-                        <div id="adminUPIPreview" class="auto-style-78">
-                            <!-- Preview Image shows here -->
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Trainer Phone</label>
+                                <input type="text" id="trainerPhoneInput" placeholder="Enter phone" class="auto-style-78">
+                            </div>
+                            <div class="form-group">
+                                <label>Trainer Role</label>
+                                <input type="text" id="trainerRoleInput" placeholder="e.g. Senior Coach" class="auto-style-78">
+                            </div>
                         </div>
-                        <button class="auto-style-79 btn btn-primary" onclick="updateAdminSettings()">
-                            <i class="fas fa-save"></i> Update Admin UPI Info
+                        <div class="form-group">
+                            <label>Gym Owner Name</label>
+                            <input type="text" id="gymOwnerInput" placeholder="Enter owner name" class="auto-style-78">
+                        </div>
+                        <div class="form-group">
+                            <label>UPI QR Code (for fees)</label>
+                            <input type="file" id="upiQRFile" class="auto-style-78">
+                        </div>
+                        <button class="auto-style-79 btn btn-primary" onclick="updateAdminSettings()" style="width: 100%;">
+                            <i class="fas fa-save"></i> Save Gym Settings
+                        </button>                     <i class="fas fa-save"></i> Update Admin UPI Info
                         </button>
                     </div>
                 </div>
@@ -2639,6 +2655,44 @@
                     <button class="btn btn-secondary" onclick="closeModal('addMemberOTPModal')"
                         style="width: 100%; margin-top: 10px; background: transparent; border: none; font-size: 12px; color: #666;">Cancel</button>
                 </div>
+            </div>
+        </div>
+        <!-- ASSIGN TASK MODAL -->
+        <div class="modal" id="assignTaskModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Assign Task / Achievement</h3>
+                    <button class="close-btn" onclick="closeModal('assignTaskModal')">&times;</button>
+                </div>
+                <div class="form-group">
+                    <label>Select Member</label>
+                    <select id="taskMemberEmail" class="auto-style-78">
+                        <option value="">Choose member...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Task Title</label>
+                    <input type="text" id="taskTitle" placeholder="e.g. 5 Day Streak Challenge" class="auto-style-78">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="taskDesc" placeholder="What should the member do?" class="auto-style-78" style="height:80px;"></textarea>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Points Award</label>
+                        <input type="number" id="taskPoints" value="50" class="auto-style-78">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="taskCategory" class="auto-style-78">
+                            <option value="Workout">Workout</option>
+                            <option value="Attendance">Attendance</option>
+                            <option value="Social">Social</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width:100%;" onclick="submitTask()">Assign Task</button>
             </div>
         </div>
         <div class="modal" id="markAttendanceModal">
@@ -3352,49 +3406,89 @@
                     .then(data => {
                         if (data.success && data.config) {
                             const c = data.config;
-                            // UPI / Phone (payments page)
-                            document.getElementById('adminPhoneInput').value = c.adminPhone || '';
-                            if (c.upiQR) {
-                                document.getElementById('adminUPIPreview').innerHTML = `<img src="${c.upiQR}" class="auto-style-111">`;
-                            }
-                            // Gym Details card
                             const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
-                            setVal('adminNameInput', c.adminName);
-                            setVal('adminEmailInput', c.adminEmail);
+                            
+                            setVal('adminPhoneInput', c.adminPhone);
                             setVal('trainerNameInput', c.trainerName);
-                            setVal('trainerEmailInput', c.trainerEmail);
                             setVal('trainerPhoneInput', c.trainerPhone);
-                            // Photos
-                            if (c.adminPhoto) {
-                                document.getElementById('adminPhotoPreviewHolder').innerHTML = `<img src="${c.adminPhoto}" style="width:100%;height:100%;object-fit:cover;">`;
-                            }
-                            if (c.trainerPhoto) {
-                                document.getElementById('trainerPhotoPreviewHolder').innerHTML = `<img src="${c.trainerPhoto}" style="width:100%;height:100%;object-fit:cover;">`;
+                            setVal('trainerRoleInput', c.trainerRole);
+                            setVal('gymOwnerInput', c.gymOwner);
+                            
+                            if (c.upiQR && document.getElementById('adminUPIPreview')) {
+                                document.getElementById('adminUPIPreview').innerHTML = `<img src="${c.upiQR}" class="auto-style-111">`;
                             }
                         }
                     });
             }
 
             function updateAdminSettings() {
-                const phone = document.getElementById('adminPhoneInput').value;
-                const fileInput = document.getElementById('adminUPIFile');
                 const formData = new FormData();
-                formData.append('adminPhone', phone);
-                if (fileInput && fileInput.files[0]) {
-                    formData.append('upiQR', fileInput.files[0]);
-                }
+                formData.append('adminPhone', document.getElementById('adminPhoneInput').value.trim());
+                formData.append('trainerName', document.getElementById('trainerNameInput').value.trim());
+                formData.append('trainerPhone', document.getElementById('trainerPhoneInput').value.trim());
+                formData.append('trainerRole', document.getElementById('trainerRoleInput').value.trim());
+                formData.append('gymOwner', document.getElementById('gymOwnerInput').value.trim());
+                
+                const upiFile = document.getElementById('upiQRFile');
+                if (upiFile && upiFile.files[0]) formData.append('upiQR', upiFile.files[0]);
 
                 fetch('/updateAdminConfig', { method: 'POST', body: formData })
                     .then(r => r.json())
                     .then(data => {
                         if (data.success) {
-                            showToast(data.message, 'success');
+                            showToast('Gym settings updated!', 'success');
                             loadAdminConfig();
                         } else {
-                            showToast(data.message, 'error');
+                            showToast(data.message || 'Error updating settings', 'error');
                         }
                     })
-                    .catch(() => showToast('Error updating admin config', 'error'));
+                    .catch(() => showToast('Network error updating settings', 'error'));
+            }
+
+            function submitTask() {
+                const email = document.getElementById('taskMemberEmail').value;
+                const title = document.getElementById('taskTitle').value.trim();
+                const description = document.getElementById('taskDesc').value.trim();
+                const points = document.getElementById('taskPoints').value;
+                const category = document.getElementById('taskCategory').value;
+
+                if (!email || !title) return showToast('Member and title are required', 'error');
+
+                fetch('/assign-task', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, title, description, points, category })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Task assigned successfully!', 'success');
+                        closeModal('assignTaskModal');
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(() => showToast('Failed to assign task', 'error'));
+            }
+
+            function openAssignTaskModal() {
+                populateTaskMemberDropdown();
+                openModal('assignTaskModal');
+            }
+
+            function populateTaskMemberDropdown() {
+                fetch('/getMembers')
+                    .then(r => r.json())
+                    .then(data => {
+                        const select = document.getElementById('taskMemberEmail');
+                        if (data.success && data.members) {
+                            let html = '<option value="">Choose member...</option>';
+                            data.members.forEach(m => {
+                                html += `<option value="${m.email}">${m.fullname} (${m.email})</option>`;
+                            });
+                            select.innerHTML = html;
+                        }
+                    });
             }
 
             function updateGymDetails() {
@@ -3623,30 +3717,45 @@
                 document.getElementById('downloadQRBtn').style.display = 'inline-block';
                 showToast('QR code generated for ' + escapeHtml(memberName) + '!', 'success');
 
-                // Auto-save QR to member's profile so they can view it
+                // Auto-save QR with white border (quiet zone) so it's readable anywhere
                 setTimeout(function () {
                     const qrDiv = document.getElementById('actualQR');
                     const canvas = qrDiv ? qrDiv.querySelector('canvas') : null;
-                    const img = qrDiv ? qrDiv.querySelector('img') : null;
-                    let qrDataUrl = null;
-                    if (img && img.src && img.src.startsWith('data:image')) {
-                        qrDataUrl = img.src;
-                    } else if (canvas) {
-                        qrDataUrl = canvas.toDataURL('image/png');
+                    const imgSource = qrDiv ? qrDiv.querySelector('img') : null;
+                    let source = null;
+                    if (canvas) {
+                        source = canvas.toDataURL('image/png');
+                    } else if (imgSource && imgSource.src && imgSource.src.startsWith('data:image')) {
+                        source = imgSource.src;
                     }
-                    if (qrDataUrl) {
-                        fetch('/saveGeneratedQR', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ memberEmail: memberEmail, qrDataUrl: qrDataUrl })
-                        }).then(function (r) { return r.json(); })
-                            .then(function (d) {
-                                if (d.success) {
-                                    showToast('QR saved to member profile!', 'success');
-                                }
-                            }).catch(function () { /* silent */ });
+
+                    if (source) {
+                        const BORDER = 40;
+                        const img = new Image();
+                        img.onload = function () {
+                            const out = document.createElement('canvas');
+                            out.width = img.width + BORDER * 2;
+                            out.height = img.height + BORDER * 2;
+                            const ctx = out.getContext('2d');
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(0, 0, out.width, out.height);
+                            ctx.drawImage(img, BORDER, BORDER, img.width, img.height);
+                            const finalDataUrl = out.toDataURL('image/png');
+
+                            fetch('/saveGeneratedQR', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ memberEmail: memberEmail, qrDataUrl: finalDataUrl })
+                            }).then(function (r) { return r.json(); })
+                                .then(function (d) {
+                                    if (d.success) {
+                                        showToast('QR saved with border!', 'success');
+                                    }
+                                }).catch(function () { /* silent */ });
+                        };
+                        img.src = source;
                     }
-                }, 500);
+                }, 800);
 
                 // refresh members if possible
                 if (typeof loadMembers === 'function') loadMembers();
@@ -3729,6 +3838,14 @@
                         const video = document.getElementById('qrVideo');
                         video.srcObject = stream;
                         video.style.display = 'block';
+
+                        // Smart Mirroring: Mirror if using front camera (user), otherwise normal (environment)
+                        const settings = scanTrack.getSettings ? scanTrack.getSettings() : {};
+                        if (settings.facingMode === 'user') {
+                            video.style.transform = 'scaleX(-1)';
+                        } else {
+                            video.style.transform = 'scaleX(1)';
+                        }
 
                         document.getElementById('scannerIdleMsg').style.display = 'none';
                         document.getElementById('scanOverlay').style.display = 'block';
