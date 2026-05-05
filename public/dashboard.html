@@ -2796,7 +2796,7 @@
 
         </div> <!-- End main-wrapper -->
         <script>
-            let userEmailForOTP = ''; // Global for OTP verification
+
 
             // Initialize
             document.addEventListener('DOMContentLoaded', function () {
@@ -2808,7 +2808,7 @@
                     window.location.href = '/login.html';
                     return;
                 }
-                // if a nonâ€‘admin somehow landed on this page, bounce them out
+                // if a non-admin somehow landed on this page, bounce them out
                 if (user.role !== 'admin') {
                     // you can comment out the redirect if you want them to stay here
                     // and see only their QR image
@@ -2830,7 +2830,7 @@
                     attDate.value = new Date().toISOString().split('T')[0];
                     attDate.addEventListener('change', (e) => loadAttendanceTable(e.target.value));
                 }
-                adjustQrSection();              // <â€“â€“ roleâ€‘aware adjustment
+                // adjustQrSection(); // Removed as it was undefined and causing page to stick
             });
 
             // Sidebar Toggle
@@ -3167,7 +3167,6 @@
 
 
             let allMembers = [];
-            let userEmailForOTP = '';
             function loadMembers() {
                 fetch('/getMembers')
                     .then(r => r.json())

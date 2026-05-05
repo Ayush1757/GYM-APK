@@ -11,7 +11,7 @@ const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
-const { Resend } = require("resend");
+const Resend = require("resend").Resend;
 const app = express();
 
 // Initialize Nodemailer Transporter
@@ -734,15 +734,6 @@ app.post("/login", async (req, res) => {
 
         const user = await User.findOne({ email });
         if (!user) {
-            // Check if user is pending verification
-            const pending = await PendingUser.findOne({ email });
-            if (pending) {
-                return res.status(403).json({ 
-                    success: false, 
-                    message: "Your account is pending verification. Please verify the OTP sent to your email or register again.",
-                    isPending: true
-                });
-            }
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
