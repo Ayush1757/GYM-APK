@@ -10,25 +10,20 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const fs = require("fs");
-const nodemailer = require("nodemailer");
-const Resend = require("resend").Resend;
 const app = express();
+// Initialize Resend with API Key only if available
+let resend = null;
+try {
+    const ResendLib = require("resend").Resend;
+    if (process.env.RESEND_API_KEY) {
+        resend = new ResendLib(process.env.RESEND_API_KEY);
+    }
+} catch (e) {
+    console.warn("Resend library failed to initialize:", e.message);
+}
 
-// Initialize Nodemailer Transporter
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
-
-// Initialize Resend with API Key (keeping for backward compatibility if needed, but switching main logic)
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // Support JSON-encoded bodies
 app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
