@@ -208,86 +208,9 @@ const volumeTrackingSchema = new mongoose.Schema({
 });
 const VolumeTracking = mongoose.model("VolumeTracking", volumeTrackingSchema);
 
-/* ================= OTP & PENDING REGISTRATION ================= */
 
-const pendingUserSchema = new mongoose.Schema({
-    email: { type: String, required: true },
-    otp: { type: String, required: true },
-    userData: { type: Object, required: true },
-    createdAt: { type: Date, default: Date.now, expires: 600 } // 10 mins
-});
-const PendingUser = mongoose.model("PendingUser", pendingUserSchema);
 
-async function sendOTP(email, otp) {
-    try {
-        const mailOptions = {
-            from: `"Gym Management" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Your Gym App Verification Code",
-            html: `
-                <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ff1a1a; border-radius: 10px; background-color: #050505; color: #ffffff;">
-                    <h2 style="color: #ff1a1a; text-align: center;">Welcome to the Gym!</h2>
-                    <p>You're almost there! Please use the 6-digit code below to verify your email and complete your registration.</p>
-                    <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; text-align: center; margin: 25px 0;">
-                        <span style="font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #ff1a1a;">${otp}</span>
-                    </div>
-                    <p style="color: #9ca3af; font-size: 14px;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
-                    <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
-                    <p style="text-align: center; font-size: 12px; color: #666;">&copy; 2026 Gym Management System</p>
-                </div>
-            `
-        };
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("OTP Email Sent via Nodemailer:", info.messageId);
-        return info;
-    } catch (err) {
-        console.error("sendOTP Error (Nodemailer):", err);
-        // Fallback to Resend if Nodemailer fails and API key exists
-        if (process.env.RESEND_API_KEY) {
-            try {
-                console.log("Attempting fallback to Resend...");
-                return await resend.emails.send({
-                    from: "Gym App <onboarding@resend.dev>",
-                    to: email,
-                    subject: "Your Gym App Verification Code",
-                    html: `OTP Code: ${otp}`
-                });
-            } catch (resendErr) {
-                console.error("Resend Fallback also failed:", resendErr);
-            }
-        }
-        throw err;
-    }
-}
-
-// Dedicated /resend-otp route that works for registration/member addition
-app.post("/resend-otp", async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email) return res.status(400).json({ success: false, message: "Email is required" });
-        const userEmail = email.toLowerCase();
-
-        // Check if user exists in PendingUser
-        const pending = await PendingUser.findOne({ email: userEmail });
-        if (!pending) {
-            return res.status(404).json({ success: false, message: "No pending registration found for this email. Please register again." });
-        }
-
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        
-        // Update OTP and reset creation date for expiry
-        pending.otp = otp;
-        pending.createdAt = new Date();
-        await pending.save();
-
-        await sendOTP(userEmail, otp);
-        res.json({ success: true, message: "New OTP sent successfully" });
-    } catch (err) {
-        console.error("/resend-otp Error:", err);
-        res.status(500).json({ success: false, message: "Failed to resend OTP" });
-    }
-});
 
 
 
@@ -775,25 +698,23 @@ app.post("/register", async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        const newUser = new User({
+            fullname,
+            email: userEmail,
+            password: hashedPassword,
+            role: role || "user"
+        });
 
-        await PendingUser.findOneAndUpdate(
-            { email: userEmail },
-            {
-                email: userEmail,
-                otp,
-                userData: { fullname, email: userEmail, password: hashedPassword, role: role || "user" }
-            },
-            { upsert: true, returnDocument: 'after' }
-        );
+        await newUser.save();
 
-        try {
-            await sendOTP(userEmail, otp);
-            res.json({ success: true, message: "OTP sent to your email", email: userEmail });
-        } catch (mailErr) {
-            console.error("Mail Error:", mailErr);
-            res.status(500).json({ success: false, message: "Failed to send OTP. Please check your email configuration." });
-        }
+        const safeUser = {
+            fullname: newUser.fullname,
+            email: newUser.email,
+            role: newUser.role
+        };
+
+        res.json({ success: true, message: "Account created successfully!", user: safeUser });
 
     } catch (err) {
         console.error("Registration Error:", err);
@@ -801,55 +722,7 @@ app.post("/register", async (req, res) => {
     }
 });
 
-app.post("/verify-otp", async (req, res) => {
-    try {
-        const { email, otp } = req.body;
-        const userEmail = email.toLowerCase();
-        const pending = await PendingUser.findOne({ email: userEmail, otp });
 
-        if (!pending) {
-            return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
-        }
-
-        const { fullname, password, role, phone, membershipPlan, expiry } = pending.userData;
-
-        const newUser = new User({
-            fullname,
-            email,
-            password,
-            role: role || "user",
-            phone: phone || "",
-            membershipPlan: membershipPlan || "",
-            expiry: expiry || ""
-        });
-
-        await newUser.save();
-        await PendingUser.deleteOne({ _id: pending._id });
-
-        const safeUser = {
-            fullname: newUser.fullname,
-            email: newUser.email,
-            role: newUser.role,
-            phone: newUser.phone || '',
-            gender: newUser.gender || '',
-            dob: newUser.dob || '',
-            height: newUser.height || '',
-            weight: newUser.weight || '',
-            bloodGroup: newUser.bloodGroup || '',
-            expiry: newUser.expiry || null
-        };
-
-        res.json({ 
-            success: true, 
-            message: "Email verified and account created!", 
-            user: safeUser 
-        });
-
-    } catch (err) {
-        console.error("OTP Verification Error:", err);
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
 
 
 /* ================= LOGIN ================= */
@@ -1421,29 +1294,20 @@ app.post("/addMember", async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password || "Member@123", 10);
         const expiry = getExpiryFromPlan(membershipPlan);
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        const newUser = new User({
+            fullname,
+            email: userEmail,
+            password: hashedPassword,
+            role: "user",
+            phone: phone || "",
+            membershipPlan: membershipPlan || "",
+            expiry
+        });
 
-        await PendingUser.findOneAndUpdate(
-            { email: userEmail },
-            {
-                email: userEmail,
-                otp,
-                userData: {
-                    fullname,
-                    email: userEmail,
-                    password: hashedPassword,
-                    role: "user",
-                    phone: phone || "",
-                    membershipPlan: membershipPlan || "",
-                    expiry
-                }
-            },
-            { upsert: true }
-        );
+        await newUser.save();
 
-        await sendOTP(userEmail, otp);
-
-        res.json({ success: true, message: "OTP sent to member's email", email: userEmail });
+        res.json({ success: true, message: "Member added successfully!", member: { fullname, email: userEmail } });
     } catch (err) {
         console.error("addMember error:", err);
         res.status(500).json({ success: false, message: err.message });

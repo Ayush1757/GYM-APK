@@ -133,28 +133,7 @@
 
     </div>
 
-    <div id="otpModal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
-        <div class="register-container" style="width:340px; padding:30px; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);">
-            <div style="font-size: 40px; color: #ff1a1a; margin-bottom: 20px;">📧</div>
-            <h3>Verify Your Email</h3>
-            <p style="font-size: 13px; color: #ccc; margin: 15px 0;">We've sent a 6-digit code to:<br><b
-                    id="otpEmailDisplay" style="color:#ff1a1a;"></b></p>
-            <input type="text" id="otpInput" maxlength="6" placeholder="000000"
-                style="text-align:center; font-size:24px; letter-spacing:10px; width:180px; margin:20px auto; display:block; background:rgba(255,255,255,0.05); border:1px solid #333;">
-            <button onclick="verifyOTP()" id="verifyBtn">Verify & Create Account</button>
-            <div style="margin-top: 15px; font-size: 13px;">
-                <span style="color: #666;">Didn't receive code?</span>
-                <a href="#" onclick="resendRegisterOTP(event)" id="resendLink" style="color: #ff1a1a; text-decoration: none; font-weight: bold; margin-left: 5px;">Resend OTP</a>
-            </div>
-            <p style="font-size: 12px; margin-top: 15px;"><a href="#" onclick="location.reload()"
-                    style="color: #666; text-decoration:none;">Cancel</a></p>
-        </div>
-    </div>
-
     <script>
-        let userEmail = '';
-
         // show/hide admin key input when role is changed
         (function () {
             const roleSelect = document.getElementById('roleSelect');
@@ -172,12 +151,11 @@
             e.preventDefault();
             const btn = e.target.querySelector('button');
             const originalText = btn.innerText;
-            btn.innerText = 'Sending OTP...';
+            btn.innerText = 'Creating Account...';
             btn.disabled = true;
 
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
-            userEmail = data.email;
 
             try {
                 const response = await fetch('/register', {
@@ -188,108 +166,25 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    document.getElementById('otpEmailDisplay').innerText = userEmail;
-                    document.getElementById('otpModal').style.display = 'flex';
+                    alert('Registration Successful!');
+                    if (result.user) {
+                        localStorage.setItem("user", JSON.stringify(result.user));
+                        const redirect = result.user.role === 'admin' ? '/dashboard.html' : '/home.html';
+                        window.location.href = redirect;
+                    } else {
+                        window.location.href = '/login.html';
+                    }
                 } else {
-                    alert(result.message || 'Error sending OTP');
+                    alert(result.message || 'Error creating account');
                     btn.innerText = originalText;
                     btn.disabled = false;
                 }
             } catch (err) {
-                // Fallback if the server returns non-JSON (like "User already exists")
-                const text = await err.message || 'Error occurred';
-                alert('Registration Issue: ' + text);
+                alert('Registration Issue: ' + err.message);
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
         });
-
-        async function verifyOTP() {
-            const otp = document.getElementById('otpInput').value;
-            if (otp.length !== 6) return alert('Enter 6-digit code');
-
-            const btn = document.getElementById('verifyBtn');
-            const originalText = btn.innerText;
-            btn.innerText = 'Verifying...';
-            btn.disabled = true;
-
-            try {
-                const response = await fetch('/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail, otp })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    // Registration and verification successful
-                    // Log the user in automatically
-                    if (result.user) {
-                        localStorage.setItem("user", JSON.stringify(result.user));
-                        const redirect = result.user.role === 'admin' ? '/dashboard.html' : '/home.html';
-                        alert('Registration and Verification Successful! Logging you in...');
-                        window.location.href = redirect;
-                    } else {
-                        alert('Registration Successful! Please login.');
-                        window.location.href = '/login.html';
-                    }
-                } else {
-                    alert(result.message || 'Invalid OTP');
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Verification Error');
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        }
-        async function resendRegisterOTP(e) {
-            if (e) e.preventDefault();
-            const resendLink = document.getElementById('resendLink');
-            const originalText = resendLink.innerText;
-            
-            resendLink.innerText = 'Sending...';
-            resendLink.style.pointerEvents = 'none';
-            resendLink.style.opacity = '0.5';
-
-            try {
-                const response = await fetch('/resend-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    alert('A new OTP has been sent to your email.');
-                    // Disable for 30 seconds
-                    let timeLeft = 30;
-                    const interval = setInterval(() => {
-                        resendLink.innerText = `Resend in ${timeLeft}s`;
-                        timeLeft--;
-                        if (timeLeft < 0) {
-                            clearInterval(interval);
-                            resendLink.innerText = originalText;
-                            resendLink.style.pointerEvents = 'auto';
-                            resendLink.style.opacity = '1';
-                        }
-                    }, 1000);
-                } else {
-                    alert(result.message || 'Error resending OTP');
-                    resendLink.innerText = originalText;
-                    resendLink.style.pointerEvents = 'auto';
-                    resendLink.style.opacity = '1';
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error connecting to server');
-                resendLink.innerText = originalText;
-                resendLink.style.pointerEvents = 'auto';
-                resendLink.style.opacity = '1';
-            }
-        }
     </script>
 
 </body>
