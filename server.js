@@ -10,17 +10,11 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const fs = require("fs");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const app = express();
 
-// Set up Mail Transporter
-const mailTransporter = nodemailer.createTransport({
-    service: 'gmail', // you can swap this with another host
-    auth: {
-        user: process.env.EMAIL_USER || "yourgymemail@gmail.com",
-        pass: process.env.EMAIL_PASS || "your_app_password"
-    }
-});
+// Initialize Resend with API Key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Support JSON-encoded bodies
@@ -215,25 +209,59 @@ const pendingUserSchema = new mongoose.Schema({
 const PendingUser = mongoose.model("PendingUser", pendingUserSchema);
 
 async function sendOTP(email, otp) {
-    const mailOptions = {
-        from: process.env.EMAIL_USER || "yourgymemail@gmail.com",
-        to: email,
-        subject: "Your Gym App Verification Code",
-        html: `
-            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ff1a1a; border-radius: 10px; background-color: #050505; color: #ffffff;">
-                <h2 style="color: #ff1a1a; text-align: center;">Welcome to the Gym!</h2>
-                <p>You're almost there! Please use the 4-digit code below to verify your email and complete your registration.</p>
-                <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; text-align: center; margin: 25px 0;">
-                    <span style="font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #ff1a1a;">${otp}</span>
+    try {
+        const { data, error } = await resend.emails.send({
+            from: "Gym App <onboarding@resend.dev>",
+            to: email,
+            subject: "Your Gym App Verification Code",
+            html: `
+                <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ff1a1a; border-radius: 10px; background-color: #050505; color: #ffffff;">
+                    <h2 style="color: #ff1a1a; text-align: center;">Welcome to the Gym!</h2>
+                    <p>You're almost there! Please use the 6-digit code below to verify your email and complete your registration.</p>
+                    <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; text-align: center; margin: 25px 0;">
+                        <span style="font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #ff1a1a;">${otp}</span>
+                    </div>
+                    <p style="color: #9ca3af; font-size: 14px;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
+                    <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+                    <p style="text-align: center; font-size: 12px; color: #666;">&copy; 2026 Gym Management System</p>
                 </div>
-                <p style="color: #9ca3af; font-size: 14px;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
-                <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
-                <p style="text-align: center; font-size: 12px; color: #666;">&copy; 2026 Gym Management System</p>
-            </div>
-        `
-    };
-    return mailTransporter.sendMail(mailOptions);
+            `
+        });
+
+        if (error) {
+            console.error("Resend Error:", error);
+            throw error;
+        }
+
+        return data;
+    } catch (err) {
+        console.error("sendOTP Error:", err);
+        throw err;
+    }
 }
+
+// Dedicated /send-otp route
+app.post("/send-otp", async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ success: false, message: "Email is required" });
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Save OTP to DB for verification later
+        await Otp.findOneAndUpdate(
+            { email },
+            { otp, createdAt: new Date() },
+            { upsert: true }
+        );
+
+        await sendOTP(email, otp);
+        res.json({ success: true, message: "OTP sent successfully" });
+    } catch (err) {
+        console.error("/send-otp Error:", err);
+        res.status(500).json({ success: false, message: "Failed to send OTP" });
+    }
+});
 
 
 
@@ -610,7 +638,7 @@ app.post("/saveMemberWorkoutLog", async (req, res) => {
         const log = await MemberWorkoutLog.findOneAndUpdate(
             { memberEmail: email, date },
             { exercises, updatedAt: new Date() },
-            { upsert: true, new: true, setDefaultsOnInsert: true }
+            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
         );
 
         res.json({ success: true, message: "Workout log saved!", log, prUpdates });
@@ -720,7 +748,7 @@ app.post("/register", async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const otp = Math.floor(1000 + Math.random() * 9000).toString();
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
         await PendingUser.findOneAndUpdate(
             { email },
@@ -729,7 +757,7 @@ app.post("/register", async (req, res) => {
                 otp,
                 userData: { fullname, email, password: hashedPassword, role: role || "user" }
             },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
         );
 
         try {
@@ -1192,8 +1220,8 @@ app.post("/collectPayment", async (req, res) => {
 
         // Send Automated Payment Email asynchronously
         try {
-            const mailOptions = {
-                from: process.env.EMAIL_USER || "yourgymemail@gmail.com",
+            resend.emails.send({
+                from: "Gym App <onboarding@resend.dev>",
                 to: member.email,
                 subject: `Payment Successful - Invoice ${invoiceNo}`,
                 html: `
@@ -1208,9 +1236,7 @@ app.post("/collectPayment", async (req, res) => {
                     <p>Best Regards,</p>
                     <p>Your Gym Admin</p>
                 `
-            };
-            // sendMail doesn't block the request response
-            mailTransporter.sendMail(mailOptions).catch(err => console.log('Failed to send invoice email:', err));
+            }).catch(err => console.log('Failed to send invoice email:', err));
         } catch (mailError) {
             console.log('Error triggering mail sequence', mailError);
         }
@@ -1366,7 +1392,7 @@ app.post("/addMember", async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password || "Member@123", 10);
         const expiry = getExpiryFromPlan(membershipPlan);
-        const otp = Math.floor(1000 + Math.random() * 9000).toString();
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
         await PendingUser.findOneAndUpdate(
             { email },

@@ -6,37 +6,23 @@
     <title>Register</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link rel="stylesheet" href="responsive.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', sans-serif;
+            --primary-red: #ff1a1a;
         }
 
         body {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(-45deg, #000000, #220000, #440000, #ff0000);
-            background-size: 400% 400%;
-            animation: gradientMove 10s ease infinite;
-            overflow: hidden;
-        }
-
-        @keyframes gradientMove {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
+            background: linear-gradient(135deg, #050505 0%, #1a0000 50%, #000000 100%);
+            padding: 40px 20px;
         }
 
         .register-container {
@@ -152,9 +138,9 @@
         <div class="register-container" style="width:340px; padding:30px; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);">
             <div style="font-size: 40px; color: #ff1a1a; margin-bottom: 20px;">📧</div>
             <h3>Verify Your Email</h3>
-            <p style="font-size: 13px; color: #ccc; margin: 15px 0;">We've sent a 4-digit code to:<br><b
+            <p style="font-size: 13px; color: #ccc; margin: 15px 0;">We've sent a 6-digit code to:<br><b
                     id="otpEmailDisplay" style="color:#ff1a1a;"></b></p>
-            <input type="text" id="otpInput" maxlength="4" placeholder="0000"
+            <input type="text" id="otpInput" maxlength="6" placeholder="000000"
                 style="text-align:center; font-size:24px; letter-spacing:10px; width:180px; margin:20px auto; display:block; background:rgba(255,255,255,0.05); border:1px solid #333;">
             <button onclick="verifyOTP()" id="verifyBtn">Verify & Create Account</button>
             <p style="font-size: 12px; margin-top: 15px;"><a href="#" onclick="location.reload()"
@@ -216,7 +202,7 @@
 
         async function verifyOTP() {
             const otp = document.getElementById('otpInput').value;
-            if (otp.length !== 4) return alert('Enter 4-digit code');
+            if (otp.length !== 6) return alert('Enter 6-digit code');
 
             const btn = document.getElementById('verifyBtn');
             const originalText = btn.innerText;
