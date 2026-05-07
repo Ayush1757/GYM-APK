@@ -139,10 +139,6 @@
             <input type="email" name="email" id="loginEmail" placeholder="Email" required>
             <input type="password" name="password" id="loginPassword" placeholder="Password" required>
             
-            <div style="text-align: right; margin-top: -8px; margin-bottom: 15px;">
-                <a href="#" onclick="showForgotModal()" style="color: #ff1a1a; text-decoration: none; font-size: 13px; font-weight: 600;">Forgot Password?</a>
-            </div>
-
             <label>Login as</label>
             <select name="role" id="loginRole" required>
                 <option value="user" selected>Member</option>
@@ -157,121 +153,9 @@
         </div>
     </div>
 
-    <!-- FORGOT PASSWORD MODAL -->
-    <div id="forgotPasswordModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
-        <div class="login-container" style="width:340px; padding:30px; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);">
-            <div id="forgotStep1">
-                <div style="font-size: 40px; color: #ff1a1a; margin-bottom: 20px;">🔒</div>
-                <h3>Forgot Password</h3>
-                <p style="font-size: 13px; color: #ccc; margin: 15px 0;">Enter your email to receive a reset code.</p>
-                <input type="email" id="resetEmail" placeholder="your@email.com" style="margin-bottom: 20px;">
-                <button onclick="requestResetOTP()" id="requestResetBtn">Send Reset Code</button>
-                <p style="font-size: 12px; margin-top: 15px;"><a href="#" onclick="closeForgotModal()" style="color: #666; text-decoration:none;">Cancel</a></p>
-            </div>
-
-            <div id="forgotStep2" style="display:none;">
-                <div style="font-size: 40px; color: #ff1a1a; margin-bottom: 20px;">📧</div>
-                <h3>Verify Code</h3>
-                <p style="font-size: 13px; color: #ccc; margin: 15px 0;">Enter the 6-digit code and your new password.</p>
-                <input type="text" id="resetOtpInput" maxlength="6" placeholder="000000" style="text-align:center; font-size:24px; letter-spacing:10px; width:220px; margin:10px auto; display:block; background:rgba(255,255,255,0.05); border:1px solid #333;">
-                <input type="password" id="newPassword" placeholder="New Password" style="margin: 10px 0;">
-                <button onclick="performPasswordReset()" id="resetSubmitBtn">Reset Password</button>
-                <p style="font-size: 12px; margin-top: 15px;"><a href="#" onclick="backToStep1()" style="color: #666; text-decoration:none;">Back</a></p>
-            </div>
-        </div>
-    </div>
-
     <script>
         function showToast(msg, type = 'info') {
-            alert(msg); // Simplified for now, or use your toast implementation
-        }
-
-        let currentResetEmail = '';
-
-        function showForgotModal() {
-            document.getElementById('forgotPasswordModal').style.display = 'flex';
-            document.getElementById('forgotStep1').style.display = 'block';
-            document.getElementById('forgotStep2').style.display = 'none';
-            
-            // Pre-fill email if already typed in login
-            const loginEmail = document.getElementById('loginEmail').value;
-            if(loginEmail) document.getElementById('resetEmail').value = loginEmail;
-        }
-
-        function closeForgotModal() {
-            document.getElementById('forgotPasswordModal').style.display = 'none';
-        }
-
-        function backToStep1() {
-            document.getElementById('forgotStep1').style.display = 'block';
-            document.getElementById('forgotStep2').style.display = 'none';
-        }
-
-        function requestResetOTP() {
-            const email = document.getElementById('resetEmail').value.trim();
-            if (!email) return showToast('Please enter your email', 'error');
-            
-            currentResetEmail = email;
-            const btn = document.getElementById('requestResetBtn');
-            btn.innerText = 'Sending...';
-            btn.disabled = true;
-
-            fetch('/forgot-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            })
-            .then(r => r.json())
-            .then(data => {
-                btn.innerText = 'Send Reset Code';
-                btn.disabled = false;
-                if (data.success) {
-                    document.getElementById('forgotStep1').style.display = 'none';
-                    document.getElementById('forgotStep2').style.display = 'block';
-                    showToast('OTP sent to your email', 'success');
-                } else {
-                    showToast(data.message, 'error');
-                }
-            })
-            .catch(() => {
-                btn.innerText = 'Send Reset Code';
-                btn.disabled = false;
-                showToast('Error connecting to server', 'error');
-            });
-        }
-
-        function performPasswordReset() {
-            const otp = document.getElementById('resetOtpInput').value.trim();
-            const newPassword = document.getElementById('newPassword').value;
-            
-            if (otp.length !== 6) return showToast('Enter 6-digit OTP', 'error');
-            if (newPassword.length < 6) return showToast('Password must be at least 6 characters', 'error');
-
-            const btn = document.getElementById('resetSubmitBtn');
-            btn.innerText = 'Resetting...';
-            btn.disabled = true;
-
-            fetch('/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: currentResetEmail, otp, newPassword })
-            })
-            .then(r => r.json())
-            .then(data => {
-                btn.innerText = 'Reset Password';
-                btn.disabled = false;
-                if (data.success) {
-                    showToast('Password reset successful! You can now login.', 'success');
-                    closeForgotModal();
-                } else {
-                    showToast(data.message, 'error');
-                }
-            })
-            .catch(() => {
-                btn.innerText = 'Reset Password';
-                btn.disabled = false;
-                showToast('Network error', 'error');
-            });
+            alert(msg);
         }
 
         document.getElementById('loginForm').addEventListener('submit', async function (e) {

@@ -10,7 +10,6 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const fs = require("fs");
-const { sendOTPEmail, generateOTP } = require("./services/mailService");
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -215,45 +214,11 @@ const VolumeTracking = mongoose.model("VolumeTracking", volumeTrackingSchema);
 
 /* ================= OTP & PENDING REGISTRATION ================= */
 
-const pendingUserSchema = new mongoose.Schema({
-    email: { type: String, required: true },
-    otp: { type: String, required: true },
-    userData: { type: Object, required: true },
-    createdAt: { type: Date, default: Date.now, expires: 300 } // 5 mins expiry
-});
-const PendingUser = mongoose.model("PendingUser", pendingUserSchema);
+// OTP schemas removed
 
 // sendOTP removed in favor of services/mailService.js
 
-// Dedicated /resend-otp route that works for registration/member addition
-app.post("/resend-otp", async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email) return res.status(400).json({ success: false, message: "Email is required" });
-        const userEmail = email.toLowerCase();
-
-        // Check if user exists in PendingUser
-        const pending = await PendingUser.findOne({ email: userEmail });
-        if (!pending) {
-            return res.status(404).json({ success: false, message: "No pending registration found for this email. Please register again." });
-        }
-
-        const otp = generateOTP();
-        
-        // Update OTP and reset creation date for expiry
-        pending.otp = otp;
-        pending.createdAt = new Date();
-        await pending.save();
-
-        // Send OTP in background for speed
-        sendOTPEmail(userEmail, otp, 'Verification').catch(e => console.error("Resend-OTP background error:", e));
-        
-        res.json({ success: true, message: "New OTP sended Quickly to your email" });
-    } catch (err) {
-        console.error("/resend-otp Error:", err);
-        res.status(500).json({ success: false, message: "Failed to resend OTP" });
-    }
-});
+// OTP resend route removed
 
 
 
@@ -681,111 +646,7 @@ const Otp = mongoose.model("Otp", otpSchema);
 
 /* ================= LOGIN OTP API ================= */
 
-app.post("/request-login-otp", async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email) return res.status(400).json({ success: false, message: "Email is required" });
-
-        const user = await User.findOne({ email });
-        if (!user) return res.status(404).json({ success: false, message: "No account found with this email" });
-
-        const otp = generateOTP();
-        
-        // Remove any existing OTPs for this email
-        await Otp.deleteMany({ email });
-        
-        // Save new OTP
-        await Otp.create({ email, otp });
-
-        // Send OTP in background
-        sendOTPEmail(email, otp, 'Login').catch(e => console.error("Login-OTP background error:", e));
-
-        res.json({ success: true, message: "OTP sent Quickly to your email" });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
-
-/* ================= FORGOT PASSWORD API ================= */
-
-app.post("/forgot-password", async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email) return res.status(400).json({ success: false, message: "Email is required" });
-
-        const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-        const otp = generateOTP();
-
-        // Reuse Otp model for password reset
-        await Otp.deleteMany({ email: user.email });
-        await Otp.create({ email: user.email, otp });
-
-        sendOTPEmail(user.email, otp, 'Password Reset').catch(e => console.error("Forgot-Pass background error:", e));
-
-        res.json({ success: true, message: "Password reset OTP sent to your email" });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
-
-app.post("/reset-password", async (req, res) => {
-    try {
-        const { email, otp, newPassword } = req.body;
-        if (!email || !otp || !newPassword) return res.status(400).json({ success: false, message: "All fields are required" });
-
-        const record = await Otp.findOne({ email: email.toLowerCase(), otp });
-        if (!record) return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
-
-        const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        user.password = hashedPassword;
-        await user.save();
-
-        // Clean up OTP
-        await Otp.deleteMany({ email: email.toLowerCase() });
-
-        res.json({ success: true, message: "Password has been reset successfully" });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
-
-app.post("/verify-login-otp", async (req, res) => {
-    try {
-        const { email, otp } = req.body;
-        if (!email || !otp) return res.status(400).json({ success: false, message: "Email and OTP are required" });
-
-        const record = await Otp.findOne({ email, otp });
-        if (!record) return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
-
-        const user = await User.findOne({ email });
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-        // Clean up OTP
-        await Otp.deleteOne({ _id: record._id });
-
-        // Success - log them in
-        res.json({
-            success: true,
-            message: "Login successful via OTP",
-            user: {
-                fullname: user.fullname,
-                email: user.email,
-                phone: user.phone,
-                role: user.role,
-                expiry: user.expiry,
-                streak: user.streak,
-                points: user.points
-            }
-        });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
+// Login OTP and Forgot Password routes removed
 
 
 /* ================= MULTER CONFIG ================= */
@@ -849,24 +710,18 @@ app.post("/register", async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const otp = generateOTP();
+        const newUser = new User({
+            fullname,
+            email: userEmail,
+            password: hashedPassword,
+            role: role || "user"
+        });
 
-        await PendingUser.findOneAndUpdate(
-            { email: userEmail },
-            {
-                email: userEmail,
-                otp,
-                userData: { fullname, email: userEmail, password: hashedPassword, role: role || "user" }
-            },
-            { upsert: true, returnDocument: 'after' }
-        );
-
-        // Send OTP in background - making registration instant
-        sendOTPEmail(userEmail, otp, 'Verification').catch(err => console.error("Registration OTP background error:", err));
+        await newUser.save();
         
         res.json({ 
             success: true, 
-            message: "OTP sended Quickly to your email. Please check your inbox.", 
+            message: "Registration successful! You can now login.", 
             email: userEmail 
         });
 
@@ -876,55 +731,7 @@ app.post("/register", async (req, res) => {
     }
 });
 
-app.post("/verify-otp", async (req, res) => {
-    try {
-        const { email, otp } = req.body;
-        const userEmail = email.toLowerCase();
-        const pending = await PendingUser.findOne({ email: userEmail, otp });
-
-        if (!pending) {
-            return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
-        }
-
-        const { fullname, password, role, phone, membershipPlan, expiry } = pending.userData;
-
-        const newUser = new User({
-            fullname,
-            email,
-            password,
-            role: role || "user",
-            phone: phone || "",
-            membershipPlan: membershipPlan || "",
-            expiry: expiry || ""
-        });
-
-        await newUser.save();
-        await PendingUser.deleteOne({ _id: pending._id });
-
-        const safeUser = {
-            fullname: newUser.fullname,
-            email: newUser.email,
-            role: newUser.role,
-            phone: newUser.phone || '',
-            gender: newUser.gender || '',
-            dob: newUser.dob || '',
-            height: newUser.height || '',
-            weight: newUser.weight || '',
-            bloodGroup: newUser.bloodGroup || '',
-            expiry: newUser.expiry || null
-        };
-
-        res.json({ 
-            success: true, 
-            message: "Email verified and account created!", 
-            user: safeUser 
-        });
-
-    } catch (err) {
-        console.error("OTP Verification Error:", err);
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
+// verify-otp removed
 
 
 /* ================= LOGIN ================= */
@@ -936,15 +743,6 @@ app.post("/login", async (req, res) => {
 
         const user = await User.findOne({ email });
         if (!user) {
-            // Check if user is pending verification
-            const pending = await PendingUser.findOne({ email });
-            if (pending) {
-                return res.status(403).json({ 
-                    success: false, 
-                    message: "Your account is pending verification. Please verify the OTP sent to your email or register again.",
-                    isPending: true
-                });
-            }
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
@@ -1742,30 +1540,20 @@ app.post("/addMember", async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password || "Member@123", 10);
         const expiry = getExpiryFromPlan(membershipPlan);
-        const otp = generateOTP();
+        
+        const newUser = new User({
+            fullname,
+            email: userEmail,
+            password: hashedPassword,
+            role: "user",
+            phone: phone || "",
+            membershipPlan: membershipPlan || "",
+            expiry
+        });
 
-        await PendingUser.findOneAndUpdate(
-            { email: userEmail },
-            {
-                email: userEmail,
-                otp,
-                userData: {
-                    fullname,
-                    email: userEmail,
-                    password: hashedPassword,
-                    role: "user",
-                    phone: phone || "",
-                    membershipPlan: membershipPlan || "",
-                    expiry
-                }
-            },
-            { upsert: true }
-        );
+        await newUser.save();
 
-        // Send OTP in background
-        sendOTPEmail(userEmail, otp, 'Verification').catch(err => console.error("AddMember OTP background error:", err));
-
-        res.json({ success: true, message: "OTP sended Quickly to your email", email: userEmail });
+        res.json({ success: true, message: "Member added successfully", email: userEmail });
     } catch (err) {
         console.error("addMember error:", err);
         res.status(500).json({ success: false, message: err.message });
