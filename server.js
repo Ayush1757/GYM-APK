@@ -10,30 +10,8 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const fs = require("fs");
-const nodemailer = require("nodemailer");
-const { Resend } = require("resend");
+const { sendOTPEmail, generateOTP } = require("./services/mailService");
 const app = express();
-
-// Initialize Nodemailer Transporter
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
-
-// Verify connection configuration
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log("[Nodemailer] Connection error:", error);
-    } else {
-        console.log("[Nodemailer] Server is ready to take our messages");
-    }
-});
-
-// Initialize Resend with API Key (keeping for backward compatibility if needed, but switching main logic)
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Support JSON-encoded bodies
@@ -241,76 +219,11 @@ const pendingUserSchema = new mongoose.Schema({
     email: { type: String, required: true },
     otp: { type: String, required: true },
     userData: { type: Object, required: true },
-    createdAt: { type: Date, default: Date.now, expires: 600 } // 10 mins
+    createdAt: { type: Date, default: Date.now, expires: 300 } // 5 mins expiry
 });
 const PendingUser = mongoose.model("PendingUser", pendingUserSchema);
 
-async function sendOTP(email, otp) {
-    console.log(`[sendOTP] Initiating OTP send for: ${email}`);
-    
-    const htmlContent = `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ff1a1a; border-radius: 10px; background-color: #050505; color: #ffffff;">
-            <h2 style="color: #ff1a1a; text-align: center;">Welcome to the Gym!</h2>
-            <p>You're almost there! Please use the 6-digit code below to verify your email and complete your registration.</p>
-            <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; text-align: center; margin: 25px 0;">
-                <span style="font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #ff1a1a;">${otp}</span>
-            </div>
-            <p style="color: #9ca3af; font-size: 14px;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
-            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
-            <p style="text-align: center; font-size: 12px; color: #666;">&copy; 2026 Gym Management System</p>
-        </div>
-    `;
-
-    // 1. Try Resend first
-    if (process.env.RESEND_API_KEY) {
-        try {
-            console.log("[sendOTP] Attempting Resend...");
-            const { data, error } = await resend.emails.send({
-                from: "Gym App <onboarding@resend.dev>",
-                to: email,
-                subject: "Your Gym App Verification Code",
-                html: htmlContent
-            });
-
-            if (error) {
-                console.error("[sendOTP] Resend error detected:", error.message);
-                // Continue to fallback
-            } else if (data && data.id) {
-                console.log("[sendOTP] Resend success, ID:", data.id);
-                return data;
-            } else {
-                console.log("[sendOTP] Resend returned no error but no ID either. Falling back.");
-            }
-        } catch (resendErr) {
-            console.error("[sendOTP] Resend exception:", resendErr.message);
-        }
-    } else {
-        console.log("[sendOTP] No RESEND_API_KEY found, skipping Resend.");
-    }
-
-    // 2. Fallback to Nodemailer (Gmail)
-    try {
-        console.log("[sendOTP] Attempting Nodemailer (Gmail) fallback...");
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-            console.error("[sendOTP] Nodemailer config missing EMAIL_USER or EMAIL_PASS");
-            return null;
-        }
-
-        const mailOptions = {
-            from: `"Gym Management" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Your Gym App Verification Code",
-            html: htmlContent
-        };
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log("[sendOTP] Nodemailer success, MessageID:", info.messageId);
-        return info;
-    } catch (err) {
-        console.error("[sendOTP] Nodemailer final failure:", err.message);
-        return null;
-    }
-}
+// sendOTP removed in favor of services/mailService.js
 
 // Dedicated /resend-otp route that works for registration/member addition
 app.post("/resend-otp", async (req, res) => {
@@ -325,7 +238,7 @@ app.post("/resend-otp", async (req, res) => {
             return res.status(404).json({ success: false, message: "No pending registration found for this email. Please register again." });
         }
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = generateOTP();
         
         // Update OTP and reset creation date for expiry
         pending.otp = otp;
@@ -333,9 +246,9 @@ app.post("/resend-otp", async (req, res) => {
         await pending.save();
 
         // Send OTP in background for speed
-        sendOTP(userEmail, otp).catch(e => console.error("Resend-OTP background error:", e));
+        sendOTPEmail(userEmail, otp, 'Verification').catch(e => console.error("Resend-OTP background error:", e));
         
-        res.json({ success: true, message: "New OTP sent successfully" });
+        res.json({ success: true, message: "New OTP sended Quickly to your email" });
     } catch (err) {
         console.error("/resend-otp Error:", err);
         res.status(500).json({ success: false, message: "Failed to resend OTP" });
@@ -761,7 +674,7 @@ app.delete("/clearMemberWorkoutLog", async (req, res) => {
 const otpSchema = new mongoose.Schema({
     email: String,
     otp: String,
-    createdAt: { type: Date, default: Date.now, expires: 600 } // 10 minutes expiry
+    createdAt: { type: Date, default: Date.now, expires: 300 } // 5 minutes expiry
 });
 
 const Otp = mongoose.model("Otp", otpSchema);
@@ -776,7 +689,7 @@ app.post("/request-login-otp", async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ success: false, message: "No account found with this email" });
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = generateOTP();
         
         // Remove any existing OTPs for this email
         await Otp.deleteMany({ email });
@@ -785,9 +698,57 @@ app.post("/request-login-otp", async (req, res) => {
         await Otp.create({ email, otp });
 
         // Send OTP in background
-        sendOTP(email, otp).catch(e => console.error("Login-OTP background error:", e));
+        sendOTPEmail(email, otp, 'Login').catch(e => console.error("Login-OTP background error:", e));
 
-        res.json({ success: true, message: "OTP sent to your email" });
+        res.json({ success: true, message: "OTP sent Quickly to your email" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+/* ================= FORGOT PASSWORD API ================= */
+
+app.post("/forgot-password", async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ success: false, message: "Email is required" });
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+        const otp = generateOTP();
+
+        // Reuse Otp model for password reset
+        await Otp.deleteMany({ email: user.email });
+        await Otp.create({ email: user.email, otp });
+
+        sendOTPEmail(user.email, otp, 'Password Reset').catch(e => console.error("Forgot-Pass background error:", e));
+
+        res.json({ success: true, message: "Password reset OTP sent to your email" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/reset-password", async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+        if (!email || !otp || !newPassword) return res.status(400).json({ success: false, message: "All fields are required" });
+
+        const record = await Otp.findOne({ email: email.toLowerCase(), otp });
+        if (!record) return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        // Clean up OTP
+        await Otp.deleteMany({ email: email.toLowerCase() });
+
+        res.json({ success: true, message: "Password has been reset successfully" });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
@@ -888,7 +849,7 @@ app.post("/register", async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = generateOTP();
 
         await PendingUser.findOneAndUpdate(
             { email: userEmail },
@@ -901,11 +862,11 @@ app.post("/register", async (req, res) => {
         );
 
         // Send OTP in background - making registration instant
-        sendOTP(userEmail, otp).catch(err => console.error("Registration OTP background error:", err));
+        sendOTPEmail(userEmail, otp, 'Verification').catch(err => console.error("Registration OTP background error:", err));
         
         res.json({ 
             success: true, 
-            message: "OTP sended Quickly on that mentioned email. Please check your inbox.", 
+            message: "OTP sended Quickly to your email. Please check your inbox.", 
             email: userEmail 
         });
 
@@ -1781,7 +1742,7 @@ app.post("/addMember", async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password || "Member@123", 10);
         const expiry = getExpiryFromPlan(membershipPlan);
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = generateOTP();
 
         await PendingUser.findOneAndUpdate(
             { email: userEmail },
@@ -1802,9 +1763,9 @@ app.post("/addMember", async (req, res) => {
         );
 
         // Send OTP in background
-        sendOTP(userEmail, otp).catch(err => console.error("AddMember OTP background error:", err));
+        sendOTPEmail(userEmail, otp, 'Verification').catch(err => console.error("AddMember OTP background error:", err));
 
-        res.json({ success: true, message: "OTP sended Quickly on that mentioned email", email: userEmail });
+        res.json({ success: true, message: "OTP sended Quickly to your email", email: userEmail });
     } catch (err) {
         console.error("addMember error:", err);
         res.status(500).json({ success: false, message: err.message });
