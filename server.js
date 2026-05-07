@@ -719,10 +719,23 @@ app.post("/register", async (req, res) => {
 
         await newUser.save();
         
+        const safeUser = {
+            fullname: newUser.fullname,
+            email: newUser.email,
+            role: newUser.role,
+            phone: '',
+            expiry: null,
+            points: 0,
+            badges: []
+        };
+
+        const redirect = newUser.role === "admin" ? "/dashboard.html" : "/home.html";
+
         res.json({ 
             success: true, 
-            message: "Registration successful! You can now login.", 
-            email: userEmail 
+            message: "Registration successful! Logging you in...", 
+            user: safeUser,
+            redirect: redirect
         });
 
     } catch (err) {

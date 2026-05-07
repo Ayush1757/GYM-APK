@@ -180,8 +180,14 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    alert(result.message || 'Registration successful!');
-                    window.location.href = '/login.html';
+                    if (result.user) {
+                        localStorage.setItem("user", JSON.stringify(result.user));
+                        alert(result.message || 'Registration successful!');
+                        window.location.href = result.redirect || (result.user.role === 'admin' ? '/dashboard.html' : '/home.html');
+                    } else {
+                        alert('Registration successful! Please login.');
+                        window.location.href = '/login.html';
+                    }
                 } else {
                     alert(result.message || 'Error during registration');
                     btn.innerText = originalText;
