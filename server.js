@@ -250,18 +250,23 @@ async function sendOTP(email, otp) {
         </div>
     `;
 
-    // 1. Try Resend first as it's typically much faster than SMTP
     if (process.env.RESEND_API_KEY) {
         try {
             console.log("Attempting to send OTP via Resend...");
-            const data = await resend.emails.send({
+            const { data, error } = await resend.emails.send({
                 from: "Gym App <onboarding@resend.dev>",
                 to: email,
                 subject: "Your Gym App Verification Code",
                 html: htmlContent
             });
-            console.log("OTP Sent via Resend successfully:", data.id);
-            return data;
+
+            if (error) {
+                console.error("Resend API error:", error.message);
+                // Continue to fallback
+            } else {
+                console.log("OTP Sent via Resend successfully:", data.id);
+                return data;
+            }
         } catch (resendErr) {
             console.error("Resend delivery failed, trying fallback:", resendErr.message);
         }
