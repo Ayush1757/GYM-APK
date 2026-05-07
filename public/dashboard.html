@@ -2645,26 +2645,7 @@
             </div>
         </div>
 
-        <!-- ADD MEMBER OTP MODAL -->
-        <div class="modal" id="addMemberOTPModal">
-            <div class="modal-content" style="max-width: 350px;">
-                <div class="modal-header">
-                    <h3>Verify Member Email</h3>
-                    <button class="close-btn" onclick="closeModal('addMemberOTPModal')">×</button>
-                </div>
-                <div style="text-align: center; padding: 10px;">
-                    <div style="font-size: 36px; margin-bottom: 15px; color: #ff1a1a;">📧</div>
-                    <p style="font-size: 13px; color: #888; margin-bottom: 15px;">Enter the 6-digit code sent to:<br><b
-                            id="adminOTPEmailDisplay" style="color:var(--text-primary);"></b></p>
-                    <input type="text" id="adminMemberOTPInput" maxlength="6" placeholder="000000"
-                        style="text-align:center; font-size:24px; letter-spacing:10px; width:220px; margin:20px auto; display:block; background:#111; border:1px solid #333; color:white; border-radius: 8px; padding: 10px;">
-                    <button class="btn btn-primary" onclick="verifyMemberOTP()" id="adminVerifyBtn"
-                        style="width: 100%; height: 45px; font-weight: bold;">Verify & Create Account</button>
-                    <button class="btn btn-secondary" onclick="closeModal('addMemberOTPModal')"
-                        style="width: 100%; margin-top: 10px; background: transparent; border: none; font-size: 12px; color: #666;">Cancel</button>
-                </div>
-            </div>
-        </div>
+        <!-- Add Member OTP Modal Removed -->
         <!-- ASSIGN WORKOUT MODAL -->
         <div class="modal" id="assignWorkoutModal">
             <div class="modal-content">
@@ -3234,11 +3215,16 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            userEmailForOTP = email;
-                            document.getElementById('adminOTPEmailDisplay').innerText = email;
+                            showToast('Member added successfully!', 'success');
                             closeModal('addMemberModal');
-                            openModal('addMemberOTPModal');
-                            showToast('OTP sent to member email', 'success');
+                            // Clear fields
+                            document.getElementById('memberName').value = '';
+                            document.getElementById('memberEmail').value = '';
+                            document.getElementById('memberPhone').value = '';
+                            document.getElementById('memberPassword').value = '';
+                            // Reload members list
+                            loadMembers();
+                            loadDashboardData();
                         } else {
                             showToast(data.message || 'Error adding member', 'error');
                         }
@@ -3246,43 +3232,7 @@
                     .catch(err => showToast(err.message || 'Error adding member', 'error'));
             }
 
-            function verifyMemberOTP() {
-                const otp = document.getElementById('adminMemberOTPInput').value;
-                if (otp.length !== 6) return showToast('Enter 6-digit code', 'error');
-
-                const btn = document.getElementById('adminVerifyBtn');
-                btn.innerText = 'Verifying...';
-                btn.disabled = true;
-
-                fetch('/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmailForOTP, otp })
-                })
-                    .then(r => r.json())
-                    .then(data => {
-                        btn.disabled = false;
-                        btn.innerText = 'Verify & Create Account';
-                        if (data.success) {
-                            showToast('Member verified and added successfully!', 'success');
-                            closeModal('addMemberOTPModal');
-                            document.getElementById('memberName').value = '';
-                            document.getElementById('memberEmail').value = '';
-                            document.getElementById('memberPhone').value = '';
-                            document.getElementById('memberPassword').value = '';
-                            document.getElementById('adminMemberOTPInput').value = '';
-                            loadMembers();
-                            loadDashboardData();
-                        } else {
-                            showToast(data.message || 'Invalid OTP', 'error');
-                        }
-                    })
-                    .catch(err => {
-                        btn.disabled = false;
-                        btn.innerText = 'Verify & Create Account';
-                        showToast('Verification failed', 'error');
-                    });
-            }
+            // verifyMemberOTP removed
 
             let allMembers = [];
             function loadMembers() {
