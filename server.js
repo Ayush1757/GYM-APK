@@ -237,45 +237,53 @@ const pendingUserSchema = new mongoose.Schema({
 const PendingUser = mongoose.model("PendingUser", pendingUserSchema);
 
 async function sendOTP(email, otp) {
+    const htmlContent = `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ff1a1a; border-radius: 10px; background-color: #050505; color: #ffffff;">
+            <h2 style="color: #ff1a1a; text-align: center;">Welcome to the Gym!</h2>
+            <p>You're almost there! Please use the 6-digit code below to verify your email and complete your registration.</p>
+            <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; text-align: center; margin: 25px 0;">
+                <span style="font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #ff1a1a;">${otp}</span>
+            </div>
+            <p style="color: #9ca3af; font-size: 14px;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
+            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+            <p style="text-align: center; font-size: 12px; color: #666;">&copy; 2026 Gym Management System</p>
+        </div>
+    `;
+
+    // 1. Try Resend first as it's typically much faster than SMTP
+    if (process.env.RESEND_API_KEY) {
+        try {
+            console.log("Attempting to send OTP via Resend...");
+            const data = await resend.emails.send({
+                from: "Gym App <onboarding@resend.dev>",
+                to: email,
+                subject: "Your Gym App Verification Code",
+                html: htmlContent
+            });
+            console.log("OTP Sent via Resend successfully:", data.id);
+            return data;
+        } catch (resendErr) {
+            console.error("Resend delivery failed, trying fallback:", resendErr.message);
+        }
+    }
+
+    // 2. Fallback to Nodemailer (Gmail)
     try {
+        console.log("Sending OTP via Nodemailer fallback...");
         const mailOptions = {
             from: `"Gym Management" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: "Your Gym App Verification Code",
-            html: `
-                <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ff1a1a; border-radius: 10px; background-color: #050505; color: #ffffff;">
-                    <h2 style="color: #ff1a1a; text-align: center;">Welcome to the Gym!</h2>
-                    <p>You're almost there! Please use the 6-digit code below to verify your email and complete your registration.</p>
-                    <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; text-align: center; margin: 25px 0;">
-                        <span style="font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #ff1a1a;">${otp}</span>
-                    </div>
-                    <p style="color: #9ca3af; font-size: 14px;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
-                    <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
-                    <p style="text-align: center; font-size: 12px; color: #666;">&copy; 2026 Gym Management System</p>
-                </div>
-            `
+            html: htmlContent
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log("OTP Email Sent via Nodemailer:", info.messageId);
+        console.log("OTP Email Sent via Nodemailer fallback:", info.messageId);
         return info;
     } catch (err) {
-        console.error("sendOTP Error (Nodemailer):", err);
-        // Fallback to Resend if Nodemailer fails and API key exists
-        if (process.env.RESEND_API_KEY) {
-            try {
-                console.log("Attempting fallback to Resend...");
-                return await resend.emails.send({
-                    from: "Gym App <onboarding@resend.dev>",
-                    to: email,
-                    subject: "Your Gym App Verification Code",
-                    html: `OTP Code: ${otp}`
-                });
-            } catch (resendErr) {
-                console.error("Resend Fallback also failed:", resendErr);
-            }
-        }
-        throw err;
+        console.error("Critical: All OTP delivery methods failed:", err);
+        // We don't throw here to avoid crashing background processes, but we log heavily
+        return null;
     }
 }
 
@@ -299,7 +307,9 @@ app.post("/resend-otp", async (req, res) => {
         pending.createdAt = new Date();
         await pending.save();
 
-        await sendOTP(userEmail, otp);
+        // Send OTP in background for speed
+        sendOTP(userEmail, otp).catch(e => console.error("Resend-OTP background error:", e));
+        
         res.json({ success: true, message: "New OTP sent successfully" });
     } catch (err) {
         console.error("/resend-otp Error:", err);
@@ -749,8 +759,8 @@ app.post("/request-login-otp", async (req, res) => {
         // Save new OTP
         await Otp.create({ email, otp });
 
-        // Send Email
-        await sendOTP(email, otp);
+        // Send OTP in background
+        sendOTP(email, otp).catch(e => console.error("Login-OTP background error:", e));
 
         res.json({ success: true, message: "OTP sent to your email" });
     } catch (err) {
@@ -865,13 +875,14 @@ app.post("/register", async (req, res) => {
             { upsert: true, returnDocument: 'after' }
         );
 
-        try {
-            await sendOTP(userEmail, otp);
-            res.json({ success: true, message: "OTP sent to your email", email: userEmail });
-        } catch (mailErr) {
-            console.error("Mail Error:", mailErr);
-            res.status(500).json({ success: false, message: "Failed to send OTP. Please check your email configuration." });
-        }
+        // Send OTP in background - making registration instant
+        sendOTP(userEmail, otp).catch(err => console.error("Registration OTP background error:", err));
+        
+        res.json({ 
+            success: true, 
+            message: "OTP sended Quickly on that mentioned email. Please check your inbox.", 
+            email: userEmail 
+        });
 
     } catch (err) {
         console.error("Registration Error:", err);
@@ -1765,9 +1776,10 @@ app.post("/addMember", async (req, res) => {
             { upsert: true }
         );
 
-        await sendOTP(userEmail, otp);
+        // Send OTP in background
+        sendOTP(userEmail, otp).catch(err => console.error("AddMember OTP background error:", err));
 
-        res.json({ success: true, message: "OTP sent to member's email", email: userEmail });
+        res.json({ success: true, message: "OTP sended Quickly on that mentioned email", email: userEmail });
     } catch (err) {
         console.error("addMember error:", err);
         res.status(500).json({ success: false, message: err.message });
