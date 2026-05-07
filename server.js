@@ -23,6 +23,15 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+// Verify connection configuration
+transporter.verify(function (error, success) {
+    if (error) {
+        console.log("[Nodemailer] Connection error:", error);
+    } else {
+        console.log("[Nodemailer] Server is ready to take our messages");
+    }
+});
+
 // Initialize Resend with API Key (keeping for backward compatibility if needed, but switching main logic)
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -237,6 +246,8 @@ const pendingUserSchema = new mongoose.Schema({
 const PendingUser = mongoose.model("PendingUser", pendingUserSchema);
 
 async function sendOTP(email, otp) {
+    console.log(`[sendOTP] Initiating OTP send for: ${email}`);
+    
     const htmlContent = `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ff1a1a; border-radius: 10px; background-color: #050505; color: #ffffff;">
             <h2 style="color: #ff1a1a; text-align: center;">Welcome to the Gym!</h2>
@@ -250,9 +261,10 @@ async function sendOTP(email, otp) {
         </div>
     `;
 
+    // 1. Try Resend first
     if (process.env.RESEND_API_KEY) {
         try {
-            console.log("Attempting to send OTP via Resend...");
+            console.log("[sendOTP] Attempting Resend...");
             const { data, error } = await resend.emails.send({
                 from: "Gym App <onboarding@resend.dev>",
                 to: email,
@@ -261,20 +273,29 @@ async function sendOTP(email, otp) {
             });
 
             if (error) {
-                console.error("Resend API error:", error.message);
+                console.error("[sendOTP] Resend error detected:", error.message);
                 // Continue to fallback
-            } else {
-                console.log("OTP Sent via Resend successfully:", data.id);
+            } else if (data && data.id) {
+                console.log("[sendOTP] Resend success, ID:", data.id);
                 return data;
+            } else {
+                console.log("[sendOTP] Resend returned no error but no ID either. Falling back.");
             }
         } catch (resendErr) {
-            console.error("Resend delivery failed, trying fallback:", resendErr.message);
+            console.error("[sendOTP] Resend exception:", resendErr.message);
         }
+    } else {
+        console.log("[sendOTP] No RESEND_API_KEY found, skipping Resend.");
     }
 
     // 2. Fallback to Nodemailer (Gmail)
     try {
-        console.log("Sending OTP via Nodemailer fallback...");
+        console.log("[sendOTP] Attempting Nodemailer (Gmail) fallback...");
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            console.error("[sendOTP] Nodemailer config missing EMAIL_USER or EMAIL_PASS");
+            return null;
+        }
+
         const mailOptions = {
             from: `"Gym Management" <${process.env.EMAIL_USER}>`,
             to: email,
@@ -283,11 +304,10 @@ async function sendOTP(email, otp) {
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log("OTP Email Sent via Nodemailer fallback:", info.messageId);
+        console.log("[sendOTP] Nodemailer success, MessageID:", info.messageId);
         return info;
     } catch (err) {
-        console.error("Critical: All OTP delivery methods failed:", err);
-        // We don't throw here to avoid crashing background processes, but we log heavily
+        console.error("[sendOTP] Nodemailer final failure:", err.message);
         return null;
     }
 }
