@@ -2865,78 +2865,31 @@
         <!-- NO OTP MODAL -->
 
         <script>
-            // Global Click Listener for Event Delegation
-            document.addEventListener('click', function(e) {
-                const menuItem = e.target.closest('.menu-item');
-                if (menuItem && menuItem.dataset.page) {
-                    switchPage(menuItem.dataset.page);
-                }
-            });
-
-            let userEmailForOTP = ''; // Global for OTP verification
-
-            // Initialize
-            document.addEventListener('DOMContentLoaded', function () {
-                // Load saved theme preference first
-                loadTheme();
-
-                const user = JSON.parse(localStorage.getItem('user'));
-                if (!user) {
-                    window.location.href = '/login.html';
-                    return;
-                }
-                // if a nonâ€‘admin somehow landed on this page, bounce them out
-                if (user.role !== 'admin') {
-                    // you can comment out the redirect if you want them to stay here
-                    // and see only their QR image
-                    // window.location.href = '/home.html';
-                }
-
-                document.getElementById('userName').textContent = user.fullname;
-                document.getElementById('profileName').value = user.fullname;
-                document.getElementById('profileEmail').value = user.email;
-                document.getElementById('profilePhone').value = user.phone || '';
-                document.getElementById('profileRole').value = user.role === 'admin' ? 'Admin' : 'Member';
-
-                loadDashboardData();
-                loadMembers();
-                loadAnnouncements();
-                initCharts();
-                const attDate = document.getElementById('attendanceDate');
-                if (attDate) {
-                    attDate.value = new Date().toISOString().split('T')[0];
-                    attDate.addEventListener('change', (e) => loadAttendanceTable(e.target.value));
-                }
-                adjustQrSection();              // <â€“â€“ roleâ€‘aware adjustment
-            });
-
-            // Sidebar Toggle
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const container = document.getElementById('mainContainer');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            if (window.innerWidth <= 768) {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-                if (sidebar.classList.contains('active')) {
-                    document.body.style.overflow = 'hidden';
+            // UI Interaction Functions
+            function toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                const container = document.getElementById('mainContainer');
+                const overlay = document.getElementById('sidebarOverlay');
+                
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                    if (sidebar.classList.contains('active')) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
                 } else {
-                    document.body.style.overflow = '';
+                    sidebar.classList.toggle('collapsed');
+                    container.classList.toggle('collapsed');
                 }
-            } else {
-                sidebar.classList.toggle('collapsed');
-                container.classList.toggle('collapsed');
             }
-        }
 
-            // Page Switching
             function switchPage(page) {
                 try {
-                    if (page === 'settings') page = 'profile'; // Alias
                     const pages = document.querySelectorAll('.page');
                     const menuItems = document.querySelectorAll('.menu-item');
-
+                    
                     pages.forEach(p => p.classList.remove('active'));
                     menuItems.forEach(m => m.classList.remove('active'));
 
@@ -2986,7 +2939,6 @@
                 }
             }
 
-            // Modal Functions
             function openModal(modalId) {
                 document.getElementById(modalId).classList.add('active');
             }
@@ -2995,23 +2947,28 @@
                 document.getElementById(modalId).classList.remove('active');
             }
 
-            // User Menu Toggle
             function toggleUserMenu() {
-                document.getElementById('userMenu').classList.toggle('active');
+                const menu = document.getElementById('userMenu');
+                if (menu) menu.classList.toggle('active');
             }
 
-            // Logout
             function logout() {
                 localStorage.removeItem('user');
                 window.location.href = '/login.html';
             }
 
-            // Notifications Toggle
             function toggleNotifications() {
                 showToast('3 new notifications!', 'info');
             }
 
-            // Theme Toggle
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
             function toggleTheme() {
                 const body = document.body;
                 const isLight = body.classList.toggle('light-theme');
@@ -3036,14 +2993,42 @@
                 updateThemeToggleText();
             }
 
-            // Toast Notification
-            function showToast(message, type = 'info') {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML = message;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
-            }
+            // Global Click Listener for Event Delegation
+            document.addEventListener('click', function(e) {
+                const menuItem = e.target.closest('.menu-item');
+                if (menuItem && menuItem.dataset.page) {
+                    switchPage(menuItem.dataset.page);
+                }
+            });
+
+            // Initialize
+            document.addEventListener('DOMContentLoaded', function () {
+                loadTheme();
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                document.getElementById('userName').textContent = user.fullname;
+                document.getElementById('profileName').value = user.fullname;
+                document.getElementById('profileEmail').value = user.email;
+                document.getElementById('profilePhone').value = user.phone || '';
+                document.getElementById('profileRole').value = user.role === 'admin' ? 'Admin' : 'Member';
+
+                loadDashboardData();
+                loadMembers();
+                loadAnnouncements();
+                initCharts();
+                const attDate = document.getElementById('attendanceDate');
+                if (attDate) {
+                    attDate.value = new Date().toISOString().split('T')[0];
+                    attDate.addEventListener('change', (e) => loadAttendanceTable(e.target.value));
+                }
+                adjustQrSection();
+            });
+
+
 
             // Attendance Table Loading
             function loadAttendanceTable(dateVal) {
@@ -3180,7 +3165,7 @@
                             data.announcements.forEach((a, i) => {
                                 rows += `<tr>
                             <td>${escapeHtml(a.title)}</td>
-                            <td><span class="badge badge-${a.priority === }'high' ? 'danger' : a.priority === 'low' ? 'success' : 'warning'}">${a.priority}</span></td>
+                            <td><span class="badge badge-${a.priority === 'high' ? 'danger' : a.priority === 'low' ? 'success' : 'warning'}">${a.priority}</span></td>
                             <td>${a.target}</td>
                             <td>Active</td>
                             <td><button class="auto-style-100 btn btn-secondary"><i class="fas fa-trash"></i></button></td>
@@ -3421,7 +3406,7 @@
                             <tr>
                                 <td>${p.date}</td>
                                 <td>${escapeHtml(p.memberName)}</td>
-                                <td>${p.plan ? p.plan.replace(/_/g, }' ') : '--'}</td>
+                                <td>${p.plan ? p.plan.replace(/_/g, ' ') : '--'}</td>
                                 <td>₹${p.amount}</td>
                                 <td>${p.method}</td>
                                 <td><span class="badge badge-success">${p.status}</span></td>
