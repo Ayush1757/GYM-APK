@@ -149,6 +149,49 @@
             margin-left: 80px;
         }
 
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -260px;
+                z-index: 2000;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-container {
+                margin-left: 0 !important;
+            }
+
+            .sidebar-header h2 {
+                display: block !important;
+            }
+            
+            .sidebar.collapsed {
+                width: 260px;
+            }
+        }
+
         .navbar {
             background: var(--bg-secondary);
             padding: 20px 30px;
@@ -1748,6 +1791,9 @@
 
 <body>
 
+    <!-- SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -2858,12 +2904,24 @@
             });
 
             // Sidebar Toggle
-            function toggleSidebar() {
-                const sidebar = document.getElementById('sidebar');
-                const container = document.getElementById('mainContainer');
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const container = document.getElementById('mainContainer');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                if (sidebar.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            } else {
                 sidebar.classList.toggle('collapsed');
                 container.classList.toggle('collapsed');
             }
+        }
 
             // Page Switching
             function switchPage(page) {
@@ -2873,6 +2931,12 @@
                 const pageElement = document.getElementById(page + '-page');
                 if (pageElement) {
                     pageElement.classList.add('active');
+                    if (window.innerWidth <= 768) {
+                        const sidebar = document.getElementById('sidebar');
+                        if (sidebar.classList.contains('active')) {
+                            toggleSidebar(); // Close sidebar on mobile after selection
+                        }
+                    }
 
                     // Refresh data based on page
                     if (page === 'dashboard') { loadDashboardData(); loadAnnouncements(); }
