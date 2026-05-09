@@ -45,6 +45,7 @@
             width: 380px;
             padding: 40px;
             border-radius: 24px;
+            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 26, 26, 0.2);
@@ -138,7 +139,7 @@
             <input type="password" name="password" id="loginPassword" placeholder="Password" required>
             
             <label>Login as</label>
-            <select name="role" id="loginRole" required>
+            <select name="role" id="loginRole" title="Login Role" required>
                 <option value="user" selected>Member</option>
                 <option value="admin">Administrator</option>
             </select>

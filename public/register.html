@@ -43,6 +43,7 @@
             width: 360px;
             padding: 40px;
             border-radius: 20px;
+            -webkit-backdrop-filter: blur(15px);
             backdrop-filter: blur(15px);
             background: rgba(0, 0, 0, 0.7);
             box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
@@ -104,6 +105,11 @@
             color: #ff4d4d;
             text-decoration: none;
         }
+
+        .admin-key-container {
+            display: none;
+            margin-top: 10px;
+        }
     </style>
 </head>
 
@@ -127,12 +133,12 @@
             <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
 
             <label>Register as</label>
-            <select name="role" id="roleSelect">
+            <select name="role" id="roleSelect" title="Register Role">
                 <option value="user" selected>Member</option>
                 <option value="admin">Administrator</option>
             </select>
 
-            <div id="adminKeyContainer" style="display:none;">
+            <div id="adminKeyContainer" class="admin-key-container">
                 <label>Admin key</label>
                 <input type="password" name="adminKey" placeholder="Secret code">
             </div>

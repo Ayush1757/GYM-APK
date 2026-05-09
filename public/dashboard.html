@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gym Management Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1742,7 +1742,8 @@
             font-weight: 700;
             font-size: 12px;
         }
-    </style>
+    
+        </style>
 </head>
 
 <body>
@@ -1773,7 +1774,7 @@
             </div>
             <div class="menu-item" onclick="switchPage('generateQr')">
                 <i class="fas fa-magic"></i>
-                <span>Generate QR</span>
+                <span>Generate Gym QR</span>
             </div>
             <div class="menu-item" onclick="switchPage('workoutAssign')">
                 <i class="fas fa-dumbbell"></i>
@@ -1847,7 +1848,7 @@
                 <div class="card">
                     <div class="auto-style-3">
                         <h3 class="auto-style-4">Total Members List</h3>
-                        <div style="display:flex; gap:10px;">
+                        <div  >
                             <button class="btn btn-primary" onclick="openAssignWorkoutModal()">
                                 <i class="fas fa-dumbbell"></i> Assign Workout
                             </button>
@@ -2046,73 +2047,25 @@
 
             <!-- GENERATE QR PAGE -->
             <div class="page" id="generateQr-page">
-                <h1 class="auto-style-14">✨ Generate Member QR</h1 <p class="auto-style-15">Generate a permanent QR code
-                for a
-                member. The same QR can be scanned daily for attendance until the membership expires.</p>
+                <h1 class="auto-style-14">✨ Generate Gym QR</h1>
+                <p class="auto-style-15">Generate the secure Gym QR code. Print and display this at the entrance. Members will scan this to mark their attendance.</p>
 
-                <div class="grid-2">
-                    <div class="card">
-                        <h3 class="auto-style-7">QR Details</h3>
-
-                        <div class="form-group">
-                            <label>Select Member</label>
-                            <select id="genQREmail" onchange="onGenQRMemberChange()">
-                                <option value="">Select member...</option>
-                            </select>
-                        </div>
-
-                        <div id="genQRMemberInfo" class="auto-style-38">
-                            <div class="auto-style-39">
-                                <span class="auto-style-40">Name:</span>
-                                <span id="genQRMemberName" class="auto-style-41"></span>
-                            </div>
-                            <div class="auto-style-39">
-                                <span class="auto-style-40">Plan:</span>
-                                <span id="genQRMemberPlan" class="auto-style-42"></span>
-                            </div>
-                            <div class="auto-style-43">
-                                <span class="auto-style-40">Expires:</span>
-                                <span id="genQRMemberExpiry" class="auto-style-44"></span>
-                            </div>
-                        </div>
-
-                        <div class="auto-style-45">
-                            <p class="auto-style-46">
-                                <i class="fas fa-info-circle"></i>
-                                This QR is <strong>permanent</strong> &amp; reusable. The member scans the same code
-                                every day. Attendance is blocked automatically once membership expires.
-                            </p>
-                        </div>
-
-                        <div id="genQRExistingNotice" class="auto-style-47">
-                            <p class="auto-style-48">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                This member already has a QR code. Generating a new one will replace the existing QR.
-                            </p>
-                        </div>
-
-                        <button class="auto-style-49 btn btn-primary" onclick="verifyAndGenerateQR()">
-                            <i class="fas fa-qrcode"></i> Generate QR Code
-                        </button>
+                <div class="card" >
+                    <div class="auto-style-45" >
+                        <p class="auto-style-46" >
+                            <i class="fas fa-info-circle"></i>
+                            This QR code is used by all members to mark attendance. You can regenerate it anytime to invalidate old QR codes and enhance security.
+                        </p>
                     </div>
 
-                    <div class="auto-style-50 card">
-                        <h3 class="auto-style-51">
-                            Generated QR
-                        </h3>
+                    <button class="btn btn-primary" onclick="generateGymQR()" >
+                        <i class="fas fa-qrcode"></i> Generate New Gym QR
+                    </button>
 
-                        <div id="generatedQRContainer" class="auto-style-52">
-                            <!-- QR code generated by qrcode.js will appear here -->
-                        </div>
-
-                        <div id="noQRState" class="auto-style-40">
-                            <i class="auto-style-53 fas fa-magic"></i>
-                            <p>Fill out the details to generate the QR code</p>
-                        </div>
-
-                        <button id="downloadQRBtn" class="auto-style-54 btn btn-success"
-                            onclick="downloadGeneratedQR()">
-                            <i class="fas fa-download"></i> Download QR
+                    <div  id="gymQRContainer" >
+                        <img  id="gymQRImage" src="" alt="Gym QR Code" >
+                        <button id="downloadGymQRBtn" class="btn btn-success" onclick="downloadGymQR()">
+                            <i class="fas fa-download"></i> Download Gym QR
                         </button>
                     </div>
                 </div>
@@ -2133,8 +2086,8 @@
                         <h3 class="auto-style-58">&#9997; Workout Composer</h3>
 
                         <div class="form-group">
-                            <label>Select Member</label>
-                            <select id="workoutMemberSelect" onchange="onWorkoutMemberChange()">
+                            <label for="workoutMemberSelect">Select Member</label>
+                            <select id="workoutMemberSelect" onchange="onWorkoutMemberChange()" title="Select Member">
                                 <option value="">Select member...</option>
                             </select>
                         </div>
@@ -2146,13 +2099,13 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" id="workoutDate" class="auto-style-61">
+                            <label for="workoutDate">Date</label>
+                            <input type="date" id="workoutDate" class="auto-style-61" title="Date" placeholder="Enter Date">
                         </div>
 
                         <div class="form-group">
-                            <label>Category</label>
-                            <select id="workoutCategory">
+                            <label for="workoutCategory">Category</label>
+                            <select id="workoutCategory" title="Category">
                                 <option value="General">&#127947; General</option>
                                 <option value="Chest">&#128170; Chest</option>
                                 <option value="Back">&#129336; Back</option>
@@ -2190,9 +2143,9 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Notes for Member <span class="auto-style-62">(optional)</span></label>
+                            <label for="workoutNotes">Notes for Member <span class="auto-style-62">(optional)</span></label>
                             <input type="text" id="workoutNotes"
-                                placeholder="e.g. Focus on form, increase weight next session..." class="auto-style-61">
+                                placeholder="e.g. Focus on form, increase weight next session..." class="auto-style-61" title="Notes for Member <span class="auto-style-62">(optional)</span>">
                         </div>
 
                         <button class="auto-style-63 btn btn-primary" onclick="assignWorkout()">
@@ -2298,8 +2251,8 @@
                     <div class="card">
                         <h3 class="auto-style-7">Collect Payment</h3>
                         <div class="form-group">
-                            <label>Member Name (A-Z)</label>
-                            <select id="paymentMember" onchange="handlePaymentMemberChange()">
+                            <label for="paymentMember">Member Name (A-Z)</label>
+                            <select id="paymentMember" onchange="handlePaymentMemberChange()" title="Member Name (A-Z)">
                                 <option value="">Select member...</option>
                             </select>
                         </div>
@@ -2310,9 +2263,9 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label>Membership Plan</label>
+                            <label for="paymentPlanMain">Membership Plan</label>
                             <select id="paymentPlanMain"
-                                onchange="document.getElementById('paymentAmountMain').value = this.options[this.selectedIndex].getAttribute('data-price') || '';">
+                                onchange="document.getElementById('paymentAmountMain').value = this.options[this.selectedIndex].getAttribute('data-price') || '';" title="Membership Plan">
                                 <option value="" data-price="">Select plan...</option>
                                 <option value="monthly" data-price="1000">Monthly without cardio - ₹1000</option>
                                 <option value="monthly_cardio" data-price="1500">Monthly + cardio - ₹1500</option>
@@ -2324,12 +2277,12 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Amount (₹)</label>
-                            <input type="number" id="paymentAmountMain" placeholder="Enter amount">
+                            <label for="paymentAmountMain">Amount (₹)</label>
+                            <input type="number" id="paymentAmountMain" placeholder="Enter amount" title="Amount (₹)">
                         </div>
                         <div class="form-group">
-                            <label>Payment Method</label>
-                            <select id="paymentMethodMain">
+                            <label for="paymentMethodMain">Payment Method</label>
+                            <select id="paymentMethodMain" title="Payment Method">
                                 <option value="Cash">Cash</option>
                                 <option value="UPI">UPI</option>
                                 <option value="Card">Card</option>
@@ -2340,36 +2293,36 @@
                         </button>
                         <h3 class="auto-style-7">Gym & Trainer Info</h3>
                         <div class="form-group">
-                            <label>Admin Phone Number (for WhatsApp)</label>
-                            <input type="text" id="adminPhoneInput" placeholder="91XXXXXXXXXX" class="auto-style-78">
+                            <label for="adminPhoneInput">Admin Phone Number (for WhatsApp)</label>
+                            <input type="text" id="adminPhoneInput" placeholder="91XXXXXXXXXX" class="auto-style-78" title="Admin Phone Number (for WhatsApp)">
                         </div>
                         <div class="form-group">
-                            <label>Lead Trainer Name</label>
+                            <label for="trainerNameInput">Lead Trainer Name</label>
                             <input type="text" id="trainerNameInput" placeholder="Enter trainer name"
-                                class="auto-style-78">
+                                class="auto-style-78" title="Lead Trainer Name">
                         </div>
                         <div class="grid-2">
                             <div class="form-group">
-                                <label>Trainer Phone</label>
-                                <input type="text" id="trainerPhoneInput" placeholder="Enter phone"
-                                    class="auto-style-78">
+                            <label for="trainerPhoneInput">Trainer Phone</label>
+                            <input type="text" id="trainerPhoneInput" placeholder="Enter phone"
+                                    class="auto-style-78" title="Trainer Phone">
                             </div>
                             <div class="form-group">
-                                <label>Trainer Role</label>
-                                <input type="text" id="trainerRoleInput" placeholder="e.g. Senior Coach"
-                                    class="auto-style-78">
+                            <label for="trainerRoleInput">Trainer Role</label>
+                            <input type="text" id="trainerRoleInput" placeholder="e.g. Senior Coach"
+                                    class="auto-style-78" title="Trainer Role">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Gym Owner Name</label>
-                            <input type="text" id="gymOwnerInput" placeholder="Enter owner name" class="auto-style-78">
+                            <label for="gymOwnerInput">Gym Owner Name</label>
+                            <input type="text" id="gymOwnerInput" placeholder="Enter owner name" class="auto-style-78" title="Gym Owner Name">
                         </div>
                         <div class="form-group">
-                            <label>UPI QR Code (for fees)</label>
-                            <input type="file" id="upiQRFile" class="auto-style-78">
+                            <label for="upiQRFile">UPI QR Code (for fees)</label>
+                            <input type="file" id="upiQRFile" class="auto-style-78" title="UPI QR Code (for fees)" placeholder="Enter UPI QR Code (for fees)">
                         </div>
                         <button class="auto-style-79 btn btn-primary" onclick="updateAdminSettings()"
-                            style="width: 100%;">
+                            >
                             <i class="fas fa-save"></i> Save Gym Settings
                         </button> <i class="fas fa-save"></i> Update Admin UPI Info
                         </button>
@@ -2416,20 +2369,20 @@
                             <button class="btn btn-secondary">Upload Photo</button>
                         </div>
                         <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" id="profileName" value="">
+                            <label for="profileName">Full Name</label>
+                            <input type="text" id="profileName" value="" title="Full Name" placeholder="Enter Full Name">
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="profileEmail" value="">
+                            <label for="profileEmail">Email</label>
+                            <input type="email" id="profileEmail" value="" title="Email" placeholder="Enter Email">
                         </div>
                         <div class="form-group">
-                            <label>Phone</label>
-                            <input type="tel" id="profilePhone" value="">
+                            <label for="profilePhone">Phone</label>
+                            <input type="tel" id="profilePhone" value="" title="Phone" placeholder="Enter Phone">
                         </div>
                         <div class="form-group">
-                            <label>Role</label>
-                            <input type="text" id="profileRole" value="Admin" readonly class="auto-style-83">
+                            <label for="profileRole">Role</label>
+                            <input type="text" id="profileRole" value="Admin" readonly class="auto-style-83" title="Role" placeholder="Enter Role">
                         </div>
                         <button class="auto-style-49 btn btn-primary" onclick="saveProfile()">
                             <i class="fas fa-save"></i> Save Changes
@@ -2442,16 +2395,16 @@
                         <div class="auto-style-72">
                             <h4 class="auto-style-84">Change Password</h4>
                             <div class="form-group">
-                                <label>Current Password</label>
-                                <input type="password" id="currentPassword">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" title="Current Password" placeholder="Enter Current Password">
                             </div>
                             <div class="form-group">
-                                <label>New Password</label>
-                                <input type="password" id="newPassword">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" title="New Password" placeholder="Enter New Password">
                             </div>
                             <div class="form-group">
-                                <label>Confirm Password</label>
-                                <input type="password" id="confirmPassword">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <input type="password" id="confirmPassword" title="Confirm Password" placeholder="Enter Confirm Password">
                             </div>
                             <button class="auto-style-49 btn btn-primary" onclick="updatePassword()">
                                 <i class="fas fa-lock"></i> Update Password
@@ -2461,78 +2414,78 @@
                 </div>
 
                 <!-- GYM DETAILS (Editable by admin) -->
-                <div class="card" style="margin-top:1.5rem;">
-                    <h3 class="auto-style-10" style="margin-bottom:0.5rem;">
-                        <i class="fas fa-dumbbell" style="color:var(--primary,#e74c3c);margin-right:8px;"></i>Gym
+                <div class="card" >
+                    <h3 class="auto-style-10" >
+                        <i class="fas fa-dumbbell" ></i>Gym
                         Details
                     </h3>
-                    <p style="font-size:0.82rem;color:#888;margin-bottom:1.4rem;">These details are shown (read-only) to
+                    <p  >These details are shown (read-only) to
                         all members on their profile page.</p>
-                    <div class="grid-2" style="gap:2rem;">
+                    <div class="grid-2" >
                         <!-- ADMIN DETAILS -->
                         <div>
-                            <h4
-                                style="font-size:0.95rem;font-weight:600;margin-bottom:1rem;color:var(--primary,#e74c3c);">
-                                <i class="fas fa-user-shield" style="margin-right:6px;"></i>Admin Details
+                            <h4 
+                                >
+                                <i class="fas fa-user-shield" ></i>Admin Details
                             </h4>
                             <!-- Photo -->
-                            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
-                                <div id="adminPhotoPreviewHolder"
-                                    style="width:72px;height:72px;border-radius:50%;background:#1e1e1e;border:2px solid var(--primary,#e74c3c);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
-                                    <i class="fas fa-user" style="color:#888;font-size:1.5rem;"></i>
+                            <div  >
+                                <div  id="adminPhotoPreviewHolder"
+                                    >
+                                    <i class="fas fa-user" ></i>
                                 </div>
                                 <div>
-                                    <label style="font-size:0.78rem;display:block;margin-bottom:4px;">Admin
+                                    <label  >Admin
                                         Photo</label>
-                                    <input type="file" id="adminPhotoFile" accept="image/*"
-                                        onchange="previewAdminPhoto(event)" style="font-size:0.82rem;">
+                                    <input  type="file" id="adminPhotoFile" accept="image/*"
+                                        onchange="previewAdminPhoto(event)" >
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Admin Name</label>
-                                <input type="text" id="adminNameInput" placeholder="Enter admin full name">
+                            <label for="adminNameInput">Admin Name</label>
+                            <input type="text" id="adminNameInput" placeholder="Enter admin full name" title="Admin Name">
                             </div>
                             <div class="form-group">
-                                <label>Admin Email</label>
-                                <input type="email" id="adminEmailInput" placeholder="Enter admin email">
+                            <label for="adminEmailInput">Admin Email</label>
+                            <input type="email" id="adminEmailInput" placeholder="Enter admin email" title="Admin Email">
                             </div>
                             <div class="form-group">
-                                <label>Admin Phone</label>
-                                <input type="text" id="adminPhoneInput" placeholder="Enter phone for UPI / contact">
+                            <label for="adminPhoneInput">Admin Phone</label>
+                            <input type="text" id="adminPhoneInput" placeholder="Enter phone for UPI / contact" title="Admin Phone">
                             </div>
                         </div>
                         <!-- TRAINER DETAILS -->
                         <div>
-                            <h4 style="font-size:0.95rem;font-weight:600;margin-bottom:1rem;color:#3b82f6;"><i
-                                    class="fas fa-running" style="margin-right:6px;"></i>Trainer Details</h4>
+                            <h4  ><i
+                                    class="fas fa-running" ></i>Trainer Details</h4>
                             <!-- Photo -->
-                            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
-                                <div id="trainerPhotoPreviewHolder"
-                                    style="width:72px;height:72px;border-radius:50%;background:#1e1e1e;border:2px solid #3b82f6;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
-                                    <i class="fas fa-user" style="color:#888;font-size:1.5rem;"></i>
+                            <div  >
+                                <div  id="trainerPhotoPreviewHolder"
+                                    >
+                                    <i class="fas fa-user" ></i>
                                 </div>
                                 <div>
-                                    <label style="font-size:0.78rem;display:block;margin-bottom:4px;">Trainer
+                                    <label  >Trainer
                                         Photo</label>
-                                    <input type="file" id="trainerPhotoFile" accept="image/*"
-                                        onchange="previewTrainerPhoto(event)" style="font-size:0.82rem;">
+                                    <input  type="file" id="trainerPhotoFile" accept="image/*"
+                                        onchange="previewTrainerPhoto(event)" >
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Trainer Name</label>
-                                <input type="text" id="trainerNameInput" placeholder="Enter trainer full name">
+                            <label for="trainerNameInput">Trainer Name</label>
+                            <input type="text" id="trainerNameInput" placeholder="Enter trainer full name" title="Trainer Name">
                             </div>
                             <div class="form-group">
-                                <label>Trainer Email</label>
-                                <input type="email" id="trainerEmailInput" placeholder="Enter trainer email">
+                            <label for="trainerEmailInput">Trainer Email</label>
+                            <input type="email" id="trainerEmailInput" placeholder="Enter trainer email" title="Trainer Email">
                             </div>
                             <div class="form-group">
-                                <label>Trainer Phone</label>
-                                <input type="tel" id="trainerPhoneInput" placeholder="Enter trainer phone number">
+                            <label for="trainerPhoneInput">Trainer Phone</label>
+                            <input type="tel" id="trainerPhoneInput" placeholder="Enter trainer phone number" title="Trainer Phone">
                             </div>
                         </div>
                     </div>
-                    <button class="auto-style-49 btn btn-primary" onclick="updateGymDetails()" style="margin-top:1rem;">
+                    <button class="auto-style-49 btn btn-primary" onclick="updateGymDetails()" >
                         <i class="fas fa-save"></i> Save Gym Details
                     </button>
                 </div>
@@ -2545,21 +2498,21 @@
                             <h4 class="auto-style-87">Email Notifications</h4>
                             <p class="auto-style-88">Receive updates via email</p>
                         </div>
-                        <input type="checkbox" checked class="auto-style-89">
+                        <input type="checkbox" checked class="auto-style-89" title="Notification Preference">
                     </div>
                     <div class="auto-style-86">
                         <div>
                             <h4 class="auto-style-87">SMS Notifications</h4>
                             <p class="auto-style-88">Receive updates via SMS</p>
                         </div>
-                        <input type="checkbox" class="auto-style-89">
+                        <input type="checkbox" class="auto-style-89" title="Notification Preference">
                     </div>
                     <div class="auto-style-90">
                         <div>
                             <h4 class="auto-style-87">Payment Reminders</h4>
                             <p class="auto-style-88">Get reminded about due payments</p>
                         </div>
-                        <input type="checkbox" checked class="auto-style-89">
+                        <input type="checkbox" checked class="auto-style-89" title="Notification Preference">
                     </div>
                 </div>
 
@@ -2576,25 +2529,25 @@
                     <button class="close-btn" onclick="closeModal('addAnnouncementModal')">×</button>
                 </div>
                 <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" id="announcementTitle" placeholder="Announcement title">
+                            <label for="announcementTitle">Title</label>
+                            <input type="text" id="announcementTitle" placeholder="Announcement title" title="Title">
                 </div>
                 <div class="form-group">
-                    <label>Content</label>
-                    <textarea id="announcementContent" placeholder="Write your announcement..."></textarea>
+                            <label for="announcementContent">Content</label>
+                            <textarea id="announcementContent" placeholder="Write your announcement..." title="Content"></textarea>
                 </div>
                 <div class="auto-style-92">
                     <div class="form-group">
-                        <label>Priority Level</label>
-                        <select id="announcementPriority">
+                            <label for="announcementPriority">Priority Level</label>
+                            <select id="announcementPriority" title="Priority Level">
                             <option value="low">Low</option>
                             <option value="medium" selected>Medium</option>
                             <option value="high">High</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Target Audience</label>
-                        <select id="announcementTarget">
+                            <label for="announcementTarget">Target Audience</label>
+                            <select id="announcementTarget" title="Target Audience">
                             <option value="all">All Members</option>
                             <option value="active">Active Members</option>
                             <option value="specific">Specific Group</option>
@@ -2602,8 +2555,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Expiration Date</label>
-                    <input type="date" id="announcementExpiry">
+                            <label for="announcementExpiry">Expiration Date</label>
+                            <input type="date" id="announcementExpiry" title="Expiration Date" placeholder="Enter Expiration Date">
                 </div>
                 <div class="auto-style-12">
                     <button class="auto-style-21 btn btn-primary" onclick="addAnnouncement()">Create</button>
@@ -2621,20 +2574,20 @@
                     <button class="close-btn" onclick="closeModal('addMemberModal')">×</button>
                 </div>
                 <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="memberName" placeholder="Enter full name">
+                            <label for="memberName">Full Name</label>
+                            <input type="text" id="memberName" placeholder="Enter full name" title="Full Name">
                 </div>
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="memberEmail" placeholder="Enter email">
+                            <label for="memberEmail">Email</label>
+                            <input type="email" id="memberEmail" placeholder="Enter email" title="Email">
                 </div>
                 <div class="form-group">
-                    <label>Phone</label>
-                    <input type="tel" id="memberPhone" placeholder="Enter phone number">
+                            <label for="memberPhone">Phone</label>
+                            <input type="tel" id="memberPhone" placeholder="Enter phone number" title="Phone">
                 </div>
                 <div class="form-group">
-                    <label>Initial Password (optional, default: Member@123)</label>
-                    <input type="password" id="memberPassword" placeholder="Leave blank for default">
+                            <label for="memberPassword">Initial Password (optional, default: Member@123)</label>
+                            <input type="password" id="memberPassword" placeholder="Leave blank for default" title="Initial Password (optional, default: Member@123)">
                 </div>
                 <div class="auto-style-12">
                     <button class="auto-style-21 btn btn-primary" onclick="addMember()">Add
@@ -2654,39 +2607,39 @@
                     <button class="close-btn" onclick="closeModal('assignWorkoutModal')">&times;</button>
                 </div>
                 <div class="form-group">
-                    <label>Select Member</label>
-                    <select id="workoutMemberEmail" class="auto-style-78">
+                            <label for="workoutMemberEmail">Select Member</label>
+                            <select id="workoutMemberEmail" class="auto-style-78" title="Select Member">
                         <option value="">Choose member...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Exercise Name</label>
-                    <input type="text" id="workoutExercise" placeholder="e.g. Bench Press" class="auto-style-78">
+                            <label for="workoutExercise">Exercise Name</label>
+                            <input type="text" id="workoutExercise" placeholder="e.g. Bench Press" class="auto-style-78" title="Exercise Name">
                 </div>
                 <div class="grid-2">
                     <div class="form-group">
-                        <label>Sets</label>
-                        <input type="number" id="workoutSets" value="3" class="auto-style-78">
+                            <label for="workoutSets">Sets</label>
+                            <input type="number" id="workoutSets" value="3" class="auto-style-78" title="Sets" placeholder="Enter Sets">
                     </div>
                     <div class="form-group">
-                        <label>Reps</label>
-                        <input type="text" id="workoutReps" placeholder="e.g. 10-12" class="auto-style-78">
+                            <label for="workoutReps">Reps</label>
+                            <input type="text" id="workoutReps" placeholder="e.g. 10-12" class="auto-style-78" title="Reps">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Duration (optional)</label>
-                    <input type="text" id="workoutDuration" placeholder="e.g. 30 mins" class="auto-style-78">
+                            <label for="workoutDuration">Duration (optional)</label>
+                            <input type="text" id="workoutDuration" placeholder="e.g. 30 mins" class="auto-style-78" title="Duration (optional)">
                 </div>
                 <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="workoutNotes" placeholder="Any special instructions?" class="auto-style-78"
-                        style="height:80px;"></textarea>
+                            <label for="workoutNotes">Notes</label>
+                            <textarea id="workoutNotes" placeholder="Any special instructions?" class="auto-style-78"
+                         title="Notes"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="workoutDate" class="auto-style-78">
+                            <label for="workoutDate">Date</label>
+                            <input type="date" id="workoutDate" class="auto-style-78" title="Date" placeholder="Enter Date">
                 </div>
-                <button class="btn btn-primary" style="width:100%;" onclick="submitWorkoutAssignment()">Assign
+                <button class="btn btn-primary"  onclick="submitWorkoutAssignment()">Assign
                     Workout</button>
             </div>
         </div>
@@ -2699,35 +2652,35 @@
                     <button class="close-btn" onclick="closeModal('assignTaskModal')">&times;</button>
                 </div>
                 <div class="form-group">
-                    <label>Select Member</label>
-                    <select id="taskMemberEmail" class="auto-style-78">
+                            <label for="taskMemberEmail">Select Member</label>
+                            <select id="taskMemberEmail" class="auto-style-78" title="Select Member">
                         <option value="">Choose member...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Task Title</label>
-                    <input type="text" id="taskTitle" placeholder="e.g. 5 Day Streak Challenge" class="auto-style-78">
+                            <label for="taskTitle">Task Title</label>
+                            <input type="text" id="taskTitle" placeholder="e.g. 5 Day Streak Challenge" class="auto-style-78" title="Task Title">
                 </div>
                 <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="taskDesc" placeholder="What should the member do?" class="auto-style-78"
-                        style="height:80px;"></textarea>
+                            <label for="taskDesc">Description</label>
+                            <textarea id="taskDesc" placeholder="What should the member do?" class="auto-style-78"
+                         title="Description"></textarea>
                 </div>
                 <div class="grid-2">
                     <div class="form-group">
-                        <label>Points Award</label>
-                        <input type="number" id="taskPoints" value="50" class="auto-style-78">
+                            <label for="taskPoints">Points Award</label>
+                            <input type="number" id="taskPoints" value="50" class="auto-style-78" title="Points Award" placeholder="Enter Points Award">
                     </div>
                     <div class="form-group">
-                        <label>Category</label>
-                        <select id="taskCategory" class="auto-style-78">
+                            <label for="taskCategory">Category</label>
+                            <select id="taskCategory" class="auto-style-78" title="Category">
                             <option value="Workout">Workout</option>
                             <option value="Attendance">Attendance</option>
                             <option value="Social">Social</option>
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-primary" style="width:100%;" onclick="submitTask()">Assign Task</button>
+                <button class="btn btn-primary"  onclick="submitTask()">Assign Task</button>
             </div>
         </div>
         <div class="modal" id="markAttendanceModal">
@@ -2737,26 +2690,26 @@
                     <button class="close-btn" onclick="closeModal('markAttendanceModal')">×</button>
                 </div>
                 <div class="form-group">
-                    <label>Select Member</label>
-                    <select id="attendanceMember">
+                            <label for="attendanceMember">Select Member</label>
+                            <select id="attendanceMember" title="Select Member">
                         <option value="">Choose member...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="attendanceMarkDate">
+                            <label for="attendanceMarkDate">Date</label>
+                            <input type="date" id="attendanceMarkDate" title="Date" placeholder="Enter Date">
                 </div>
                 <div class="form-group">
-                    <label>Check-in Time</label>
-                    <input type="time" id="checkInTime">
+                            <label for="checkInTime">Check-in Time</label>
+                            <input type="time" id="checkInTime" title="Check-in Time" placeholder="Enter Check-in Time">
                 </div>
                 <div class="form-group">
-                    <label>Check-out Time</label>
-                    <input type="time" id="checkOutTime">
+                            <label for="checkOutTime">Check-out Time</label>
+                            <input type="time" id="checkOutTime" title="Check-out Time" placeholder="Enter Check-out Time">
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
-                    <select id="attendanceStatus">
+                            <label for="attendanceStatus">Status</label>
+                            <select id="attendanceStatus" title="Status">
                         <option value="present">Present</option>
                         <option value="absent">Absent</option>
                         <option value="late">Late</option>
@@ -2778,15 +2731,15 @@
                     <button class="close-btn" onclick="closeModal('collectPaymentModal')">×</button>
                 </div>
                 <div class="form-group">
-                    <label>Member Name</label>
-                    <select id="modalPaymentMember">
+                            <label for="modalPaymentMember">Member Name</label>
+                            <select id="modalPaymentMember" title="Member Name">
                         <option value="">Select member...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Membership Plan</label>
-                    <select id="modalPaymentPlan"
-                        onchange="document.getElementById('paymentAmount').value = this.options[this.selectedIndex].getAttribute('data-price') || '';">
+                            <label for="modalPaymentPlan">Membership Plan</label>
+                            <select id="modalPaymentPlan"
+                        onchange="document.getElementById('paymentAmount').value = this.options[this.selectedIndex].getAttribute('data-price') || '';" title="Membership Plan">
                         <option value="" data-price="">Select plan...</option>
                         <option value="monthly" data-price="1000">Monthly without cardio - ₹1000</option>
                         <option value="monthly_cardio" data-price="1500">Monthly + cardio - ₹1500</option>
@@ -2797,12 +2750,12 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Amount</label>
-                    <input type="number" id="paymentAmount" placeholder="0">
+                            <label for="paymentAmount">Amount</label>
+                            <input type="number" id="paymentAmount" placeholder="0" title="Amount">
                 </div>
                 <div class="form-group">
-                    <label>Payment Method</label>
-                    <select id="modalPaymentMethod">
+                            <label for="modalPaymentMethod">Payment Method</label>
+                            <select id="modalPaymentMethod" title="Payment Method">
                         <option value="cash">Cash</option>
                         <option value="card">Card</option>
                         <option value="online">Online</option>
@@ -2824,12 +2777,12 @@
                     <button class="close-btn" onclick="closeModal('uploadQRModal')">×</button>
                 </div>
                 <div class="form-group">
-                    <label>Member</label>
-                    <input type="text" id="uploadQRMemberEmail" readonly class="auto-style-83">
+                            <label for="uploadQRMemberEmail">Member</label>
+                            <input type="text" id="uploadQRMemberEmail" readonly class="auto-style-83" title="Member" placeholder="Enter Member">
                 </div>
                 <div class="form-group">
-                    <label>Select QR Image (unique per member)</label>
-                    <input type="file" id="uploadQRFile" accept="image/*">
+                            <label for="uploadQRFile">Select QR Image (unique per member)</label>
+                            <input type="file" id="uploadQRFile" accept="image/*" title="Select QR Image (unique per member)" placeholder="Enter Select QR Image (unique per member)">
                 </div>
                 <div class="auto-style-12">
                     <button class="auto-style-21 btn btn-primary" onclick="uploadMemberQr()">
@@ -3568,7 +3521,7 @@
                 const reader = new FileReader();
                 reader.onload = e => {
                     document.getElementById('adminPhotoPreviewHolder').innerHTML =
-                        `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+                        `<img  src="${e.target.result}" >`;
                 };
                 reader.readAsDataURL(file);
             }
@@ -3579,7 +3532,7 @@
                 const reader = new FileReader();
                 reader.onload = e => {
                     document.getElementById('trainerPhotoPreviewHolder').innerHTML =
-                        `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+                        `<img  src="${e.target.result}" >`;
                 };
                 reader.readAsDataURL(file);
             }
@@ -3700,155 +3653,39 @@
                 select.value = currentVal;
             }
 
-            function onGenQRMemberChange() {
-                const email = document.getElementById('genQREmail').value;
-                const infoDiv = document.getElementById('genQRMemberInfo');
-                const noticeDiv = document.getElementById('genQRExistingNotice');
-                if (!email) {
-                    infoDiv.style.display = 'none';
-                    noticeDiv.style.display = 'none';
-                    return;
-                }
-                const member = allMembers.find(m => m.email === email);
-                if (member) {
-                    infoDiv.style.display = 'block';
-                    document.getElementById('genQRMemberName').textContent = member.fullname || '--';
-                    document.getElementById('genQRMemberPlan').textContent = member.membershipPlan ? member.membershipPlan.replace(/_/g, ' ') : '--';
-                    const expiryEl = document.getElementById('genQRMemberExpiry');
-                    if (member.expiry) {
-                        const exp = new Date(member.expiry);
-                        const today = new Date();
-                        const isExpired = today > exp;
-                        expiryEl.textContent = exp.toLocaleDateString();
-                        expiryEl.style.color = isExpired ? '#ef4444' : '#22c55e';
+            async function generateGymQR() {
+                try {
+                    const res = await fetch('/admin/generateGymQR', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        const qrContainer = document.getElementById('gymQRContainer');
+                        const qrImage = document.getElementById('gymQRImage');
+                        qrImage.src = data.qrDataUrl;
+                        qrContainer.style.display = 'flex';
+                        showToast('New Gym QR Code generated successfully!', 'success');
                     } else {
-                        expiryEl.textContent = 'Not set';
-                        expiryEl.style.color = '#f59e0b';
+                        showToast(data.message || 'Failed to generate Gym QR', 'error');
                     }
-                    // Show warning if member already has QR
-                    noticeDiv.style.display = member.qrImage ? 'block' : 'none';
+                } catch (err) {
+                    showToast('Server error generating Gym QR', 'error');
                 }
             }
 
-            function verifyAndGenerateQR() {
-                const memberEmail = document.getElementById('genQREmail').value.trim();
-
-                if (!memberEmail) {
-                    showToast('Please select a member', 'error');
+            function downloadGymQR() {
+                const qrImage = document.getElementById('gymQRImage');
+                if (!qrImage || !qrImage.src) {
+                    showToast('No QR code to download', 'error');
                     return;
                 }
-
-                document.getElementById('noQRState').style.display = 'none';
-                const qrContainer = document.getElementById('generatedQRContainer');
-                qrContainer.style.display = 'flex';
-                const member = allMembers.find(m => m.email === memberEmail);
-                const memberName = member ? member.fullname : memberEmail;
-                // Container (#generatedQRContainer) is already white with 40px padding — just inject name + QR div
-                qrContainer.innerHTML =
-                    '<h5 class="auto-style-112">'
-                    + escapeHtml(memberName) + '</h5>'
-                    + '<div id="actualQR"></div>';
-
-                // Use pure BLACK for maximum scanner contrast
-                new QRCode(document.getElementById('actualQR'), {
-                    text: memberEmail,
-                    width: 250,
-                    height: 250,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-
-                document.getElementById('downloadQRBtn').style.display = 'inline-block';
-                showToast('QR code generated for ' + escapeHtml(memberName) + '!', 'success');
-
-                // Auto-save QR with white border (quiet zone) so it's readable anywhere
-                setTimeout(function () {
-                    const qrDiv = document.getElementById('actualQR');
-                    const canvas = qrDiv ? qrDiv.querySelector('canvas') : null;
-                    const imgSource = qrDiv ? qrDiv.querySelector('img') : null;
-                    let source = null;
-                    if (canvas) {
-                        source = canvas.toDataURL('image/png');
-                    } else if (imgSource && imgSource.src && imgSource.src.startsWith('data:image')) {
-                        source = imgSource.src;
-                    }
-
-                    if (source) {
-                        const BORDER = 40;
-                        const img = new Image();
-                        img.onload = function () {
-                            const out = document.createElement('canvas');
-                            out.width = img.width + BORDER * 2;
-                            out.height = img.height + BORDER * 2;
-                            const ctx = out.getContext('2d');
-                            ctx.fillStyle = '#ffffff';
-                            ctx.fillRect(0, 0, out.width, out.height);
-                            ctx.drawImage(img, BORDER, BORDER, img.width, img.height);
-                            const finalDataUrl = out.toDataURL('image/png');
-
-                            fetch('/saveGeneratedQR', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ memberEmail: memberEmail, qrDataUrl: finalDataUrl })
-                            }).then(function (r) { return r.json(); })
-                                .then(function (d) {
-                                    if (d.success) {
-                                        showToast('QR saved with border!', 'success');
-                                    }
-                                }).catch(function () { /* silent */ });
-                        };
-                        img.src = source;
-                    }
-                }, 800);
-
-                // refresh members if possible
-                if (typeof loadMembers === 'function') loadMembers();
-            }
-
-            function downloadGeneratedQR() {
-                // 1cm white border: 1cm = ~38px at 96dpi; we use 40px for a safe margin
-                const BORDER = 40;
-                setTimeout(() => {
-                    const qrDiv = document.getElementById('actualQR');
-                    const canvas = qrDiv ? qrDiv.querySelector('canvas') : null;
-                    let qrImg = qrDiv ? qrDiv.querySelector('img') : null;
-
-                    // Resolve raw QR source (data URL)
-                    let source = null;
-                    if (canvas) {
-                        source = canvas.toDataURL('image/png');
-                    } else if (qrImg && qrImg.src && qrImg.src.startsWith('data:image')) {
-                        source = qrImg.src;
-                    }
-
-                    if (!source) {
-                        showToast('QR code not ready yet, try again', 'error');
-                        return;
-                    }
-
-                    // Composite: white canvas + QR offset by BORDER
-                    const img = new Image();
-                    img.onload = function () {
-                        const out = document.createElement('canvas');
-                        out.width = img.width + BORDER * 2;
-                        out.height = img.height + BORDER * 2;
-                        const ctx = out.getContext('2d');
-                        // White background (quiet zone)
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(0, 0, out.width, out.height);
-                        // Draw QR centred with border
-                        ctx.drawImage(img, BORDER, BORDER, img.width, img.height);
-
-                        const link = document.createElement('a');
-                        link.href = out.toDataURL('image/png');
-                        link.download = document.getElementById('genQREmail').value.trim() + '-QR.png';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    };
-                    img.src = source;
-                }, 150);
+                const link = document.createElement('a');
+                link.href = qrImage.src;
+                link.download = 'Gym-Attendance-QR.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
 
             /* ===== QR CAMERA SCANNER ===== */

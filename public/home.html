@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gym Dashboard</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1282,7 +1283,8 @@
         .progress-stat-card .psc-value {
             animation: countUp 0.5s ease-out;
         }
-    </style>
+    
+        </style>
 </head>
 
 <body>
@@ -1291,7 +1293,7 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>TARA FITNESS CENTRE 💪🏻</h2>
-            <button class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <button class="toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
         </div>
         <div class="sidebar-menu">
             <div class="menu-item active" onclick="switchPage('dashboard')">
@@ -1304,7 +1306,7 @@
                 <i class="fas fa-dumbbell"></i> <span>Workout</span>
             </div>
             <div class="menu-item" onclick="window.location.href='/attendanceQR.html'">
-                <i class="fas fa-qrcode"></i> <span>My Attendance QR</span>
+                <i class="fas fa-qrcode"></i> <span>Scan Gym QR</span>
             </div>
             <div class="menu-item" onclick="switchPage('payments')">
                 <i class="fas fa-receipt"></i> <span>Fees & Payments</span>
@@ -1326,7 +1328,7 @@
             <div class="menu-item" onclick="switchPage('attendance')">
                 <i class="fas fa-calendar-check"></i> <span>Attendance History</span>
             </div>
-            <div class="menu-item" onclick="logout()" style="color: #e74c3c;">
+            <div class="menu-item" onclick="logout()" >
                 <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
             </div>
         </div>
@@ -1341,16 +1343,16 @@
             <div class="navbar-right">
                 <div class="notification-bell" onclick="toggleNotifications()">
                     <i class="fas fa-bell"></i>
-                    <div class="notification-badge" id="notificationBadge" style="display: none;">0</div>
+                    <div class="notification-badge" id="notificationBadge" >0</div>
 
                     <div class="dropdown-menu" id="notificationMenu"
-                        style="width: 320px; right: -10px; max-height: 400px; overflow-y: auto;">
-                        <div
-                            style="padding: 10px 20px; border-bottom: 1px solid var(--border-light); font-weight: bold; font-size: 14px; position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
+                        >
+                        <div 
+                            >
                             Notifications
                         </div>
                         <div id="notificationList">
-                            <a style="text-align: center; color: var(--text-muted); cursor: default;">Loading...</a>
+                            <a  >Loading...</a>
                         </div>
                     </div>
                 </div>
@@ -1372,7 +1374,7 @@
 
             <!-- DASHBOARD PAGE -->
             <div class="page active" id="dashboard-page">
-                <h1 style="color: var(--text-primary); margin-bottom: 30px;">Welcome back, <span
+                <h1  >Welcome back, <span
                         id="userName">Member</span>!👋</h1>
 
                 <!-- STATS GRID -->
@@ -1387,101 +1389,101 @@
                         <div class="stat-label">Days Remaining</div>
                         <div class="stat-value" id="daysRemaining">--</div>
                     </div>
-                    <div class="stat-card" style="border-left-color: #f97316;">
-                        <div class="stat-icon" style="color: #f97316;">🔥</div>
+                    <div class="stat-card" >
+                        <div class="stat-icon" >🔥</div>
                         <div class="stat-label">Attendance Streak</div>
                         <div class="stat-value" id="attendanceStreak">0</div>
                     </div>
                 </div>
 
                 <!-- DAILY PROGRESS SUMMARY -->
-                <div class="card" style="border-top: 4px solid #ff1a1a;">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 style="color: var(--text-primary); margin: 0;"><i class="fas fa-chart-line"
-                                style="color: #ff1a1a; margin-right: 10px;"></i>Daily Progress Summary</h3>
-                        <span id="dashboardDate" style="color: var(--text-muted); font-size: 14px;">Today</span>
+                <div class="card" >
+                    <div 
+                        >
+                        <h3  ><i class="fas fa-chart-line"
+                                ></i>Daily Progress Summary</h3>
+                        <span  id="dashboardDate" >Today</span>
                     </div>
 
-                    <div class="grid-2" style="gap: 15px;">
-                        <div
-                            style="background: rgba(255,26,26,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,26,26,0.1);">
-                            <div
-                                style="color: var(--text-muted); font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                    <div class="grid-2" >
+                        <div 
+                            >
+                            <div 
+                                >
                                 Workouts This Month</div>
-                            <div style="font-size: 24px; font-weight: 800; color: #ff1a1a;" id="dashMonthWorkouts">0
+                            <div   id="dashMonthWorkouts">0
                             </div>
                         </div>
-                        <div
-                            style="background: rgba(255,26,26,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,26,26,0.1);">
-                            <div
-                                style="color: var(--text-muted); font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                        <div 
+                            >
+                            <div 
+                                >
                                 Badges Earned</div>
-                            <div style="font-size: 24px; font-weight: 800; color: #ff1a1a;" id="dashBadgesCount">0</div>
+                            <div   id="dashBadgesCount">0</div>
                         </div>
                     </div>
 
-                    <div
-                        style="margin-top: 20px; padding: 15px; background: #0b0b0b; border-radius: 12px; display: flex; align-items: center; gap: 15px;">
-                        <div
-                            style="background: #ff1a1a; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                    <div 
+                        >
+                        <div 
+                            >
                             <i class="fas fa-qrcode"></i>
                         </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: var(--text-primary);">Personal Attendance QR</div>
-                            <div style="color: var(--text-muted); font-size: 12px;">Show this at the desk for check-in
+                        <div  >
+                            <div  >Scan Gym QR</div>
+                            <div  >Scan the QR at the gym entrance to check in/out
                             </div>
                         </div>
                         <button class="btn btn-primary" onclick="window.location.href='/attendanceQR.html'"
-                            style="padding: 8px 15px; font-size: 13px;">View QR</button>
+                            >Scan QR</button>
                     </div>
                 </div>
 
                 <!-- TODAY'S WORKOUTS -->
-                <div class="card" style="border-top: 4px solid #3b82f6;">
-                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">
-                        <i class="fas fa-dumbbell" style="color: #3b82f6; margin-right: 10px;"></i>Today's Assigned
+                <div class="card" >
+                    <h3  >
+                        <i class="fas fa-dumbbell" ></i>Today's Assigned
                         Workouts
                     </h3>
                     <div id="todayWorkoutsContainer">
-                        <p style="text-align: center; color: var(--text-muted); padding: 20px;">No workouts assigned for
+                        <p  >No workouts assigned for
                             today.</p>
                     </div>
                 </div>
 
                 <!-- 30 DAY PROGRESS TRACKER -->
-                <div class="card" style="border-top: 4px solid #10b981;">
-                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">
-                        <i class="fas fa-chart-line" style="color: #10b981; margin-right: 10px;"></i>Activity (Last 30
+                <div class="card" >
+                    <h3  >
+                        <i class="fas fa-chart-line" ></i>Activity (Last 30
                         Days)
                     </h3>
                     <div class="stats-grid">
-                        <div class="stat-card" style="padding: 15px; background: #0b0b0b;">
+                        <div class="stat-card" >
                             <div class="stat-label">Gym Visits</div>
-                            <div class="stat-value" id="monthlyVisits" style="font-size: 24px;">0</div>
+                            <div class="stat-value" id="monthlyVisits" >0</div>
                         </div>
-                        <div class="stat-card" style="padding: 15px; background: #0b0b0b;">
+                        <div class="stat-card" >
                             <div class="stat-label">Workouts</div>
-                            <div class="stat-value" id="monthlyWorkouts" style="font-size: 24px;">0</div>
+                            <div class="stat-value" id="monthlyWorkouts" >0</div>
                         </div>
                     </div>
-                    <div style="margin-top: 20px;">
-                        <div
-                            style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
-                            <span style="color: var(--text-secondary);">Monthly Attendance Goal</span>
-                            <span style="color: #10b981;" id="monthlyProgressText">0/20 days</span>
+                    <div  >
+                        <div 
+                            >
+                            <span  >Monthly Attendance Goal</span>
+                            <span   id="monthlyProgressText">0/20 days</span>
                         </div>
-                        <div style="height: 8px; background: #222; border-radius: 4px; overflow: hidden;">
-                            <div id="monthlyProgressBar"
-                                style="width: 0%; height: 100%; background: #10b981; transition: width 0.5s;"></div>
+                        <div  >
+                            <div  id="monthlyProgressBar"
+                                ></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- QUICK ACTIONS -->
                 <div class="card">
-                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">Quick Actions</h3>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <h3  >Quick Actions</h3>
+                    <div  >
                         <button class="btn btn-primary" onclick="switchPage('workouts')">
                             <i class="fas fa-dumbbell"></i> View Workout
                         </button>
@@ -1499,39 +1501,39 @@
 
                 <!-- TRAINER & OWNER DETAILS -->
                 <div class="grid-2">
-                    <div class="card" style="border-left: 4px solid #3b82f6;">
-                        <h3 style="color: var(--text-primary); margin-bottom: 15px;"><i class="fas fa-user-tie"
-                                style="color:#3b82f6; margin-right:10px;"></i>Your Trainer</h3>
-                        <div id="trainerInfo" style="color: var(--text-secondary);">
-                            <p style="font-size: 16px; font-weight: bold;" id="trainerNameDisplay">Loading...</p>
-                            <p id="trainerRoleDisplay" style="color: var(--text-muted); font-size: 13px;"></p>
-                            <p style="margin-top: 10px;"><i class="fas fa-phone-alt"></i> <span
+                    <div class="card" >
+                        <h3  ><i class="fas fa-user-tie"
+                                ></i>Your Trainer</h3>
+                        <div  id="trainerInfo" >
+                            <p   id="trainerNameDisplay">Loading...</p>
+                            <p  id="trainerRoleDisplay" ></p>
+                            <p  ><i class="fas fa-phone-alt"></i> <span
                                     id="trainerPhoneDisplay"></span></p>
                         </div>
                     </div>
-                    <div class="card" style="border-left: 4px solid #10b981;">
-                        <h3 style="color: var(--text-primary); margin-bottom: 15px;"><i class="fas fa-crown"
-                                style="color:#10b981; margin-right:10px;"></i>Gym Owner</h3>
-                        <div id="ownerInfo" style="color: var(--text-secondary);">
-                            <p style="font-size: 16px; font-weight: bold;" id="gymOwnerDisplay">Loading...</p>
-                            <p style="color: var(--text-muted); font-size: 13px;">Proprietor</p>
-                            <p style="margin-top: 10px;"><i class="fas fa-envelope"></i> Contact via Admin</p>
+                    <div class="card" >
+                        <h3  ><i class="fas fa-crown"
+                                ></i>Gym Owner</h3>
+                        <div  id="ownerInfo" >
+                            <p   id="gymOwnerDisplay">Loading...</p>
+                            <p  >Proprietor</p>
+                            <p  ><i class="fas fa-envelope"></i> Contact via Admin</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- ANNOUNCEMENTS PREVIEW -->
                 <div class="card">
-                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">Recent Announcements</h3>
+                    <h3  >Recent Announcements</h3>
                     <div id="announcementsPreview">
-                        <p style="color: var(--text-muted); text-align: center; padding: 20px;">No announcements yet</p>
+                        <p  >No announcements yet</p>
                     </div>
                 </div>
 
                 <!-- CHARTS -->
                 <div class="grid-2">
                     <div class="card">
-                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">Weekly Attendance Trend</h3>
+                        <h3  >Weekly Attendance Trend</h3>
                         <div class="chart-container">
                             <canvas id="attendanceChart"></canvas>
                         </div>
@@ -1542,17 +1544,17 @@
 
             <!-- ANNOUNCEMENTS PAGE -->
             <div class="page" id="announcements-page">
-                <h1 style="color: var(--text-primary); margin-bottom: 25px;">📢 Announcements</h1>
+                <h1  >📢 Announcements</h1>
                 <div id="announcementsList">
                     <div class="card">
-                        <p style="text-align: center; color: var(--text-muted);">Loading announcements...</p>
+                        <p  >Loading announcements...</p>
                     </div>
                 </div>
             </div>
 
             <!-- ATTENDANCE PAGE -->
             <div class="page" id="attendance-page">
-                <h1 style="color: var(--text-primary); margin-bottom: 25px;">📅 My Attendance (This Month)</h1>
+                <h1  >📅 My Attendance (This Month)</h1>
                 <div class="card">
                     <table class="table">
                         <thead>
@@ -1563,7 +1565,7 @@
                         </thead>
                         <tbody id="userAttendanceTbody">
                             <tr>
-                                <td colspan="2" style="text-align: center; color: var(--text-muted);">Loading
+                                <td  colspan="2" >Loading
                                     attendance...</td>
                             </tr>
                         </tbody>
@@ -1573,83 +1575,83 @@
 
             <!-- ACHIEVEMENTS & TASKS PAGE -->
             <div class="page" id="achievements-page">
-                <h1 style="color: var(--text-primary); margin-bottom: 25px;">🏆 Tasks & Achievements</h1>
+                <h1  >🏆 Tasks & Achievements</h1>
 
                 <div class="grid-2">
                     <div class="card">
-                        <h3 style="color: var(--text-primary); margin-bottom: 15px;">Badges Earned</h3>
-                        <div id="badgesContainer" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <h3  >Badges Earned</h3>
+                        <div  id="badgesContainer" >
                             <!-- Badges will appear here -->
                         </div>
                     </div>
                     <div class="card">
-                        <h3 style="color: var(--text-primary); margin-bottom: 15px;">Gamification Points</h3>
-                        <div style="font-size: 36px; font-weight: 800; color: #fbbf24;">
+                        <h3  >Gamification Points</h3>
+                        <div  >
                             <i class="fas fa-coins"></i> <span id="userPointsDisplay">0</span>
                         </div>
-                        <p style="color: var(--text-muted); margin-top: 5px;">Keep completing tasks to earn more!</p>
+                        <p  >Keep completing tasks to earn more!</p>
                     </div>
                 </div>
 
-                <div class="card" style="margin-top: 20px;">
-                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">Current Assignments</h3>
+                <div class="card" >
+                    <h3  >Current Assignments</h3>
                     <div id="tasksContainer">
-                        <p style="text-align: center; color: var(--text-muted);">No active tasks assigned.</p>
+                        <p  >No active tasks assigned.</p>
                     </div>
                 </div>
             </div>
 
             <!-- BMI CALCULATOR PAGE -->
             <div class="page" id="bmi-page">
-                <h1 style="color: var(--text-primary); margin-bottom: 25px;">⚖️ BMI Calculator</h1>
+                <h1  >⚖️ BMI Calculator</h1>
 
                 <div class="grid-2">
                     <div class="card">
-                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">Calculate Your BMI</h3>
+                        <h3  >Calculate Your BMI</h3>
                         <div class="form-group">
-                            <label>Height (cm)</label>
-                            <input type="number" id="bmiHeight" placeholder="e.g. 175">
+                            <label for="bmiHeight">Height (cm)</label>
+                            <input type="number" id="bmiHeight" title="Height (cm)" placeholder="e.g. 175">
                         </div>
                         <div class="form-group">
-                            <label>Weight (kg)</label>
-                            <input type="number" id="bmiWeight" placeholder="e.g. 70">
+                            <label for="bmiWeight">Weight (kg)</label>
+                            <input type="number" id="bmiWeight" title="Weight (kg)" placeholder="e.g. 70">
                         </div>
-                        <button class="btn btn-primary" onclick="calculateBMI()" id="calcBMIBtn" style="width: 100%;">
+                        <button class="btn btn-primary" onclick="calculateBMI()" id="calcBMIBtn" >
                             Calculate & Save
                         </button>
 
-                        <div id="bmiResult"
-                            style="margin-top: 20px; display: none; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h2 id="bmiValue" style="font-size: 32px; font-weight: bold;"></h2>
-                            <p id="bmiCategory" style="font-weight: 600; margin-top: 5px;"></p>
+                        <div  id="bmiResult"
+                            >
+                            <h2  id="bmiValue" ></h2>
+                            <p  id="bmiCategory" ></p>
                         </div>
                     </div>
 
                     <div class="card">
-                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">BMI History</h3>
-                        <div id="bmiHistory" style="max-height: 400px; overflow-y: auto;">
-                            <p style="text-align: center; color: var(--text-muted);">No records yet.</p>
+                        <h3  >BMI History</h3>
+                        <div  id="bmiHistory" >
+                            <p  >No records yet.</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="page" id="workouts-page">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                <div  >
                     <div>
-                        <h1 style="color:var(--text-primary);">&#127947; My Workouts</h1>
-                        <p style="color:var(--text-muted); margin-top:5px; font-size:14px;">Workout plans assigned by
+                        <h1  >&#127947; My Workouts</h1>
+                        <p  >Workout plans assigned by
                             your trainer</p>
                     </div>
-                    <button class="btn btn-primary" onclick="loadMyWorkouts()" style="gap:8px;">
+                    <button class="btn btn-primary" onclick="loadMyWorkouts()" >
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
 
                 <!-- ═══════════════ MY WORKOUT LOG (member self-track) ═══════════════ -->
-                <div class="wlog-section" style="margin-bottom: 30px;">
+                <div class="wlog-section" >
                     <div class="wlog-header">
-                        <h3><i class="fas fa-clipboard-list"></i> My Workout Log <span
-                                style="color:#9ca3af; font-weight:400; font-size:13px;">&mdash; Today</span></h3>
+                        <h3><i class="fas fa-clipboard-list"></i> My Workout Log <span 
+                                >&mdash; Today</span></h3>
                         <div class="wlog-actions">
                             <span id="wlogSavedMsg" class="wlog-saved-msg"><i class="fas fa-check-circle"></i>
                                 Saved</span>
@@ -1685,43 +1687,43 @@
                 </div>
 
                 <!-- TODAY'S WORKOUT HIGHLIGHT -->
-                <div id="todayWorkoutSection" style="margin-bottom:28px; display:none;">
-                    <h3 style="color:#22c55e; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-                        <i class="fas fa-fire" style="color:#f97316;"></i> Today's Workout
+                <div  id="todayWorkoutSection" >
+                    <h3  >
+                        <i class="fas fa-fire" ></i> Today's Workout
                     </h3>
                     <div id="todayWorkoutCard"></div>
                 </div>
 
                 <!-- NO WORKOUT TODAY -->
-                <div id="noTodayWorkout" style="display:none; margin-bottom:24px;">
+                <div  id="noTodayWorkout" >
                     <div class="member-workout-card"
-                        style="border-color:#2a1a00; background:linear-gradient(135deg,#0d0d00,#1a1000); text-align:center; padding:30px;">
+                        >
                         <i class="fas fa-dumbbell"
-                            style="font-size:36px; color:#4b3300; display:block; margin-bottom:12px;"></i>
-                        <p style="color:#9ca3af; font-size:15px;">No workout assigned for today yet.</p>
-                        <p style="color:#6b7280; font-size:13px; margin-top:5px;">Check back later or contact your
+                            ></i>
+                        <p  >No workout assigned for today yet.</p>
+                        <p  >Check back later or contact your
                             trainer.</p>
                     </div>
                 </div>
 
                 <!-- ANALYTICS DASHBOARD -->
-                <div style="margin-bottom:28px;">
-                    <h3
-                        style="color:var(--text-primary); margin-bottom:14px; border-bottom:1px solid #2a0000; padding-bottom:10px;">
+                <div  >
+                    <h3 
+                        >
                         <i class="fas fa-chart-line"></i> Analytics & Insights
                     </h3>
                     <div class="grid-2">
-                        <div class="card" style="background:#0d0d00; border-color:#2a1a00;">
-                            <h4 style="color:var(--text-primary); text-align:center; margin-bottom:10px;">Volume
+                        <div class="card" >
+                            <h4  >Volume
                                 Distribution</h4>
-                            <div style="height:200px; padding:10px;">
+                            <div  >
                                 <canvas id="volumePieChart"></canvas>
                             </div>
                         </div>
-                        <div class="card" style="background:#0d0d00; border-color:#2a1a00;">
-                            <h4 style="color:var(--text-primary); text-align:center; margin-bottom:10px;">Est. 1RM Train
+                        <div class="card" >
+                            <h4  >Est. 1RM Train
                                 Progression</h4>
-                            <div style="height:200px; padding:10px;">
+                            <div  >
                                 <canvas id="oneRMChart"></canvas>
                             </div>
                         </div>
@@ -1730,11 +1732,11 @@
 
                 <!-- WORKOUT HISTORY -->
                 <div>
-                    <h3
-                        style="color:var(--text-primary); margin-bottom:14px; border-bottom:1px solid #2a0000; padding-bottom:10px;">
+                    <h3 
+                        >
                         &#128203; Workout History</h3>
                     <div id="workoutHistorySection">
-                        <p style="color:var(--text-muted); text-align:center; padding:30px;">Loading your workouts...
+                        <p  >Loading your workouts...
                         </p>
                     </div>
                 </div>
@@ -1746,44 +1748,44 @@
 
             <!-- PAYMENTS PAGE -->
             <div class="page" id="payments-page">
-                <h1 style="color: var(--text-primary); margin-bottom: 25px;">💳 Fees & Payments</h1>
+                <h1  >💳 Fees & Payments</h1>
 
                 <div class="grid-2">
                     <div class="card">
-                        <h3 style="color: var(--text-primary); margin-bottom: 15px;">Fee Summary</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <h3  >Fee Summary</h3>
+                        <div  >
                             <div class="stat-card"
-                                style="background: #051a0a; border: 1px solid #c6f6d5; padding: 15px; border-radius: 12px; text-align: center;">
+                                >
                                 <div class="stat-value" id="totalPaidUser"
-                                    style="color: #2f855a; font-size: 20px; font-weight: bold;">?0</div>
-                                <div class="stat-label" style="color: #2f855a; font-size: 12px;">Total Paid</div>
+                                    >?0</div>
+                                <div class="stat-label" >Total Paid</div>
                             </div>
                             <div class="stat-card"
-                                style="background: #1a0505; border: 1px solid #fed7d7; padding: 15px; border-radius: 12px; text-align: center;">
+                                >
                                 <div class="stat-value" id="feesStatusUser"
-                                    style="color: #c53030; font-size: 20px; font-weight: bold;">Pending</div>
-                                <div class="stat-label" style="color: #c53030; font-size: 12px;">Fees Status</div>
+                                    >Pending</div>
+                                <div class="stat-label" >Fees Status</div>
                             </div>
                         </div>
-                        <p style="margin-top: 15px; font-size: 13px; color: var(--text-muted);">Last Payment: <span
+                        <p  >Last Payment: <span
                                 id="lastPaymentDateUser">--</span></p>
                     </div>
 
-                    <div class="card" id="adminUPICard" style="text-align: center;">
-                        <h3 style="color: var(--text-primary); margin-bottom: 15px;">Pay via UPI</h3>
-                        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">Scan the QR or use
+                    <div class="card" id="adminUPICard" >
+                        <h3  >Pay via UPI</h3>
+                        <p  >Scan the QR or use
                             the number
                             below:</p>
-                        <div id="userSideUPIQR" style="display: flex; justify-content: center; margin: 10px 0;">
-                            <p style="color: var(--text-muted); padding: 10px;">Loading QR...</p>
+                        <div  id="userSideUPIQR" >
+                            <p  >Loading QR...</p>
                         </div>
-                        <p style="margin-top: 10px; font-weight: bold; color: #333;">Admin Phone: <span
+                        <p  >Admin Phone: <span
                                 id="userSideAdminPhone">--</span></p>
                     </div>
                 </div>
 
-                <div class="card" style="margin-top: 20px;">
-                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">Payment History</h3>
+                <div class="card" >
+                    <h3  >Payment History</h3>
                     <table class="table" id="paymentsTable">
                         <thead>
                             <tr>
@@ -1796,7 +1798,7 @@
                         </thead>
                         <tbody id="userPaymentTbody">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: var(--text-muted);">No payment history
+                                <td  colspan="5" >No payment history
                                     found</td>
                             </tr>
                         </tbody>
@@ -1809,10 +1811,10 @@
                 <div class="progress-page-header">
                     <div>
                         <h1>📊 Workout Progress</h1>
-                        <p style="color:var(--text-muted); margin-top:5px; font-size:14px;">Track your weekly & monthly
+                        <p  >Track your weekly & monthly
                             workout consistency</p>
                     </div>
-                    <div style="display:flex; align-items:center; gap:20px;">
+                    <div  >
                         <div class="points-badge">
                             <i class="fas fa-coins"></i> <span id="userTotalPoints">0</span> PTS
                         </div>
@@ -1828,25 +1830,25 @@
                 <!-- STAT CARDS -->
                 <div class="progress-stats-row">
                     <div class="progress-stat-card">
-                        <div class="psc-glow" style="background: #ff1a1a;"></div>
+                        <div class="psc-glow" ></div>
                         <div class="psc-icon">🏋️</div>
                         <div class="psc-value" id="progressWorkoutCount">0</div>
                         <div class="psc-label" id="progressWorkoutLabel">Workouts This Week</div>
                     </div>
                     <div class="progress-stat-card green">
-                        <div class="psc-glow" style="background: #22c55e;"></div>
+                        <div class="psc-glow" ></div>
                         <div class="psc-icon">✅</div>
                         <div class="psc-value" id="progressCompletionRate">0%</div>
                         <div class="psc-label">Completion Rate</div>
                     </div>
                     <div class="progress-stat-card orange">
-                        <div class="psc-glow" style="background: #f97316;"></div>
+                        <div class="psc-glow" ></div>
                         <div class="psc-icon">🔥</div>
                         <div class="psc-value" id="progressStreak">0</div>
                         <div class="psc-label">Best Streak (All Time)</div>
                     </div>
                     <div class="progress-stat-card purple">
-                        <div class="psc-glow" style="background: #8b5cf6;"></div>
+                        <div class="psc-glow" ></div>
                         <div class="psc-icon">💪</div>
                         <div class="psc-value" id="progressTotalWorkouts">0</div>
                         <div class="psc-label">Total All-Time Workouts</div>
@@ -1855,19 +1857,19 @@
 
                 <div class="progress-charts-grid">
                     <!-- LEFT COLUMN: ASSIGNMENTS & ACHIEVEMENTS -->
-                    <div style="display:flex; flex-direction:column; gap:20px;">
+                    <div  >
                         <!-- WEEKLY ASSIGNMENTS -->
                         <div class="progress-chart-card">
-                            <h4 style="margin-bottom:15px;"><i class="fas fa-tasks"></i> Weekly Assignments</h4>
+                            <h4  ><i class="fas fa-tasks"></i> Weekly Assignments</h4>
                             <div id="progressAssignmentsList">
-                                <p style="color:var(--text-muted); text-align:center; padding:20px;">No active
+                                <p  >No active
                                     assignments.</p>
                             </div>
                         </div>
 
                         <!-- PAST MONTH RECORD -->
                         <div class="progress-chart-card">
-                            <h4 style="margin-bottom:15px;"><i class="fas fa-history"></i> Past Month Record</h4>
+                            <h4  ><i class="fas fa-history"></i> Past Month Record</h4>
                             <div class="past-month-row">
                                 <div class="past-month-stat">
                                     <span class="pms-val" id="pmWorkouts">0</span>
@@ -1882,7 +1884,7 @@
                                     <span class="pms-lbl">Total Vol</span>
                                 </div>
                             </div>
-                            <p style="color:var(--text-muted); font-size:12px; margin-top:12px; text-align:center;">
+                            <p  >
                                 Your stats from the previous calendar month.
                             </p>
                         </div>
@@ -1890,10 +1892,10 @@
 
                     <!-- RIGHT COLUMN: BADGES -->
                     <div class="progress-chart-card">
-                        <div
-                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                            <h4 style="margin:0;"><i class="fas fa-award"></i> Badges & Achievements</h4>
-                            <span style="color:#fbbf24; font-size:12px; font-weight:600;" id="badgeCountLabel">0
+                        <div 
+                            >
+                            <h4  ><i class="fas fa-award"></i> Badges & Achievements</h4>
+                            <span   id="badgeCountLabel">0
                                 Earned</span>
                         </div>
                         <div class="badge-grid" id="progressBadgeGrid">
@@ -1907,25 +1909,25 @@
                     <div class="progress-chart-card">
                         <h4><i class="fas fa-chart-line"></i> <span id="progressTrendTitle">Weekly Trend (Last 12
                                 Weeks)</span></h4>
-                        <div style="height: 230px;">
+                        <div  >
                             <canvas id="progressTrendChart"></canvas>
                         </div>
                     </div>
                     <div class="progress-chart-card">
                         <h4><i class="fas fa-calendar-alt"></i> Workout Calendar (This Month)</h4>
                         <div id="progressCalendar" class="progress-calendar">
-                            <p style="color: var(--text-muted); text-align:center; padding:30px; grid-column: span 7;">
+                            <p  >
                                 Loading...</p>
                         </div>
-                        <div style="margin-top:14px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-                            <span style="display:flex; align-items:center; gap:5px; font-size:11px; color:#6b7280;">
-                                <span
-                                    style="width:12px;height:12px;border-radius:3px;background:#0d0d0d;border:1px solid #1a0000;"></span>
+                        <div  >
+                            <span  >
+                                <span 
+                                    ></span>
                                 No Workout
                             </span>
-                            <span style="display:flex; align-items:center; gap:5px; font-size:11px; color:#6b7280;">
-                                <span
-                                    style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#1a0500,#330a00);border:1px solid #660000;"></span>
+                            <span  >
+                                <span 
+                                    ></span>
                                 Workout Done
                             </span>
                         </div>
@@ -1935,22 +1937,22 @@
                 <div class="progress-charts-grid">
                     <div class="progress-chart-card">
                         <h4><i class="fas fa-chart-pie"></i> Body Part Distribution</h4>
-                        <div style="height: 230px;">
+                        <div  >
                             <canvas id="progressBodyPieChart"></canvas>
                         </div>
                     </div>
                     <div class="progress-chart-card">
                         <h4><i class="fas fa-th-large"></i> Body Part Breakdown</h4>
                         <div class="bp-breakdown" id="progressBodyBreakdown">
-                            <p style="color: var(--text-muted); text-align:center; padding:30px;">Loading...</p>
+                            <p  >Loading...</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- BODY PART BAR CHART -->
-                <div class="progress-chart-card" style="margin-bottom:28px;">
+                <div class="progress-chart-card" >
                     <h4><i class="fas fa-chart-bar"></i> Volume by Body Part (kg)</h4>
-                    <div style="height: 260px;">
+                    <div  >
                         <canvas id="progressVolumeBarChart"></canvas>
                     </div>
                 </div>
@@ -1963,39 +1965,39 @@
 
             <!-- PROFILE PAGE -->
             <div class="page" id="profile-page">
-                <h1 style="color: var(--text-primary); margin-bottom: 25px;">Profile Settings</h1>
+                <h1  >Profile Settings</h1>
 
                 <div class="grid-2">
                     <!-- PROFILE INFO -->
                     <div class="card">
-                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">Personal Information</h3>
-                        <div style="text-align: center; margin-bottom: 20px;">
-                            <div id="profilePhotoHolder"
-                                style="width: 100px; height: 100px; background: #667eea; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 40px;">
+                        <h3  >Personal Information</h3>
+                        <div  >
+                            <div  id="profilePhotoHolder"
+                                >
                                 <i class="fas fa-user"></i>
                             </div>
                             <button class="btn btn-secondary"
                                 onclick="document.getElementById('profilePhotoInput').click();">Upload Photo</button>
-                            <button class="btn btn-danger" style="margin-left:8px;"
+                            <button class="btn btn-danger" 
                                 onclick="removeProfilePhoto();">Remove Photo</button>
-                            <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;"
-                                onchange="handleProfilePhotoUpload(event)" />
+                            <input  type="file" id="profilePhotoInput" accept="image/*" 
+                                onchange="handleProfilePhotoUpload(event)" title="Upload Profile Photo" />
                         </div>
                         <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" id="profileName" value="">
+                            <label for="profileName">Full Name</label>
+                            <input type="text" id="profileName" title="Full Name" value="">
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="profileEmail" value="">
+                            <label for="profileEmail">Email</label>
+                            <input type="email" id="profileEmail" title="Email" value="">
                         </div>
                         <div class="form-group">
-                            <label>Phone</label>
-                            <input type="tel" id="profilePhone" value="">
+                            <label for="profilePhone">Phone</label>
+                            <input type="tel" id="profilePhone" title="Phone" value="">
                         </div>
                         <div class="form-group">
-                            <label>Gender</label>
-                            <select id="profileGender">
+                            <label for="profileGender">Gender</label>
+                            <select id="profileGender" title="Gender">
                                 <option value="">Select</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
@@ -2003,20 +2005,20 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Date of Birth</label>
-                            <input type="date" id="profileDob" value="">
+                            <label for="profileDob">Date of Birth</label>
+                            <input type="date" id="profileDob" title="Date of Birth" value="">
                         </div>
                         <div class="form-group">
-                            <label>Height (cm)</label>
-                            <input type="number" id="profileHeight" step="0.1" value="">
+                            <label for="profileHeight">Height (cm)</label>
+                            <input type="number" id="profileHeight" title="Height in cm" step="0.1" value="">
                         </div>
                         <div class="form-group">
-                            <label>Weight (kg)</label>
-                            <input type="number" id="profileWeight" step="0.1" value="">
+                            <label for="profileWeight">Weight (kg)</label>
+                            <input type="number" id="profileWeight" title="Weight in kg" step="0.1" value="">
                         </div>
                         <div class="form-group">
-                            <label>Blood Group</label>
-                            <select id="profileBloodGroup">
+                            <label for="profileBloodGroup">Blood Group</label>
+                            <select id="profileBloodGroup" title="Blood Group">
                                 <option value="">Select</option>
                                 <option>A+</option>
                                 <option>A-</option>
@@ -2029,10 +2031,10 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Role</label>
-                            <input type="text" id="profileRole" value="Admin" readonly style="background: #0b0b0b;">
+                            <label for="profileRole">Role</label>
+                            <input  type="text" id="profileRole" title="Role" value="Admin" readonly >
                         </div>
-                        <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                        <button class="btn btn-primary" 
                             onclick="saveProfile()">
                             <i class="fas fa-save"></i> Save Changes
                         </button>
@@ -2040,22 +2042,22 @@
 
                     <!-- SECURITY SETTINGS -->
                     <div class="card">
-                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">Security</h3>
-                        <div style="margin-bottom: 20px;">
-                            <h4 style="color: #555; margin-bottom: 10px;">Change Password</h4>
+                        <h3  >Security</h3>
+                        <div  >
+                            <h4  >Change Password</h4>
                             <div class="form-group">
-                                <label>Current Password</label>
-                                <input type="password" id="currentPassword">
+                                <label for="currentPassword">Current Password</label>
+                                <input type="password" id="currentPassword" title="Current Password">
                             </div>
                             <div class="form-group">
-                                <label>New Password</label>
-                                <input type="password" id="newPassword">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" title="New Password">
                             </div>
                             <div class="form-group">
-                                <label>Confirm Password</label>
-                                <input type="password" id="confirmPassword">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" id="confirmPassword" title="Confirm Password">
                             </div>
-                            <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                            <button class="btn btn-primary" 
                                 onclick="updatePassword()">
                                 <i class="fas fa-lock"></i> Update Password
                             </button>
@@ -2064,48 +2066,48 @@
                 </div>
 
                 <!-- NOTIFICATION PREFERENCES -->
-                <div class="card" style="margin-top: 20px;">
-                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">Notification Preferences</h3>
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #e0e0e0;">
+                <div class="card" >
+                    <h3  >Notification Preferences</h3>
+                    <div 
+                        >
                         <div>
-                            <h4 style="color: #555; margin-bottom: 5px;">Email Notifications</h4>
-                            <p style="color: var(--text-muted); font-size: 14px;">Receive updates via email</p>
+                            <h4  >Email Notifications</h4>
+                            <p  >Receive updates via email</p>
                         </div>
-                        <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;" checked>
+                        <input  type="checkbox"  checked title="Notification Preference">
                     </div>
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #e0e0e0;">
+                    <div 
+                        >
                         <div>
-                            <h4 style="color: #555; margin-bottom: 5px;">SMS Notifications</h4>
-                            <p style="color: var(--text-muted); font-size: 14px;">Receive updates via SMS</p>
+                            <h4  >SMS Notifications</h4>
+                            <p  >Receive updates via SMS</p>
                         </div>
-                        <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                        <input  type="checkbox"  title="Notification Preference">
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
+                    <div  >
                         <div>
-                            <h4 style="color: #555; margin-bottom: 5px;">Payment Reminders</h4>
-                            <p style="color: var(--text-muted); font-size: 14px;">Get reminded about due payments</p>
+                            <h4  >Payment Reminders</h4>
+                            <p  >Get reminded about due payments</p>
                         </div>
-                        <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;" checked>
+                        <input  type="checkbox"  checked title="Notification Preference">
                     </div>
                 </div>
 
                 <!-- THEME & LANGUAGE -->
-                <div class="card" style="margin-top: 20px;">
-                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">Preferences</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card" >
+                    <h3  >Preferences</h3>
+                    <div  >
                         <div class="form-group">
-                            <label>Theme</label>
-                            <select id="themeSelect">
+                            <label for="themeSelect">Theme</label>
+                            <select id="themeSelect" title="Theme">
                                 <option value="light">Light Mode</option>
                                 <option value="dark">Dark Mode</option>
                                 <option value="auto">Auto</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Language</label>
-                            <select id="languageSelect">
+                            <label for="languageSelect">Language</label>
+                            <select id="languageSelect" title="Language">
                                 <option value="en">English</option>
                                 <option value="hi">Hindi</option>
                                 <option value="es">Spanish</option>
@@ -2128,25 +2130,25 @@
                 <button class="close-btn" onclick="closeModal('addAnnouncementModal')">�</button>
             </div>
             <div class="form-group">
-                <label>Title</label>
-                <input type="text" id="announcementTitle" placeholder="Announcement title">
+                            <label for="announcementTitle">Title</label>
+                            <input type="text" id="announcementTitle" placeholder="Announcement title" title="Title">
             </div>
             <div class="form-group">
-                <label>Content</label>
-                <textarea id="announcementContent" placeholder="Write your announcement..."></textarea>
+                            <label for="announcementContent">Content</label>
+                            <textarea id="announcementContent" placeholder="Write your announcement..." title="Content"></textarea>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div  >
                 <div class="form-group">
-                    <label>Priority Level</label>
-                    <select id="announcementPriority">
+                            <label for="announcementPriority">Priority Level</label>
+                            <select id="announcementPriority" title="Priority Level">
                         <option value="low">Low</option>
                         <option value="medium" selected>Medium</option>
                         <option value="high">High</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Target Audience</label>
-                    <select id="announcementTarget">
+                            <label for="announcementTarget">Target Audience</label>
+                            <select id="announcementTarget" title="Target Audience">
                         <option value="all">All Members</option>
                         <option value="active">Active Members</option>
                         <option value="specific">Specific Group</option>
@@ -2154,13 +2156,13 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>Expiration Date</label>
-                <input type="date" id="announcementExpiry">
+                            <label for="announcementExpiry">Expiration Date</label>
+                            <input type="date" id="announcementExpiry" title="Expiration Date" placeholder="Enter Expiration Date">
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" style="flex: 1; justify-content: center;"
+            <div  >
+                <button class="btn btn-primary" 
                     onclick="addAnnouncement()">Create</button>
-                <button class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                <button class="btn btn-secondary" 
                     onclick="closeModal('addAnnouncementModal')">Cancel</button>
             </div>
         </div>
@@ -2174,21 +2176,21 @@
                 <button class="close-btn" onclick="closeModal('addMemberModal')">�</button>
             </div>
             <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="memberName" placeholder="Enter full name">
+                            <label for="memberName">Full Name</label>
+                            <input type="text" id="memberName" placeholder="Enter full name" title="Full Name">
             </div>
             <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="memberEmail" placeholder="Enter email">
+                            <label for="memberEmail">Email</label>
+                            <input type="email" id="memberEmail" placeholder="Enter email" title="Email">
             </div>
             <div class="form-group">
-                <label>Phone</label>
-                <input type="tel" id="memberPhone" placeholder="Enter phone number">
+                            <label for="memberPhone">Phone</label>
+                            <input type="tel" id="memberPhone" placeholder="Enter phone number" title="Phone">
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="addMember()">Add
+            <div  >
+                <button class="btn btn-primary"  onclick="addMember()">Add
                     Member</button>
-                <button class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                <button class="btn btn-secondary" 
                     onclick="closeModal('addMemberModal')">Cancel</button>
             </div>
         </div>
@@ -2202,35 +2204,35 @@
                 <button class="close-btn" onclick="closeModal('markAttendanceModal')">�</button>
             </div>
             <div class="form-group">
-                <label>Select Member</label>
-                <select id="attendanceMember">
+                            <label for="attendanceMember">Select Member</label>
+                            <select id="attendanceMember" title="Select Member">
                     <option value="">Choose member...</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Date</label>
-                <input type="date" id="attendanceMarkDate">
+                            <label for="attendanceMarkDate">Date</label>
+                            <input type="date" id="attendanceMarkDate" title="Date" placeholder="Enter Date">
             </div>
             <div class="form-group">
-                <label>Check-in Time</label>
-                <input type="time" id="checkInTime">
+                            <label for="checkInTime">Check-in Time</label>
+                            <input type="time" id="checkInTime" title="Check-in Time" placeholder="Enter Check-in Time">
             </div>
             <div class="form-group">
-                <label>Check-out Time</label>
-                <input type="time" id="checkOutTime">
+                            <label for="checkOutTime">Check-out Time</label>
+                            <input type="time" id="checkOutTime" title="Check-out Time" placeholder="Enter Check-out Time">
             </div>
             <div class="form-group">
-                <label>Status</label>
-                <select id="attendanceStatus">
+                            <label for="attendanceStatus">Status</label>
+                            <select id="attendanceStatus" title="Status">
                     <option value="present">Present</option>
                     <option value="absent">Absent</option>
                     <option value="late">Late</option>
                 </select>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" style="flex: 1; justify-content: center;"
+            <div  >
+                <button class="btn btn-primary" 
                     onclick="markAttendance()">Save</button>
-                <button class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                <button class="btn btn-secondary" 
                     onclick="closeModal('markAttendanceModal')">Cancel</button>
             </div>
         </div>
@@ -2244,15 +2246,15 @@
                 <button class="close-btn" onclick="closeModal('collectPaymentModal')">�</button>
             </div>
             <div class="form-group">
-                <label>Member Name</label>
-                <select id="modalPaymentMember">
+                            <label for="modalPaymentMember">Member Name</label>
+                            <select id="modalPaymentMember" title="Member Name">
                     <option value="">Select member...</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Membership Plan</label>
-                <select id="modalPaymentPlan"
-                    onchange="document.getElementById('paymentAmount').value = this.options[this.selectedIndex].getAttribute('data-price') || '';">
+                            <label for="modalPaymentPlan">Membership Plan</label>
+                            <select id="modalPaymentPlan"
+                    onchange="document.getElementById('paymentAmount').value = this.options[this.selectedIndex].getAttribute('data-price') || '';" title="Membership Plan">
                     <option value="" data-price="">Select plan...</option>
                     <option value="monthly" data-price="500">Monthly - ?500</option>
                     <option value="quarterly" data-price="1200">Quarterly - ?1200</option>
@@ -2260,21 +2262,21 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Amount</label>
-                <input type="number" id="paymentAmount" placeholder="0">
+                            <label for="paymentAmount">Amount</label>
+                            <input type="number" id="paymentAmount" placeholder="0" title="Amount">
             </div>
             <div class="form-group">
-                <label>Payment Method</label>
-                <select id="modalPaymentMethod">
+                            <label for="modalPaymentMethod">Payment Method</label>
+                            <select id="modalPaymentMethod" title="Payment Method">
                     <option value="cash">Cash</option>
                     <option value="card">Card</option>
                     <option value="online">Online</option>
                 </select>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-success" style="flex: 1; justify-content: center;"
+            <div  >
+                <button class="btn btn-success" 
                     onclick="savePayment()">Collect Payment</button>
-                <button class="btn btn-secondary" style="flex: 1; justify-content: center;"
+                <button class="btn btn-secondary" 
                     onclick="closeModal('collectPaymentModal')">Cancel</button>
             </div>
         </div>
@@ -2288,19 +2290,19 @@
                 <span class="close" onclick="closeModal('addWorkoutModal')">&times;</span>
             </div>
             <div class="form-group">
-                <label>Week Starting Date</label>
-                <input type="date" id="workoutWeekStart" required>
+                            <label for="workoutWeekStart">Week Starting Date</label>
+                            <input type="date" id="workoutWeekStart" required title="Week Starting Date" placeholder="Enter Week Starting Date">
             </div>
             <div class="form-group">
-                <label>Trainer Name</label>
-                <input type="text" id="workoutTrainer" placeholder="e.g., John Smith">
+                            <label for="workoutTrainer">Trainer Name</label>
+                            <input type="text" id="workoutTrainer" placeholder="e.g., John Smith" title="Trainer Name">
             </div>
             <div class="form-group">
-                <label>Notes / Exercises</label>
-                <textarea id="workoutNotes" placeholder="Monday: Chest, Tuesday: Back..."
-                    style="height: 150px;"></textarea>
+                            <label for="workoutNotes">Notes / Exercises</label>
+                            <textarea  id="workoutNotes" placeholder="Monday: Chest, Tuesday: Back..."
+                     title="Notes / Exercises"></textarea>
             </div>
-            <button class="btn btn-primary" style="width: 100%;" onclick="saveWorkout()">
+            <button class="btn btn-primary"  onclick="saveWorkout()">
                 <i class="fas fa-save"></i> Save Workout
             </button>
         </div>
@@ -2389,7 +2391,7 @@
             const user = JSON.parse(localStorage.getItem('user'));
             const qrPage = document.getElementById('qrScanner-page');
             if (!qrPage || !user) return;
-            qrPage.innerHTML = '<h1 style="color: var(--text-primary); margin-bottom: 25px;">Your QR Code</h1><div class="card" style="text-align: center;"><p style="color: var(--text-muted); margin-bottom: 20px;">Loading...</p><div id="memberQrContainer"></div></div>';
+            qrPage.innerHTML = '<h1  >Your QR Code</h1><div class="card" ><p  >Loading...</p><div id="memberQrContainer"></div></div>';
             fetch('/getUserQR?email=' + encodeURIComponent(user.email))
                 .then(r => r.json())
                 .then(data => {
@@ -2403,26 +2405,26 @@
                             const today = new Date();
                             const daysLeft = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
                             if (daysLeft <= 0) {
-                                expiryInfo = '<p style="color: #ef4444; font-size: 13px; margin-top: 12px; font-weight: 600;"><i class="fas fa-exclamation-circle"></i> Membership expired on ' + expDate.toLocaleDateString() + '. QR scan will not work until renewed.</p>';
+                                expiryInfo = '<p  ><i class="fas fa-exclamation-circle"></i> Membership expired on ' + expDate.toLocaleDateString() + '. QR scan will not work until renewed.</p>';
                             } else if (daysLeft <= 5) {
-                                expiryInfo = '<p style="color: #f59e0b; font-size: 13px; margin-top: 12px; font-weight: 600;"><i class="fas fa-exclamation-triangle"></i> Membership expiring in ' + daysLeft + ' day(s) on ' + expDate.toLocaleDateString() + '</p>';
+                                expiryInfo = '<p  ><i class="fas fa-exclamation-triangle"></i> Membership expiring in ' + daysLeft + ' day(s) on ' + expDate.toLocaleDateString() + '</p>';
                             } else {
-                                expiryInfo = '<p style="color: #22c55e; font-size: 13px; margin-top: 12px;">Active until ' + expDate.toLocaleDateString() + ' (' + daysLeft + ' days remaining)</p>';
+                                expiryInfo = '<p  >Active until ' + expDate.toLocaleDateString() + ' (' + daysLeft + ' days remaining)</p>';
                             }
                         }
                         container.innerHTML = `
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Show this QR code at the front desk every day to mark your attendance.</p>
-                        <img src="${data.qrImage}" alt="Your QR code" style="display: block; margin: 0 auto; max-width: 250px; width: 100%; border-radius: 8px; border: 2px solid #ff1a1a;">
-                        <p style="color: var(--text-muted); font-size: 12px; margin-top: 15px;">Your permanent QR – scan it daily at the gym entrance.</p>
+                        <p  >Show this QR code at the front desk every day to mark your attendance.</p>
+                        <img  src="${data.qrImage}" alt="Your QR code" >
+                        <p  >Your permanent QR – scan it daily at the gym entrance.</p>
                         ${expiryInfo}
                     `;
                     } else {
-                        container.innerHTML = '<p style="color: var(--text-muted);">No QR code assigned yet. Ask your administrator to generate your QR.</p>';
+                        container.innerHTML = '<p  >No QR code assigned yet. Ask your administrator to generate your QR.</p>';
                     }
                 })
                 .catch(() => {
                     const container = document.getElementById('memberQrContainer');
-                    if (container) container.innerHTML = '<p style="color: var(--text-muted);">Could not load QR. Please try again later.</p>';
+                    if (container) container.innerHTML = '<p  >Could not load QR. Please try again later.</p>';
                 });
         }
 
@@ -2487,7 +2489,7 @@
             const reader = new FileReader();
             reader.onload = function (evt) {
                 const holder = document.getElementById('profilePhotoHolder');
-                holder.innerHTML = `<img src="${evt.target.result}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>`;
+                holder.innerHTML = `<img  src="${evt.target.result}" />`;
                 // TODO: optionally send to server via fetch for persistence
                 showToast('Photo loaded (not saved).', 'success');
             };
@@ -2637,12 +2639,12 @@
                             if (n.type === 'success') { iconColor = '#10b981'; iconClass = 'fa-check-circle'; }
 
                             html += `
-                                <a style="display: flex; gap: 10px; align-items: flex-start; padding: 12px 15px;">
-                                    <i class="fas ${iconClass}" style="color: ${iconColor}; margin-top: 3px;"></i>
+                                <a  >
+                                    <i style="color: ${iconColor" class="fas ${iconClass}" ></i>
                                     <div>
-                                        <div style="font-weight: 600; color: var(--text-primary); font-size: 13px; margin-bottom: 3px;">${n.title}</div>
-                                        <div style="color: var(--text-muted); font-size: 12px; line-height: 1.4; white-space: normal;">${n.message}</div>
-                                        <div style="color: #666; font-size: 10px; margin-top: 5px;">${new Date(n.date).toLocaleDateString()}</div>
+                                        <div  >${n.title}</div>
+                                        <div  >${n.message}</div>
+                                        <div  >${new Date(n.date).toLocaleDateString()}</div>
                                     </div>
                                 </a>
                             `;
@@ -2650,7 +2652,7 @@
                         listDiv.innerHTML = html;
                     } else {
                         badge.style.display = 'none';
-                        listDiv.innerHTML = '<a style="text-align: center; color: var(--text-muted); cursor: default;">No new notifications</a>';
+                        listDiv.innerHTML = '<a  >No new notifications</a>';
                     }
                 })
                 .catch(err => console.log('Error fetching notifications', err));
@@ -2836,15 +2838,15 @@
                 .then(data => {
                     const container = document.getElementById('bmiHistory');
                     if (data.success && data.records.length > 0) {
-                        let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+                        let html = '<div  >';
                         data.records.forEach(r => {
                             html += `
-                                <div style="background:#0b0b0b; padding:12px; border-radius:8px; border:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
+                                <div  >
                                     <div>
-                                        <div style="font-weight:700; color:var(--text-primary);">BMI: ${r.bmi}</div>
-                                        <div style="font-size:12px; color:var(--text-muted);">${r.date}</div>
+                                        <div  >BMI: ${r.bmi}</div>
+                                        <div  >${r.date}</div>
                                     </div>
-                                    <div style="font-size:11px; font-weight:800; padding:2px 8px; border-radius:4px; background:rgba(255,26,26,0.1); color:#ff1a1a;">
+                                    <div  >
                                         ${r.category}
                                     </div>
                                 </div>
@@ -2853,7 +2855,7 @@
                         html += '</div>';
                         container.innerHTML = html;
                     } else {
-                        container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No records yet.</p>';
+                        container.innerHTML = '<p  >No records yet.</p>';
                     }
                 });
         }
@@ -2889,15 +2891,15 @@
                         let html = '';
                         data.workouts.forEach(w => {
                             html += `
-                                <div style="background:#0b0b0b; padding:15px; border-radius:12px; border:1px solid #222; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                                <div  >
                                     <div>
-                                        <div style="font-weight:700; color:#3b82f6; font-size:16px;">${w.exerciseName}</div>
-                                        <div style="color:var(--text-secondary); font-size:13px; margin-top:4px;">
+                                        <div  >${w.exerciseName}</div>
+                                        <div  >
                                             ${w.sets} Sets × ${w.reps} Reps ${w.duration ? ' | ' + w.duration : ''}
                                         </div>
-                                        ${w.notes ? `<div style="font-size:12px; color:var(--text-muted); margin-top:8px; font-style:italic;">Note: ${w.notes}</div>` : ''}
+                                        ${w.notes ? `<div  >Note: ${w.notes}</div>` : ''}
                                     </div>
-                                    <div style="display:flex; gap:10px; align-items:center;">
+                                    <div  >
                                         <span class="badge ${w.completed ? 'badge-success' : 'badge-warning'}">${w.completed ? 'Completed' : 'Pending'}</span>
                                     </div>
                                 </div>
@@ -2905,7 +2907,7 @@
                         });
                         container.innerHTML = html;
                     } else {
-                        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 20px;">No workouts assigned for today.</p>';
+                        container.innerHTML = '<p  >No workouts assigned for today.</p>';
                     }
                 });
         }
@@ -2925,15 +2927,15 @@
                             let bHtml = '';
                             u.badges.forEach(b => {
                                 bHtml += `
-                                    <div class="badge-card" title="${b.category}" style="text-align:center; background:#1a1a1a; padding:10px; border-radius:12px; border:1px solid #333; width:80px;">
-                                        <div style="font-size:24px;">${b.icon || '🏅'}</div>
-                                        <div style="font-size:10px; font-weight:700; margin-top:5px; color:#fff;">${b.name}</div>
+                                    <div class="badge-card" title="${b.category}" >
+                                        <div  >${b.icon || '🏅'}</div>
+                                        <div  >${b.name}</div>
                                     </div>
                                 `;
                             });
                             bCont.innerHTML = bHtml;
                         } else {
-                            bCont.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">No badges yet.</p>';
+                            bCont.innerHTML = '<p  >No badges yet.</p>';
                         }
 
                         // Load Tasks
@@ -2943,16 +2945,16 @@
                             u.assignments.forEach(t => {
                                 const isDone = t.status === 'Completed';
                                 tHtml += `
-                                    <div style="background:#0b0b0b; padding:15px; border-radius:12px; border:1px solid ${isDone ? '#052a15' : '#2a0000'}; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                                    <div style="background:#0b0b0b; padding:15px; border-radius:12px; border:1px solid ${isDone ? '#052a15' : '#2a0000'" >
                                         <div>
-                                            <div style="font-weight:700; color:${isDone ? '#22c55e' : '#ff1a1a'};">${t.title}</div>
-                                            <div style="font-size:12px; color:var(--text-muted);">${t.description}</div>
-                                            <div style="font-size:11px; margin-top:5px;"><i class="fas fa-coins" style="color:#fbbf24;"></i> ${t.points} Points</div>
+                                            <div style="font-weight:700; color:${isDone ? '#22c55e' : '#ff1a1a'" >${t.title}</div>
+                                            <div  >${t.description}</div>
+                                            <div  ><i class="fas fa-coins" ></i> ${t.points} Points</div>
                                         </div>
                                         <div>
                                             ${isDone ?
-                                        '<span style="color:#22c55e; font-weight:700;"><i class="fas fa-check-circle"></i> Done</span>' :
-                                        `<button class="btn btn-primary" onclick="completeTask('${t.id}')" style="padding:5px 12px; font-size:12px;">Complete</button>`
+                                        '<span  ><i class="fas fa-check-circle"></i> Done</span>' :
+                                        `<button class="btn btn-primary" onclick="completeTask('${t.id}')" >Complete</button>`
                                     }
                                         </div>
                                     </div>
@@ -2960,7 +2962,7 @@
                             });
                             tCont.innerHTML = tHtml;
                         } else {
-                            tCont.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No active tasks assigned.</p>';
+                            tCont.innerHTML = '<p  >No active tasks assigned.</p>';
                         }
                     }
                 });
@@ -3033,13 +3035,13 @@
                         let previews = '';
                         data.announcements.forEach((a, i) => {
                             const htmlBlock = `
-                            <div style="background: #121212; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid ${a.priority === 'high' ? '#ef4444' : '#f59e0b'};">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                    <h3 style="color: var(--text-primary); margin: 0;">${escapeHtml(a.title)}</h3>
+                            <div style="background: #121212; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid ${a.priority === 'high' ? '#ef4444' : '#f59e0b'" >
+                                <div  >
+                                    <h3  >${escapeHtml(a.title)}</h3>
                                     <span class="badge badge-${a.priority === 'high' ? 'danger' : a.priority === 'low' ? 'success' : 'warning'}">${a.priority}</span>
                                 </div>
-                                <p style="color: var(--text-muted); font-size: 15px; line-height: 1.5; margin-bottom: 0;">${escapeHtml(a.content)}</p>
-                                <div style="margin-top: 15px; font-size: 12px; color: var(--text-muted);">
+                                <p  >${escapeHtml(a.content)}</p>
+                                <div  >
                                     Posted on: ${new Date(a.createdAt).toLocaleDateString()}
                                 </div>
                             </div>
@@ -3047,18 +3049,18 @@
                             fullList += htmlBlock;
                             if (i < 3) {
                                 previews += `
-                            <div style="background: #0b0b0b; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${a.priority === 'high' ? '#ef4444' : '#f59e0b'};">
-                                <h4 style="color: var(--text-primary); margin-bottom: 5px;">${escapeHtml(a.title)}</h4>
-                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 5px;">${escapeHtml(a.content)}</p>
-                                <span style="font-size: 11px; color: var(--text-muted);">Posted: ${new Date(a.createdAt).toLocaleDateString()}</span>
+                            <div style="background: #0b0b0b; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${a.priority === 'high' ? '#ef4444' : '#f59e0b'" >
+                                <h4  >${escapeHtml(a.title)}</h4>
+                                <p  >${escapeHtml(a.content)}</p>
+                                <span  >Posted: ${new Date(a.createdAt).toLocaleDateString()}</span>
                             </div>`;
                             }
                         });
                         if (listDiv) listDiv.innerHTML = fullList;
                         if (previewDiv) previewDiv.innerHTML = previews;
                     } else {
-                        if (listDiv) listDiv.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 30px;">No announcements available</p>';
-                        if (previewDiv) previewDiv.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No announcements yet</p>';
+                        if (listDiv) listDiv.innerHTML = '<p  >No announcements available</p>';
+                        if (previewDiv) previewDiv.innerHTML = '<p  >No announcements yet</p>';
                     }
                 })
                 .catch(err => console.log('Error fetching announcements', err));
@@ -3086,14 +3088,14 @@
             if (!user || !user.email) return;
 
             const tbody = document.getElementById('userAttendanceTbody');
-            if (tbody) tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--text-muted);">Loading attendance...</td></tr>';
+            if (tbody) tbody.innerHTML = '<tr><td  colspan="2" >Loading attendance...</td></tr>';
 
             fetch('/getUserAttendance?email=' + encodeURIComponent(user.email))
                 .then(r => r.json())
                 .then(data => {
                     if (data.success && data.records) {
                         if (data.records.length === 0) {
-                            tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--text-muted);">No attendance records for this month</td></tr>';
+                            tbody.innerHTML = '<tr><td  colspan="2" >No attendance records for this month</td></tr>';
                             return;
                         }
 
@@ -3110,11 +3112,11 @@
 
                         if (tbody) tbody.innerHTML = rows;
                     } else {
-                        if (tbody) tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #ff4b5c;">' + (data.message || 'Error loading records') + '</td></tr>';
+                        if (tbody) tbody.innerHTML = '<tr><td  colspan="2" >' + (data.message || 'Error loading records') + '</td></tr>';
                     }
                 })
                 .catch(() => {
-                    if (tbody) tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #ff4b5c;">Network error</td></tr>';
+                    if (tbody) tbody.innerHTML = '<tr><td  colspan="2" >Network error</td></tr>';
                 });
         }
 
@@ -3161,9 +3163,9 @@
                         document.getElementById('userSideAdminPhone').textContent = data.config.adminPhone || '--';
                         const qrDiv = document.getElementById('userSideUPIQR');
                         if (data.config.upiQR) {
-                            qrDiv.innerHTML = `<img src="${data.config.upiQR}" style="max-width:180px; border:1px solid #eee; border-radius:8px; margin-top:10px;">`;
+                            qrDiv.innerHTML = `<img  src="${data.config.upiQR}" >`;
                         } else {
-                            qrDiv.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">Admin has not uploaded UPI QR yet.</p>';
+                            qrDiv.innerHTML = '<p  >Admin has not uploaded UPI QR yet.</p>';
                         }
                     }
                 });
@@ -3175,7 +3177,7 @@
                     const tbody = document.getElementById('userPaymentTbody');
                     if (data.success && data.payments) {
                         if (data.payments.length === 0) {
-                            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No record found</td></tr>';
+                            tbody.innerHTML = '<tr><td  colspan="5" >No record found</td></tr>';
                             return;
                         }
                         tbody.innerHTML = data.payments.map(p => `
@@ -3184,7 +3186,7 @@
                                 <td>₹${p.amount}</td>
                                 <td>${p.method}</td>
                                 <td><span class="badge badge-success">Paid</span></td>
-                                <td style="font-size: 13px; color: var(--text-muted);">${p.plan ? p.plan.replace(/_/g, ' ') : '--'}</td>
+                                <td  >${p.plan ? p.plan.replace(/_/g, ' ') : '--'}</td>
                             </tr>
                         `).join('');
                     }
@@ -3294,7 +3296,7 @@
             const todayCard = document.getElementById('todayWorkoutCard');
             const historySection = document.getElementById('workoutHistorySection');
 
-            if (historySection) historySection.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+            if (historySection) historySection.innerHTML = '<p  ><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
 
             fetch('/getMyWorkouts?email=' + encodeURIComponent(user.email))
                 .then(r => r.json())
@@ -3302,7 +3304,7 @@
                     if (!data.success || !data.workouts || !data.workouts.length) {
                         if (todaySection) todaySection.style.display = 'none';
                         if (noTodayDiv) noTodayDiv.style.display = 'block';
-                        if (historySection) historySection.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:30px;">No workouts assigned yet. Check back later!</p>';
+                        if (historySection) historySection.innerHTML = '<p  >No workouts assigned yet. Check back later!</p>';
                         return;
                     }
 
@@ -3324,12 +3326,12 @@
                         if (pastWorkouts.length) {
                             historySection.innerHTML = pastWorkouts.map(w => buildWorkoutCard(w, false)).join('');
                         } else {
-                            historySection.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">No past workouts yet.</p>';
+                            historySection.innerHTML = '<p  >No past workouts yet.</p>';
                         }
                     }
                 })
                 .catch(() => {
-                    if (historySection) historySection.innerHTML = '<p style="color:#ef4444; text-align:center; padding:20px;">Failed to load workouts. Please refresh.</p>';
+                    if (historySection) historySection.innerHTML = '<p  >Failed to load workouts. Please refresh.</p>';
                 });
         }
 
@@ -3340,19 +3342,19 @@
             const completedTime = w.completedAt ? new Date(w.completedAt).toLocaleDateString() : '';
 
             const statusBadge = isCompleted
-                ? `<span style="display:inline-flex;align-items:center;gap:4px;background:#052a15;color:#22c55e;border:1px solid #14532d;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700;">&#10003; Completed</span>`
-                : `<span style="display:inline-flex;align-items:center;gap:4px;background:#1a0a00;color:#f97316;border:1px solid #7c3c00;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700;">&#9899; Pending</span>`;
+                ? `<span  >&#10003; Completed</span>`
+                : `<span  >&#9899; Pending</span>`;
 
-            return `<div class="member-workout-card ${isToday ? 'today-card' : 'past-card'}" style="border-left: 3px solid ${isCompleted ? '#22c55e' : (isToday ? '#22c55e' : '#ff1a1a')};">
-                ${isToday ? '<div class="today-label"><i class="fas fa-fire" style="color:#f97316;"></i> Today</div>' : ''}
-                <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+            return `<div style="border-left: 3px solid ${isCompleted ? '#22c55e' : (isToday ? '#22c55e' : '#ff1a1a')" class="member-workout-card ${isToday ? 'today-card' : 'past-card'}" >
+                ${isToday ? '<div class="today-label"><i class="fas fa-fire" ></i> Today</div>' : ''}
+                <div  >
                     <span class="workout-date-chip">${dateLabel}</span>
                     <span class="workout-category-pill">${esc(w.category || 'General')}</span>
                     ${statusBadge}
                 </div>
                 <pre class="workout-exercise-text">${esc(w.workout)}</pre>
                 ${w.notes ? `<div class="workout-trainer-note"><i class="fas fa-comment-dots"></i><span><strong>Trainer Note:</strong> ${esc(w.notes)}</span></div>` : ''}
-                ${isCompleted ? `<div style="margin-top:8px;padding:8px 12px;background:#052a15;border-radius:8px;color:#22c55e;font-size:12px;"><i class="fas fa-check-circle"></i> Trainer marked this workout as completed on ${completedTime}</div>` : ''}
+                ${isCompleted ? `<div  ><i class="fas fa-check-circle"></i> Trainer marked this workout as completed on ${completedTime}</div>` : ''}
             </div>`;
         }
 
@@ -3452,7 +3454,7 @@
             ).join('');
 
             row.innerHTML = `
-                <td style="text-align:center; color:#9ca3af; font-weight:700; font-size:13px;" class="wlog-sr">${idx}</td>
+                <td  class="wlog-sr">${idx}</td>
                 <td>
                     <select class="wlog-input wlog-bp">
                         <option value="">Select</option>
@@ -3462,15 +3464,15 @@
                 <td><input type="text" class="wlog-input wlog-ex" placeholder="e.g. Bench Press" value="${data ? (data.exerciseName || '') : ''}"></td>
                 <td><input type="number" class="wlog-input wlog-input-num wlog-sets" min="0" placeholder="0" value="${data ? (data.sets || 0) : 0}"></td>
                 <td><input type="number" class="wlog-input wlog-input-num wlog-reps" min="0" placeholder="0" value="${data ? (data.repetition || data.reps || 0) : 0}"></td>
-                <td><input type="number" class="wlog-input wlog-input-num wlog-weight" min="0" placeholder="0" value="${data ? (data.weight || 0) : ''}" style="width:60px;"></td>
-                <td><input type="number" class="wlog-input wlog-input-num wlog-rpe" min="0" max="10" placeholder="RPE" value="${data ? (data.rpe || '') : ''}" style="width:50px;"></td>
-                <td style="text-align:center;">
+                <td><input type="number" class="wlog-input wlog-input-num wlog-weight" min="0" placeholder="0" value="${data ? (data.weight || 0) : ''}" ></td>
+                <td><input type="number" class="wlog-input wlog-input-num wlog-rpe" min="0" max="10" placeholder="RPE" value="${data ? (data.rpe || '') : ''}" ></td>
+                <td  >
                     <button type="button" class="wlog-status-btn ${data && data.status === 'Completed' ? 'completed' : 'in-progress'}" onclick="toggleWlogStatus(this)">
                         <i class="fas ${data && data.status === 'Completed' ? 'fa-check-circle' : 'fa-clock'}"></i>
                         ${data && data.status === 'Completed' ? 'Completed' : 'In Progress'}
                     </button>
                 </td>
-                <td style="text-align:center;">
+                <td  >
                     <button class="wlog-remove-btn" onclick="removeWorkoutLogRow(this)" title="Remove"><i class="fas fa-times"></i></button>
                 </td>
             `;
@@ -3746,7 +3748,7 @@
             // ── Body Part Breakdown Bars ──
             const breakdownDiv = document.getElementById('progressBodyBreakdown');
             if (bpLabels.length === 0) {
-                breakdownDiv.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">No workout data logged yet.</p>';
+                breakdownDiv.innerHTML = '<p  >No workout data logged yet.</p>';
             } else {
                 const maxCount = Math.max(...bpValues, 1);
                 breakdownDiv.innerHTML = bpLabels.map((bp, i) => {
@@ -3755,7 +3757,7 @@
                     return `<div class="bp-row">
                         <span class="bp-name">${bp}</span>
                         <div class="bp-bar-track">
-                            <div class="bp-bar-fill" style="width:${pct}%; background: linear-gradient(90deg, ${color}, ${color}aa);"></div>
+                            <div style="width:${pct" class="bp-bar-fill" ></div>
                         </div>
                         <span class="bp-count">${bpValues[i]}</span>
                     </div>`;
@@ -3810,7 +3812,7 @@
             const container = document.getElementById('progressAssignmentsList');
             if (!container) return;
             if (!list.length) {
-                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">No active assignments.</p>';
+                container.innerHTML = '<p  >No active assignments.</p>';
                 return;
             }
             container.innerHTML = list.map(a => `

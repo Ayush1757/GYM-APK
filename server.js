@@ -10,6 +10,9 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const fs = require("fs");
+const crypto = require("crypto");
+const QRCode = require("qrcode");
+const { sendMembershipPaymentEmail } = require("./services/emailService");
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -71,18 +74,7 @@ const User = mongoose.model("User", userSchema);
 
 /* ================= PAYMENT SCHEMA ================= */
 
-const paymentSchema = new mongoose.Schema({
-    email: String,
-    memberName: String,
-    amount: Number,
-    date: { type: String, default: () => new Date().toISOString().split("T")[0] },
-    method: String,
-    plan: String,
-    invoiceNo: String,
-    status: { type: String, default: "Paid" }
-});
-
-const Payment = mongoose.model("Payment", paymentSchema);
+const Payment = require("./models/paymentModel");
 
 
 /* ================= ADMIN CONFIG SCHEMA ================= */
@@ -93,7 +85,8 @@ const adminConfigSchema = new mongoose.Schema({
     trainerName: { type: String, default: "John Doe" },
     trainerPhone: { type: String, default: "9876543210" },
     trainerRole: { type: String, default: "Head Trainer" },
-    gymOwner: { type: String, default: "Mr. Fitness" }
+    gymOwner: { type: String, default: "Mr. Fitness" },
+    gymToken: { type: String, default: "" }
 });
 
 const AdminConfig = mongoose.model("AdminConfig", adminConfigSchema);
@@ -121,7 +114,8 @@ const attendanceSchema = new mongoose.Schema({
     date: String,
     checkInTime: String,
     checkOutTime: String,
-    status: { type: String, default: "present" },
+    status: { type: String, default: "IN" },
+    workoutDuration: String,
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -211,6 +205,16 @@ const volumeTrackingSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const VolumeTracking = mongoose.model("VolumeTracking", volumeTrackingSchema);
+
+const notificationSchema = new mongoose.Schema({
+    email: String,
+    title: String,
+    message: String,
+    type: { type: String, default: "info" },
+    date: { type: String, default: () => new Date().toISOString().split("T")[0] },
+    createdAt: { type: Date, default: Date.now }
+});
+const Notification = mongoose.model("Notification", notificationSchema);
 
 /* ================= OTP & PENDING REGISTRATION ================= */
 
@@ -852,103 +856,137 @@ app.get("/getUserQR", async (req, res) => {
     res.json({ success: true, qrImage: user.qrImage });
 });
 
-/* ================= SCAN MEMBER QR ================= */
+/* ================= GYM QR ATTENDANCE ================= */
 
-app.post("/scanMemberQR", async (req, res) => {
+app.post("/scanGymQR", async (req, res) => {
     try {
-        const { scannedData } = req.body;
+        const { token, email } = req.body;
+        
+        // Verify token
+        const config = await AdminConfig.findOne();
+        if (!config || config.gymToken !== token) {
+            return res.json({ success: false, message: "Invalid or expired Gym QR." });
+        }
 
-        const user = await User.findOne({ email: scannedData });
+        const user = await User.findOne({ email });
         if (!user) {
-            return res.json({ success: false, message: "Invalid QR – member not found" });
+            return res.json({ success: false, message: "User not found" });
         }
 
-        // Check if QR is blocked by admin
         if (user.qrBlocked) {
-            return res.json({
-                success: false,
-                message: "QR code is blocked by admin. Please contact the gym admin."
-            });
+            return res.json({ success: false, message: "Account blocked by admin." });
         }
 
-        // Check if membership has expired
         if (user.expiry) {
             const expiryDate = new Date(user.expiry);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            expiryDate.setHours(23, 59, 59, 999); // Allow the full expiry day
+            expiryDate.setHours(23, 59, 59, 999);
             if (today > expiryDate) {
-                return res.json({
-                    success: false,
-                    message: "Membership expired on " + user.expiry + ". Please renew to mark attendance."
-                });
+                return res.json({ success: false, message: "Membership expired on " + user.expiry + ". Please renew." });
             }
         } else {
-            // No expiry set – membership not activated yet
-            return res.json({
-                success: false,
-                message: "No active membership found. Please contact admin."
-            });
+            return res.json({ success: false, message: "No active membership found." });
         }
 
         const now = new Date();
         const todayStr = now.toISOString().split("T")[0];
-        const time = now.toLocaleTimeString();
+        const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-        const existing = await Attendance.findOne({
-            email: user.email,
-            date: todayStr
-        });
+        let attendance = await Attendance.findOne({ email: user.email, date: todayStr });
 
-        if (existing) {
-            return res.json({ success: false, message: "Already marked today for " + user.fullname });
-        }
+        if (!attendance) {
+            // Check IN
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split("T")[0];
+            const hadYesterday = await Attendance.findOne({ email: user.email, date: yesterdayStr });
+            
+            if (hadYesterday) {
+                user.streak = (user.streak || 0) + 1;
+            } else {
+                user.streak = 1; 
+            }
 
-        // Calculate Streak
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split("T")[0];
+            user.points = (user.points || 0) + 10;
+            if (user.streak >= 7 && user.streak % 7 === 0) {
+                user.points += 50; 
+                try {
+                    if (typeof Notification !== 'undefined') {
+                        await Notification.create({
+                            email: user.email,
+                            title: "Streak Milestone! 🔥",
+                            message: `Amazing! ${user.streak} day streak reached. +50 bonus points awarded!`,
+                            type: "success"
+                        });
+                    }
+                } catch(e) {}
+            }
+            await user.save();
 
-        const hadYesterday = await Attendance.findOne({ email: user.email, date: yesterdayStr });
-        
-        if (hadYesterday) {
-            user.streak = (user.streak || 0) + 1;
-        } else {
-            // Check if they already marked today (prevent double increment) - wait, we already checked 'existing'
-            user.streak = 1; 
-        }
-        await user.save();
-
-        // Points for attendance
-        user.points = (user.points || 0) + 10;
-        
-        // Streak Bonus
-        if (user.streak >= 7 && user.streak % 7 === 0) {
-            user.points += 50; // Weekly bonus
-            await Notification.create({
+            attendance = await Attendance.create({
                 email: user.email,
-                title: "Streak Milestone! 🔥",
-                message: `Amazing! ${user.streak} day streak reached. +50 bonus points awarded!`,
-                type: "success"
+                memberName: user.fullname,
+                date: todayStr,
+                checkInTime: time,
+                status: "IN"
+            });
+            return res.json({
+                success: true,
+                message: "Checked IN at " + time,
+                status: "IN"
+            });
+
+        } else {
+            if (attendance.status === "OUT") {
+                return res.json({ success: false, message: "Already checked out for today!" });
+            }
+
+            // Check OUT
+            attendance.checkOutTime = time;
+            attendance.status = "OUT";
+
+            const inDate = new Date(attendance.createdAt);
+            const outDate = new Date();
+            let diffMs = outDate - inDate;
+            const diffMins = Math.floor(diffMs / 60000);
+            const hours = Math.floor(diffMins / 60);
+            const mins = diffMins % 60;
+            attendance.workoutDuration = `${hours}h ${mins}m`;
+            
+            await attendance.save();
+            return res.json({
+                success: true,
+                message: "Checked OUT at " + time + ". Duration: " + attendance.workoutDuration,
+                status: "OUT",
+                duration: attendance.workoutDuration
             });
         }
-
-        await user.save();
-
-        await Attendance.create({
-            email: user.email,
-            memberName: user.fullname,
-            date: todayStr,
-            checkInTime: time
-        });
-
-        res.json({
-            success: true,
-            message: "Attendance marked for " + user.fullname + ". Streak: " + user.streak + " 🔥. Points: " + user.points
-        });
-
     } catch (err) {
         res.json({ success: false, message: err.message });
+    }
+});
+
+/* ================= ADMIN GENERATE GYM QR ================= */
+app.post("/admin/generateGymQR", async (req, res) => {
+    try {
+        const { adminEmail } = req.body;
+        const admin = await User.findOne({ email: adminEmail });
+        if (!admin || admin.role !== "admin") return res.status(403).json({ success: false, message: "Not authorised" });
+
+        const secureToken = crypto.randomBytes(16).toString('hex');
+        
+        let config = await AdminConfig.findOne();
+        if (!config) config = new AdminConfig();
+        config.gymToken = secureToken;
+        await config.save();
+
+        const qrData = JSON.stringify({ type: "GYM_QR", token: secureToken });
+        const qrImage = await QRCode.toDataURL(qrData);
+
+        res.json({ success: true, qrImage, token: secureToken });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 
@@ -1141,92 +1179,11 @@ app.get("/getMembers", async (req, res) => {
 
 /* ================= PAYMENTS API ================= */
 
-app.post("/collectPayment", async (req, res) => {
-    try {
-        const { memberEmail, amount, method, plan } = req.body;
-        const member = await User.findOne({ email: memberEmail });
-        if (!member) return res.status(404).json({ success: false, message: "Member not found" });
+const paymentController = require("./controllers/paymentController");
 
-        const invoiceNo = "INV-" + Date.now();
-        const payment = new Payment({
-            email: memberEmail,
-            memberName: member.fullname,
-            amount: Number(amount),
-            method,
-            plan,
-            invoiceNo
-        });
-        await payment.save();
-
-        member.feesStatus = "Paid";
-        member.lastPaymentDate = new Date().toISOString().split("T")[0];
-        member.totalPaid = (member.totalPaid || 0) + Number(amount);
-
-        if (plan) {
-            member.membershipPlan = plan;
-            let durationMonths = 1;
-            if (plan.includes("quarterly")) durationMonths = 3;
-            if (plan.includes("yearly")) durationMonths = 12;
-
-            let d = new Date();
-            if (member.expiry && member.expiry !== '--') {
-                const currentExpiry = new Date(member.expiry);
-                if (currentExpiry > d) d = currentExpiry;
-            }
-            d.setMonth(d.getMonth() + durationMonths);
-            member.expiry = d.toISOString().split("T")[0];
-        }
-
-        await member.save();
-
-        // Send Automated Payment Email asynchronously
-        try {
-            resend.emails.send({
-                from: "Gym App <onboarding@resend.dev>",
-                to: member.email,
-                subject: `Payment Successful - Invoice ${invoiceNo}`,
-                html: `
-                    <h2>Payment Received</h2>
-                    <p>Hi ${member.fullname},</p>
-                    <p>Thank you! Your payment of <strong>₹${Number(amount)}</strong> has been successfully received.</p>
-                    <p><strong>Invoice Number:</strong> ${invoiceNo}</p>
-                    <p><strong>Membership Plan:</strong> ${plan ? plan.replace(/_/g, ' ') : '--'}</p>
-                    <p><strong>Payment Method:</strong> ${method}</p>
-                    <p><strong>Expiry Date:</strong> ${member.expiry || '--'}</p>
-                    <br/>
-                    <p>Best Regards,</p>
-                    <p>Your Gym Admin</p>
-                `
-            }).catch(err => console.log('Failed to send invoice email:', err));
-        } catch (mailError) {
-            console.log('Error triggering mail sequence', mailError);
-        }
-
-        res.json({ success: true, message: "Payment recorded successfully", invoiceNo });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
-
-app.get("/getPayments", async (req, res) => {
-    try {
-        const payments = await Payment.find().sort({ _id: -1 }).lean();
-        res.json({ success: true, payments });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
-
-app.get("/getPaymentsByEmail", async (req, res) => {
-    try {
-        const email = req.query.email;
-        if (!email) return res.status(400).json({ success: false, message: "Email required" });
-        const payments = await Payment.find({ email }).sort({ _id: -1 }).lean();
-        res.json({ success: true, payments });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
+app.post("/collectPayment", paymentController.collectPayment);
+app.get("/getPayments", paymentController.getPayments);
+app.get("/getPaymentsByEmail", paymentController.getPaymentsByEmail);
 
 app.get("/getAdminConfig", async (req, res) => {
     try {
@@ -1456,16 +1413,7 @@ app.get("/getMonthlyProgress", async (req, res) => {
     }
 });
 
-app.get("/getPaymentsByEmail", async (req, res) => {
-    try {
-        const { email } = req.query;
-        if (!email) return res.status(400).json({ success: false, message: "Email required" });
-        const payments = await Payment.find({ email }).sort({ _id: -1 }).lean();
-        res.json({ success: true, payments });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
+
 
 app.get("/getUserInfo", async (req, res) => {
     try {
@@ -1845,6 +1793,19 @@ app.get("/getUserNotifications", async (req, res) => {
                 type: ann.priority === "high" ? "danger" : (ann.priority === "low" ? "info" : "primary"),
                 date: ann.createdAt ? new Date(ann.createdAt).toISOString().split("T")[0] : todayStr
             });
+        }
+
+        // 5. DB Notifications (like milestones)
+        if (typeof Notification !== 'undefined') {
+            const dbNotifs = await Notification.find({ email }).sort({ _id: -1 }).lean();
+            for (const n of dbNotifs) {
+                notifications.push({
+                    title: n.title,
+                    message: n.message,
+                    type: n.type || "info",
+                    date: n.date
+                });
+            }
         }
 
         res.json({ success: true, notifications });
