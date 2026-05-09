@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gym Dashboard</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -2358,12 +2357,103 @@
 
     <script>
         // Global Click Listener for Event Delegation
+        // Global Click Listener for Event Delegation
         document.addEventListener('click', function(e) {
             const menuItem = e.target.closest('.menu-item');
             if (menuItem && menuItem.dataset.page) {
                 switchPage(menuItem.dataset.page);
             }
         });
+
+        // UI Interaction Functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const container = document.getElementById('mainContainer');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                if (sidebar.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            } else {
+                sidebar.classList.toggle('collapsed');
+                container.classList.toggle('collapsed');
+            }
+        }
+
+        function switchPage(page) {
+            try {
+                if (page === 'settings') page = 'profile'; 
+                const pages = document.querySelectorAll('.page');
+                const menuItems = document.querySelectorAll('.menu-item');
+                
+                pages.forEach(p => p.classList.remove('active'));
+                menuItems.forEach(m => m.classList.remove('active'));
+
+                const pageElement = document.getElementById(page + '-page');
+                if (pageElement) {
+                    pageElement.classList.add('active');
+                    
+                    if (window.innerWidth <= 768) {
+                        const sidebar = document.getElementById('sidebar');
+                        if (sidebar && sidebar.classList.contains('active')) {
+                            toggleSidebar(); 
+                        }
+                    }
+
+                    if (page === 'announcements') loadAnnouncements();
+                    if (page === 'workouts') loadMyWorkouts();
+                    if (page === 'payments') loadPayments();
+                    if (page === 'attendance') loadUserAttendance();
+                    if (page === 'progress') loadProgressTracker();
+                    if (page === 'profile') loadUserProfile();
+                }
+
+                const menuItem = document.querySelector(`.menu-item[data-page="${page}"]`);
+                if (menuItem) {
+                    menuItem.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Navigation error:', error);
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (menu) menu.classList.toggle('active');
+        }
+
+        function toggleNotifications() {
+            const menu = document.getElementById('notificationMenu');
+            const badge = document.getElementById('notificationBadge');
+            if (menu) menu.classList.toggle('active');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const isLight = body.classList.toggle('light-theme');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            updateThemeToggleText();
+            showToast(isLight ? 'Light mode enabled!' : 'Dark mode enabled!', 'success');
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function () {
@@ -2480,64 +2570,9 @@
 
 
 
-        // Sidebar Toggle
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const container = document.getElementById('mainContainer');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            if (window.innerWidth <= 768) {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-                if (sidebar.classList.contains('active')) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
-            } else {
-                sidebar.classList.toggle('collapsed');
-                container.classList.toggle('collapsed');
-            }
-        }
 
-        // Page Switching
-        function switchPage(page) {
-            try {
-                if (page === 'settings') page = 'profile'; // Alias
-                const pages = document.querySelectorAll('.page');
-                const menuItems = document.querySelectorAll('.menu-item');
-                
-                pages.forEach(p => p.classList.remove('active'));
-                menuItems.forEach(m => m.classList.remove('active'));
 
-                const pageElement = document.getElementById(page + '-page');
-                if (pageElement) {
-                    pageElement.classList.add('active');
-                    
-                    if (window.innerWidth <= 768) {
-                        const sidebar = document.getElementById('sidebar');
-                        if (sidebar && sidebar.classList.contains('active')) {
-                            toggleSidebar(); 
-                        }
-                    }
 
-                    // Load data based on page
-                    if (page === 'announcements') loadAnnouncements();
-                    if (page === 'workouts') loadMyWorkouts();
-                    if (page === 'payments') loadPayments();
-                    if (page === 'attendance') loadUserAttendance();
-                    if (page === 'progress') loadProgressTracker();
-                    if (page === 'profile') loadUserProfile();
-                }
-
-                const menuItem = document.querySelector(`.menu-item[data-page="${page}"]`);
-                if (menuItem) {
-                    menuItem.classList.add('active');
-                }
-            } catch (error) {
-                console.error('Navigation error:', error);
-            }
-        }
 
         // Modal Functions
         function openModal(modalId) {
@@ -2548,16 +2583,9 @@
             document.getElementById(modalId).classList.remove('active');
         }
 
-        // User Menu Toggle
-        function toggleUserMenu() {
-            document.getElementById('userMenu').classList.toggle('active');
-        }
 
-        // Logout
-        function logout() {
-            localStorage.removeItem('user');
-            window.location.href = '/login.html';
-        }
+
+
 
         // Profile photo upload/remove
         function handleProfilePhotoUpload(e) {
@@ -2686,11 +2714,7 @@
                 .catch(err => console.error('Failed to load profile:', err));
         }
 
-        // Notifications Toggle
-        function toggleNotifications() {
-            document.getElementById('notificationMenu').classList.toggle('active');
-            document.getElementById('notificationBadge').style.display = 'none'; // hide badge when opened
-        }
+
 
         // Fetch Notifications
         function fetchNotifications() {
@@ -2744,14 +2768,7 @@
             }
         });
 
-        // Theme Toggle
-        function toggleTheme() {
-            const body = document.body;
-            const isLight = body.classList.toggle('light-theme');
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
-            updateThemeToggleText();
-            showToast(isLight ? 'Light mode enabled!' : 'Dark mode enabled!', 'success');
-        }
+
 
         function updateThemeToggleText() {
             const link = document.getElementById('themeToggleLink');
@@ -2769,14 +2786,7 @@
             updateThemeToggleText();
         }
 
-        // Toast Notification
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+
 
         // Dashboard Data Loading
         function loadDashboardData() {
