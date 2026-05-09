@@ -19,49 +19,30 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(-45deg, #050505, #1a0000, #330000, #000000);
-            background-size: 400% 400%;
-            animation: gradientMove 10s ease infinite;
+            background: #050505;
             overflow: hidden;
         }
 
-        /* Animated Background */
-        @keyframes gradientMove {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* Glass Card */
+        /* Simplified Card */
         .login-container {
             width: 380px;
             padding: 40px;
-            border-radius: 24px;
-            -webkit-backdrop-filter: blur(20px);
-            backdrop-filter: blur(20px);
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 26, 26, 0.2);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 26, 26, 0.1);
+            border-radius: 12px;
+            background: #111111;
+            border: 1px solid #330000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             text-align: center;
             color: white;
         }
 
         /* Logo */
         .logo {
-            width: 110px;
-            height: 110px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             margin-bottom: 25px;
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.1);
             object-fit: cover;
+            border: 2px solid #ff1a1a;
         }
 
         /* Input Fields */
@@ -70,19 +51,17 @@
             width: 100%;
             padding: 14px;
             margin: 12px 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #333;
             outline: none;
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            background: #0b0b0b;
             color: white;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.2s;
         }
 
         input:focus,
         select:focus {
-            background: rgba(255, 26, 26, 0.1);
             border-color: #ff1a1a;
-            box-shadow: 0 0 15px rgba(255, 26, 26, 0.3);
         }
 
         /* Button */
@@ -91,21 +70,17 @@
             padding: 14px;
             margin-top: 20px;
             border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #ff1a1a 0%, #cc0000 100%);
+            border-radius: 8px;
+            background: #ff1a1a;
             color: white;
             font-weight: 700;
             font-size: 16px;
-            letter-spacing: 1px;
             cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 26, 26, 0.4);
+            transition: 0.2s;
         }
 
         button:hover {
-            background: linear-gradient(135deg, #ff3333 0%, #e60000 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 26, 26, 0.6);
+            background: #cc0000;
         }
 
         /* Footer */

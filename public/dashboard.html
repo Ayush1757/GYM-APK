@@ -3100,7 +3100,7 @@
                             data.announcements.forEach((a, i) => {
                                 rows += `<tr>
                             <td>${escapeHtml(a.title)}</td>
-                            <td><span class="badge badge-${a.priority === 'high' ? 'danger' : a.priority === 'low' ? 'success' : 'warning'}">${a.priority}</span></td>
+                            <td><span class="badge badge-${a.priority === }'high' ? 'danger' : a.priority === 'low' ? 'success' : 'warning'}">${a.priority}</span></td>
                             <td>${a.target}</td>
                             <td>Active</td>
                             <td><button class="auto-style-100 btn btn-secondary"><i class="fas fa-trash"></i></button></td>
@@ -3202,19 +3202,19 @@
                             const plan = m.membershipPlan ? m.membershipPlan.replace(/([a-z]+)/g, c => c.charAt(0).toUpperCase() + c.slice(1)) : '--';
                             const isBlockedDash = m.qrBlocked;
                             const dashBlockBtn = isBlockedDash
-                                ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock</button>`
-                                : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block</button>`;
+                                ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || }'')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock</button>`
+                                : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || }'')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block</button>`;
                             return `<tr>
-                        <td>${escapeHtml(m.fullname || '--')}</td>
-                        <td>${escapeHtml(m.email || '--')}</td>
-                        <td>${escapeHtml(m.phone || '--')}</td>
+                        <td>${escapeHtml(m.fullname || }'--')}</td>
+                        <td>${escapeHtml(m.email || }'--')}</td>
+                        <td>${escapeHtml(m.phone || }'--')}</td>
                         <td>${escapeHtml(plan)}</td>
                         <td>${escapeHtml(expiry)}</td>
                         <td><span class="auto-style-105">${m.streak || 0} 🔥</span></td>
                         <td>
-                            ${m.qrImage ? `<div class="auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
+                            ${m.qrImage ? `<div class=}"auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || }'')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || }'')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
                         </td>
-                        <td>${dashBlockBtn}${isBlockedDash ? ' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
+                        <td>${dashBlockBtn}${isBlockedDash ? }' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
                     </tr>`;
                         }).join('');
                         if (tbody) tbody.innerHTML = rows || '<tr><td colspan="8" class="auto-style-6">No members found</td></tr>';
@@ -3229,21 +3229,21 @@
                                 const plan = m.membershipPlan ? m.membershipPlan.replace(/_/g, ' ') : '--';
                                 const isBlocked = m.qrBlocked;
                                 const blockBtn = isBlocked
-                                    ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock QR</button>`
-                                    : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block QR</button>`;
+                                    ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || }'')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock QR</button>`
+                                    : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || }'')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block QR</button>`;
                                 return `<tr>
-                            <td>${escapeHtml(m.fullname || '--')}</td>
-                            <td>${escapeHtml(m.email || '--')}</td>
-                            <td>${escapeHtml(m.phone || '--')}</td>
+                            <td>${escapeHtml(m.fullname || }'--')}</td>
+                            <td>${escapeHtml(m.email || }'--')}</td>
+                            <td>${escapeHtml(m.phone || }'--')}</td>
                             <td>${escapeHtml(plan)}</td>
-                            <td>${daysRemaining != null ? daysRemaining : '--'}</td>
-                            <td><span class="badge badge-${status === 'Active' ? 'success' : status === 'Expired' ? 'danger' : 'warning'}">${status}</span></td>
-                            <td>${m.feesStatus || 'Pending'}</td>
+                            <td>${daysRemaining != null ? daysRemaining : }'--'}</td>
+                            <td><span class="badge badge-${status === }'Active' ? 'success' : status === 'Expired' ? 'danger' : 'warning'}">${status}</span></td>
+                            <td>${m.feesStatus || }'Pending'}</td>
                             <td><span class="auto-style-105">${m.streak || 0} 🔥</span></td>
                             <td>
-                                ${m.qrImage ? `<div class="auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
+                                ${m.qrImage ? `<div class=}"auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || }'')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || }'')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
                             </td>
-                            <td>${blockBtn}${isBlocked ? ' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
+                            <td>${blockBtn}${isBlocked ? }' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
                         </tr>`;
                             }).join('');
                             memberTbody.innerHTML = membershipRows || '<tr><td colspan="10" class="auto-style-6">No members found</td></tr>';
@@ -3341,7 +3341,7 @@
                             <tr>
                                 <td>${p.date}</td>
                                 <td>${escapeHtml(p.memberName)}</td>
-                                <td>${p.plan ? p.plan.replace(/_/g, ' ') : '--'}</td>
+                                <td>${p.plan ? p.plan.replace(/_/g, }' ') : '--'}</td>
                                 <td>₹${p.amount}</td>
                                 <td>${p.method}</td>
                                 <td><span class="badge badge-success">${p.status}</span></td>
@@ -4295,8 +4295,8 @@
                             <div class="workout-card-header">
                                 <div class="auto-style-122">
                                     <span class="workout-member-chip"><i class="fas fa-user"></i> ${escapeHtml(w.memberName || w.memberEmail)}</span>
-                                    <span class="auto-style-123 workout-date-badge">${isToday ? '&#128197; Today' : w.date}</span>
-                                    <span class="workout-category-tag">${escapeHtml(w.category || 'General')}</span>
+                                    <span class="auto-style-123 workout-date-badge">${isToday ? }'&#128197; Today' : w.date}</span>
+                                    <span class="workout-category-tag">${escapeHtml(w.category || }'General')}</span>
                                     ${completedBadge}
                                 </div>
                                 <div class="auto-style-124">
@@ -4305,8 +4305,8 @@
                                 </div>
                             </div>
                             <pre class="workout-text">${escapeHtml(w.workout)}</pre>
-                            ${w.notes ? `<div class="workout-notes"><i class="fas fa-sticky-note"></i> ${escapeHtml(w.notes)}</div>` : ''}
-                            ${isCompleted ? `<div class="auto-style-126"><i class="fas fa-check-circle"></i> Completed on ${completedTime}${w.completionNote ? ' &mdash; <em>' + escapeHtml(w.completionNote) + '</em>' : ''}</div>` : ''}
+                            ${w.notes ? `<div class=}"workout-notes"><i class="fas fa-sticky-note"></i> ${escapeHtml(w.notes)}</div>` : ''}
+                            ${isCompleted ? `<div class=}"auto-style-126"><i class="fas fa-check-circle"></i> Completed on ${completedTime}${w.completionNote ? }' &mdash; <em>' + escapeHtml(w.completionNote) + '</em>' : ''}</div>` : ''}
                         </div>`;
                         }).join('');
                     })
@@ -4372,7 +4372,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${data.stats.map(s => {
+                                ${data.stats.map(s =}> {
                             const rate = s.total > 0 ? Math.round((s.completed / s.total) * 100) : 0;
                             const barColor = rate >= 75 ? '#22c55e' : rate >= 40 ? '#f97316' : '#ef4444';
                             return `<tr class="auto-style-132">
