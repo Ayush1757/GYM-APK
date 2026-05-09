@@ -1,47 +1,122 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import QRScanner from './pages/QRScanner';
-import MainLayout from './layouts/MainLayout';
-
-import Payments from './pages/Payments';
-
-// Placeholder components for remaining pages
-const Workouts = () => <div className="glass-card p-10 text-center"><h2 className="text-3xl font-black italic underline decoration-neon-green">WORKOUTS</h2><p className="mt-4 text-gray-400">Coming soon... Your personalized training sessions.</p></div>;
-const Progress = () => <div className="glass-card p-10 text-center"><h2 className="text-3xl font-black italic underline decoration-neon-green">PROGRESS</h2><p className="mt-4 text-gray-400">Track your body metrics and performance gains.</p></div>;
-const Profile = () => <div className="glass-card p-10 text-center"><h2 className="text-3xl font-black italic underline decoration-neon-green">MY PROFILE</h2><p className="mt-4 text-gray-400">Personalize your fitness identity.</p></div>;
-const Achievements = () => <div className="glass-card p-10 text-center"><h2 className="text-3xl font-black italic underline decoration-neon-green">ACHIEVEMENTS</h2><p className="mt-4 text-gray-400">Unlock badges and compete in challenges.</p></div>;
-const BMICalculator = () => <div className="glass-card p-10 text-center"><h2 className="text-3xl font-black italic underline decoration-neon-green">BMI CALCULATOR</h2><p className="mt-4 text-gray-400">Instant body mass index calculation.</p></div>;
-
-import { AuthProvider } from './hooks/useAuth';
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from './assets/vite.svg'
+import heroImg from './assets/hero.png'
+import './App.css'
 
 function App() {
+  const [count, setCount] = useState(0)
+
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          <Route element={<MainLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/scan" element={<QRScanner />} />
-            <Route path="/workouts" element={<Workouts />} />
-            <Route path="/payments" element={<Payments />} />
-            <Route path="/progress" element={<Progress />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/achievements" element={<Achievements />} />
-            <Route path="/bmi" element={<BMICalculator />} />
-          </Route>
-          
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
+    <>
+      <section id="center">
+        <div className="hero">
+          <img src={heroImg} className="base" width="170" height="179" alt="" />
+          <img src={reactLogo} className="framework" alt="React logo" />
+          <img src={viteLogo} className="vite" alt="Vite logo" />
+        </div>
+        <div>
+          <h1>Get started</h1>
+          <p>
+            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+          </p>
+        </div>
+        <button
+          type="button"
+          className="counter"
+          onClick={() => setCount((count) => count + 1)}
+        >
+          Count is {count}
+        </button>
+      </section>
+
+      <div className="ticks"></div>
+
+      <section id="next-steps">
+        <div id="docs">
+          <svg className="icon" role="presentation" aria-hidden="true">
+            <use href="/icons.svg#documentation-icon"></use>
+          </svg>
+          <h2>Documentation</h2>
+          <p>Your questions, answered</p>
+          <ul>
+            <li>
+              <a href="https://vite.dev/" target="_blank">
+                <img className="logo" src={viteLogo} alt="" />
+                Explore Vite
+              </a>
+            </li>
+            <li>
+              <a href="https://react.dev/" target="_blank">
+                <img className="button-icon" src={reactLogo} alt="" />
+                Learn more
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div id="social">
+          <svg className="icon" role="presentation" aria-hidden="true">
+            <use href="/icons.svg#social-icon"></use>
+          </svg>
+          <h2>Connect with us</h2>
+          <p>Join the Vite community</p>
+          <ul>
+            <li>
+              <a href="https://github.com/vitejs/vite" target="_blank">
+                <svg
+                  className="button-icon"
+                  role="presentation"
+                  aria-hidden="true"
+                >
+                  <use href="/icons.svg#github-icon"></use>
+                </svg>
+                GitHub
+              </a>
+            </li>
+            <li>
+              <a href="https://chat.vite.dev/" target="_blank">
+                <svg
+                  className="button-icon"
+                  role="presentation"
+                  aria-hidden="true"
+                >
+                  <use href="/icons.svg#discord-icon"></use>
+                </svg>
+                Discord
+              </a>
+            </li>
+            <li>
+              <a href="https://x.com/vite_js" target="_blank">
+                <svg
+                  className="button-icon"
+                  role="presentation"
+                  aria-hidden="true"
+                >
+                  <use href="/icons.svg#x-icon"></use>
+                </svg>
+                X.com
+              </a>
+            </li>
+            <li>
+              <a href="https://bsky.app/profile/vite.dev" target="_blank">
+                <svg
+                  className="button-icon"
+                  role="presentation"
+                  aria-hidden="true"
+                >
+                  <use href="/icons.svg#bluesky-icon"></use>
+                </svg>
+                Bluesky
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <div className="ticks"></div>
+      <section id="spacer"></section>
+    </>
+  )
 }
 
-export default App;
+export default App
