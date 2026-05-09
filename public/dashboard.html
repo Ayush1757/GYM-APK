@@ -157,7 +157,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1500;
+            z-index: 2000;
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -172,7 +172,7 @@
         @media (max-width: 768px) {
             .sidebar {
                 left: -260px;
-                z-index: 2000;
+                z-index: 2500;
             }
 
             .sidebar.active {
@@ -469,7 +469,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+            z-index: 3000;
             justify-content: center;
             align-items: center;
         }
@@ -522,7 +522,7 @@
             color: white;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             animation: slideIn 0.3s ease;
-            z-index: 3000;
+            z-index: 4000;
         }
 
         .toast.success {
@@ -1802,39 +1802,39 @@
                     class="fas fa-bars"></i></button>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-item active" onclick="switchPage('dashboard')">
+            <div class="menu-item active" data-page="dashboard">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </div>
-            <div class="menu-item" onclick="switchPage('announcements')">
+            <div class="menu-item" data-page="announcements">
                 <i class="fas fa-bullhorn"></i>
                 <span>Announcements</span>
             </div>
-            <div class="menu-item" onclick="switchPage('attendance')">
+            <div class="menu-item" data-page="attendance">
                 <i class="fas fa-calendar-check"></i>
                 <span>Attendance</span>
             </div>
-            <div class="menu-item" onclick="switchPage('qrScanner')">
+            <div class="menu-item" data-page="qrScanner">
                 <i class="fas fa-qrcode"></i>
                 <span>QR Scanner</span>
             </div>
-            <div class="menu-item" onclick="switchPage('generateQr')">
+            <div class="menu-item" data-page="generateQr">
                 <i class="fas fa-magic"></i>
                 <span>Generate Gym QR</span>
             </div>
-            <div class="menu-item" onclick="switchPage('workoutAssign')">
+            <div class="menu-item" data-page="workoutAssign">
                 <i class="fas fa-dumbbell"></i>
                 <span>Assign Workout</span>
             </div>
-            <div class="menu-item" onclick="switchPage('membership')">
+            <div class="menu-item" data-page="membership">
                 <i class="fas fa-id-card"></i>
                 <span>Membership</span>
             </div>
-            <div class="menu-item" onclick="switchPage('payments')">
+            <div class="menu-item" data-page="payments">
                 <i class="fas fa-credit-card"></i>
                 <span>Fees & Payments</span>
             </div>
-            <div class="menu-item" onclick="switchPage('profile')">
+            <div class="menu-item" data-page="profile">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </div>
@@ -2866,6 +2866,14 @@
         <!-- NO OTP MODAL -->
 
         <script>
+            // Global Click Listener for Event Delegation
+            document.addEventListener('click', function(e) {
+                const menuItem = e.target.closest('.menu-item');
+                if (menuItem && menuItem.dataset.page) {
+                    switchPage(menuItem.dataset.page);
+                }
+            });
+
             let userEmailForOTP = ''; // Global for OTP verification
 
             // Initialize
@@ -2925,48 +2933,57 @@
 
             // Page Switching
             function switchPage(page) {
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                try {
+                    if (page === 'settings') page = 'profile'; // Alias
+                    const pages = document.querySelectorAll('.page');
+                    const menuItems = document.querySelectorAll('.menu-item');
 
-                const pageElement = document.getElementById(page + '-page');
-                if (pageElement) {
-                    pageElement.classList.add('active');
-                    if (window.innerWidth <= 768) {
-                        const sidebar = document.getElementById('sidebar');
-                        if (sidebar.classList.contains('active')) {
-                            toggleSidebar(); // Close sidebar on mobile after selection
+                    pages.forEach(p => p.classList.remove('active'));
+                    menuItems.forEach(m => m.classList.remove('active'));
+
+                    const pageElement = document.getElementById(page + '-page');
+                    if (pageElement) {
+                        pageElement.classList.add('active');
+                        
+                        if (window.innerWidth <= 768) {
+                            const sidebar = document.getElementById('sidebar');
+                            if (sidebar && sidebar.classList.contains('active')) {
+                                toggleSidebar(); 
+                            }
+                        }
+
+                        // Refresh data based on page
+                        if (page === 'dashboard') { loadDashboardData(); loadAnnouncements(); }
+                        if (page === 'announcements') loadAnnouncements();
+                        if (page === 'attendance') {
+                            const dateInput = document.getElementById('attendanceDate');
+                            if (dateInput && !dateInput.value) {
+                                dateInput.value = new Date().toISOString().split('T')[0];
+                            }
+                            loadAttendanceTable(dateInput ? dateInput.value : null);
+                        }
+                        if (page === 'payments') {
+                            loadPayments();
+                            loadAdminConfig();
+                            loadMembers();
+                        }
+                        if (page === 'generateQr') {
+                            populateGenQRDropdown();
+                        }
+                        if (page === 'workoutAssign') {
+                            populateWorkoutMemberDropdown();
+                            populateWorkoutHistoryFilter();
+                            loadWorkoutHistory();
+                            loadCompletionStats();
                         }
                     }
 
-                    // Refresh data based on page
-                    if (page === 'dashboard') { loadDashboardData(); loadAnnouncements(); }
-                    if (page === 'announcements') loadAnnouncements();
-                    if (page === 'attendance') {
-                        const dateInput = document.getElementById('attendanceDate');
-                        if (dateInput && !dateInput.value) {
-                            dateInput.value = new Date().toISOString().split('T')[0];
-                        }
-                        loadAttendanceTable(dateInput ? dateInput.value : null);
+                    const menuItem = document.querySelector(`.menu-item[data-page="${page}"]`);
+                    if (menuItem) {
+                        menuItem.classList.add('active');
                     }
-                    if (page === 'payments') {
-                        loadPayments();
-                        loadAdminConfig();
-                        loadMembers();
-                    }
-                    if (page === 'generateQr') {
-                        populateGenQRDropdown();
-                    }
-                    if (page === 'workoutAssign') {
-                        populateWorkoutMemberDropdown();
-                        populateWorkoutHistoryFilter();
-                        loadWorkoutHistory();
-                        loadCompletionStats();
-                    }
-                }
-
-                const menuItem = document.querySelector(`[onclick="switchPage('${page}')"]`);
-                if (menuItem) {
-                    menuItem.classList.add('active');
+                } catch (error) {
+                    console.error('Navigation error:', error);
                 }
             }
 
@@ -3266,19 +3283,19 @@
                             const plan = m.membershipPlan ? m.membershipPlan.replace(/([a-z]+)/g, c => c.charAt(0).toUpperCase() + c.slice(1)) : '--';
                             const isBlockedDash = m.qrBlocked;
                             const dashBlockBtn = isBlockedDash
-                                ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || }'')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock</button>`
-                                : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || }'')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block</button>`;
+                                ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock</button>`
+                                : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block</button>`;
                             return `<tr>
-                        <td>${escapeHtml(m.fullname || }'--')}</td>
-                        <td>${escapeHtml(m.email || }'--')}</td>
-                        <td>${escapeHtml(m.phone || }'--')}</td>
+                        <td>${escapeHtml(m.fullname || '--')}</td>
+                        <td>${escapeHtml(m.email || '--')}</td>
+                        <td>${escapeHtml(m.phone || '--')}</td>
                         <td>${escapeHtml(plan)}</td>
                         <td>${escapeHtml(expiry)}</td>
                         <td><span class="auto-style-105">${m.streak || 0} 🔥</span></td>
                         <td>
-                            ${m.qrImage ? `<div class=}"auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || }'')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || }'')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
+                            ${m.qrImage ? `<div class="auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
                         </td>
-                        <td>${dashBlockBtn}${isBlockedDash ? }' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
+                        <td>${dashBlockBtn}${isBlockedDash ? ' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
                     </tr>`;
                         }).join('');
                         if (tbody) tbody.innerHTML = rows || '<tr><td colspan="8" class="auto-style-6">No members found</td></tr>';
@@ -3293,21 +3310,21 @@
                                 const plan = m.membershipPlan ? m.membershipPlan.replace(/_/g, ' ') : '--';
                                 const isBlocked = m.qrBlocked;
                                 const blockBtn = isBlocked
-                                    ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || }'')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock QR</button>`
-                                    : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || }'')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block QR</button>`;
+                                    ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock QR</button>`
+                                    : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block QR</button>`;
                                 return `<tr>
-                            <td>${escapeHtml(m.fullname || }'--')}</td>
-                            <td>${escapeHtml(m.email || }'--')}</td>
-                            <td>${escapeHtml(m.phone || }'--')}</td>
+                            <td>${escapeHtml(m.fullname || '--')}</td>
+                            <td>${escapeHtml(m.email || '--')}</td>
+                            <td>${escapeHtml(m.phone || '--')}</td>
                             <td>${escapeHtml(plan)}</td>
-                            <td>${daysRemaining != null ? daysRemaining : }'--'}</td>
-                            <td><span class="badge badge-${status === }'Active' ? 'success' : status === 'Expired' ? 'danger' : 'warning'}">${status}</span></td>
-                            <td>${m.feesStatus || }'Pending'}</td>
+                            <td>${daysRemaining != null ? daysRemaining : '--'}</td>
+                            <td><span class="badge badge-${status === 'Active' ? 'success' : status === 'Expired' ? 'danger' : 'warning'}">${status}</span></td>
+                            <td>${m.feesStatus || 'Pending'}</td>
                             <td><span class="auto-style-105">${m.streak || 0} 🔥</span></td>
                             <td>
-                                ${m.qrImage ? `<div class=}"auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || }'')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || }'')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
+                                ${m.qrImage ? `<div class="auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
                             </td>
-                            <td>${blockBtn}${isBlocked ? }' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
+                            <td>${blockBtn}${isBlocked ? ' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
                         </tr>`;
                             }).join('');
                             memberTbody.innerHTML = membershipRows || '<tr><td colspan="10" class="auto-style-6">No members found</td></tr>';
@@ -4359,8 +4376,8 @@
                             <div class="workout-card-header">
                                 <div class="auto-style-122">
                                     <span class="workout-member-chip"><i class="fas fa-user"></i> ${escapeHtml(w.memberName || w.memberEmail)}</span>
-                                    <span class="auto-style-123 workout-date-badge">${isToday ? }'&#128197; Today' : w.date}</span>
-                                    <span class="workout-category-tag">${escapeHtml(w.category || }'General')}</span>
+                                    <span class="auto-style-123 workout-date-badge">${isToday ? '&#128197; Today' : w.date}</span>
+                                    <span class="workout-category-tag">${escapeHtml(w.category || 'General')}</span>
                                     ${completedBadge}
                                 </div>
                                 <div class="auto-style-124">
@@ -4369,8 +4386,8 @@
                                 </div>
                             </div>
                             <pre class="workout-text">${escapeHtml(w.workout)}</pre>
-                            ${w.notes ? `<div class=}"workout-notes"><i class="fas fa-sticky-note"></i> ${escapeHtml(w.notes)}</div>` : ''}
-                            ${isCompleted ? `<div class=}"auto-style-126"><i class="fas fa-check-circle"></i> Completed on ${completedTime}${w.completionNote ? }' &mdash; <em>' + escapeHtml(w.completionNote) + '</em>' : ''}</div>` : ''}
+                            ${w.notes ? `<div class="workout-notes"><i class="fas fa-sticky-note"></i> ${escapeHtml(w.notes)}</div>` : ''}
+                            ${isCompleted ? `<div class="auto-style-126"><i class="fas fa-check-circle"></i> Completed on ${completedTime}${w.completionNote ? ' &mdash; <em>' + escapeHtml(w.completionNote) + '</em>' : ''}</div>` : ''}
                         </div>`;
                         }).join('');
                     })
