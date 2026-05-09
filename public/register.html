@@ -3,138 +3,392 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Register</title>
+    <title>Register | Tara Fitness Centre</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
         }
 
         body {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             background: #050505;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
             overflow: hidden;
         }
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: orbFloat 12s ease-in-out infinite alternate;
+        }
+        .bg-orb:nth-child(1) {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, #ff1a1a, transparent 70%);
+            top: -10%; right: -10%;
+            animation-duration: 14s;
+        }
+        .bg-orb:nth-child(2) {
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, #990000, transparent 70%);
+            bottom: -15%; left: -10%;
+            animation-duration: 10s;
+            animation-delay: -3s;
+        }
+        .bg-orb:nth-child(3) {
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, #660000, transparent 70%);
+            top: 50%; left: 60%;
+            animation-duration: 16s;
+            animation-delay: -6s;
+            opacity: 0.2;
+        }
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(40px, -30px) scale(1.1); }
+            100% { transform: translate(-20px, 20px) scale(0.95); }
+        }
 
+        .particle-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            background-image:
+                radial-gradient(circle, rgba(255,26,26,0.08) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridShift 30s linear infinite;
+        }
+        @keyframes gridShift {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
+        }
+
+        /* Card */
         .register-container {
-            width: 360px;
-            padding: 40px;
-            border-radius: 12px;
-            background: #111111;
-            border: 1px solid #330000;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            width: 420px;
+            padding: 36px 40px;
+            margin: 30px 0;
+            border-radius: 20px;
+            background: rgba(17,17,17,0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,26,26,0.12);
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(255,26,26,0.05);
             text-align: center;
             color: white;
+            animation: cardEntry 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff1a1a, #cc0000, transparent);
+            border-radius: 20px 20px 0 0;
+        }
+        @keyframes cardEntry {
+            0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .logo {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
+        /* Logo */
+        .logo-wrapper {
+            position: relative;
+            display: inline-block;
             margin-bottom: 20px;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #ff1a1a;
+            border: 3px solid #ff1a1a;
+            box-shadow: 0 0 30px rgba(255,26,26,0.25);
+            transition: transform 0.3s;
+        }
+        .logo:hover { transform: scale(1.08); }
+        .logo-ring {
+            position: absolute;
+            inset: -6px;
+            border: 2px solid rgba(255,26,26,0.2);
+            border-radius: 50%;
+            animation: ringPulse 3s ease-in-out infinite;
+        }
+        @keyframes ringPulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.12); opacity: 0; }
         }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #333;
-            outline: none;
-            border-radius: 8px;
-            background: #0b0b0b;
-            color: white;
-            transition: 0.2s;
+        h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+        .subtitle {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 24px;
         }
 
-        input:focus {
-            border-color: #ff1a1a;
+        /* Form */
+        .input-group {
+            position: relative;
+            margin-bottom: 14px;
         }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            border: none;
-            border-radius: 8px;
-            background: #ff1a1a;
-            color: #ffffff;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        button:hover {
-            background: #cc0000;
-        }
-
-        .footer {
-            margin-top: 15px;
+        .input-group i.input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4b5563;
             font-size: 14px;
-            color: #ccc;
+            transition: color 0.3s;
+            z-index: 1;
         }
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 13px 14px 13px 42px;
+            border: 1px solid #1f1f1f;
+            outline: none;
+            border-radius: 12px;
+            background: #0a0a0a;
+            color: white;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #ff1a1a;
+            box-shadow: 0 0 0 3px rgba(255,26,26,0.1);
+        }
+        .input-group:focus-within i.input-icon { color: #ff4d4d; }
 
-        .footer a {
-            color: #ff4d4d;
-            text-decoration: none;
+        .input-group select {
+            appearance: none;
+            cursor: pointer;
+        }
+        .input-group select option {
+            background: #111;
+            color: #fff;
         }
 
         .admin-key-container {
             display: none;
-            margin-top: 10px;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            0% { opacity: 0; transform: translateY(-8px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0 14px;
+        }
+        .divider span {
+            color: #4b5563;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #333, transparent);
+        }
+
+        /* Button */
+        .register-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ff1a1a 0%, #cc0000 50%, #990000 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.35s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(255,26,26,0.3);
+        }
+        .register-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+            animation: btnShine 3s infinite;
+        }
+        @keyframes btnShine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255,26,26,0.45);
+        }
+        .register-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        .footer a {
+            color: #ff4d4d;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .footer a:hover {
+            color: #ff1a1a;
+            text-decoration: underline;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            animation: toastIn 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .toast.error { background: linear-gradient(135deg, #991b1b, #dc2626); }
+        .toast.success { background: linear-gradient(135deg, #064e3b, #10b981); }
+        .toast.info { background: linear-gradient(135deg, #1e3a5f, #3b82f6); }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateX(30px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        @media (max-width: 480px) {
+            .register-container {
+                width: calc(100% - 40px);
+                padding: 28px 20px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+    </div>
+    <div class="particle-grid"></div>
+
+    <div class="toast-container" id="toastContainer"></div>
 
     <div class="register-container">
-
-        <!-- Logo -->
-        <img src="/logo.jpg" class="logo" alt="Tara Fitness Center Logo">
-
+        <div class="logo-wrapper">
+            <div class="logo-ring"></div>
+            <img src="/logo.jpg" class="logo" alt="Tara Fitness Centre Logo">
+        </div>
         <h2>Create Account</h2>
+        <p class="subtitle">Join Tara Fitness Centre today</p>
 
-        <form action="/register" method="POST" id="regForm">
-
-            <input type="text" name="fullname" placeholder="Full Name" required>
-
-            <input type="email" name="email" placeholder="Enter Email" required>
-
-            <input type="password" name="password" placeholder="Create Password" required>
-
-            <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
-
-            <label>Register as</label>
-            <select name="role" id="roleSelect" title="Register Role">
-                <option value="user" selected>Member</option>
-                <option value="admin">Administrator</option>
-            </select>
-
-            <div id="adminKeyContainer" class="admin-key-container">
-                <label>Admin key</label>
-                <input type="password" name="adminKey" placeholder="Secret code">
+        <form id="regForm">
+            <div class="input-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" name="fullname" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="email" name="email" placeholder="Email address" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" name="password" placeholder="Create Password" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-shield-alt input-icon"></i>
+                <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
             </div>
 
-            <button type="submit">Register</button>
+            <div class="divider"><span>register as</span></div>
 
+            <div class="input-group">
+                <i class="fas fa-user-tag input-icon"></i>
+                <select name="role" id="roleSelect" title="Register Role">
+                    <option value="user" selected>Member</option>
+                    <option value="admin">Administrator</option>
+                </select>
+            </div>
+
+            <div id="adminKeyContainer" class="admin-key-container">
+                <div class="input-group">
+                    <i class="fas fa-key input-icon"></i>
+                    <input type="password" name="adminKey" placeholder="Admin Secret Key">
+                </div>
+            </div>
+
+            <button type="submit" class="register-btn">
+                <i class="fas fa-user-plus"></i>&nbsp; Create Account
+            </button>
         </form>
 
         <div class="footer">
-            Already have an account? <a href="/login.html">Login</a>
+            Already have an account? <a href="/login.html">Sign in</a>
         </div>
-
     </div>
 
     <script>
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
         // show/hide admin key input when role is changed
         (function () {
             const roleSelect = document.getElementById('roleSelect');
@@ -151,8 +405,8 @@
         document.getElementById('regForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-            btn.innerText = 'Registering...';
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp; Creating account...';
             btn.disabled = true;
 
             const formData = new FormData(this);
@@ -169,21 +423,23 @@
                 if (result.success) {
                     if (result.user) {
                         localStorage.setItem("user", JSON.stringify(result.user));
-                        alert(result.message || 'Registration successful!');
-                        window.location.href = result.redirect || (result.user.role === 'admin' ? '/dashboard.html' : '/home.html');
+                        showToast('Registration successful! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = result.redirect || (result.user.role === 'admin' ? '/dashboard.html' : '/home.html');
+                        }, 600);
                     } else {
-                        alert('Registration successful! Please login.');
-                        window.location.href = '/login.html';
+                        showToast('Registration successful! Please login.', 'success');
+                        setTimeout(() => { window.location.href = '/login.html'; }, 1000);
                     }
                 } else {
-                    alert(result.message || 'Error during registration');
-                    btn.innerText = originalText;
+                    showToast(result.message || 'Error during registration', 'error');
+                    btn.innerHTML = originalHTML;
                     btn.disabled = false;
                 }
             } catch (err) {
                 console.error(err);
-                alert('Registration Error occurred');
-                btn.innerText = originalText;
+                showToast('Registration Error occurred', 'error');
+                btn.innerHTML = originalHTML;
                 btn.disabled = false;
             }
         });

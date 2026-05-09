@@ -1102,6 +1102,20 @@ app.post("/addAnnouncement", async (req, res) => {
     }
 });
 
+app.post("/deleteAnnouncement", async (req, res) => {
+    try {
+        const { id } = req.body;
+        const deletedAnnouncement = await Announcement.findByIdAndDelete(id);
+        if (!deletedAnnouncement) {
+            return res.status(404).json({ success: false, message: "Announcement not found" });
+        }
+        res.json({ success: true, message: "Announcement deleted", announcement: deletedAnnouncement });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
 app.get("/getAnnouncements", async (req, res) => {
     try {
         const announcements = await Announcement.find().sort({ _id: -1 }).lean();

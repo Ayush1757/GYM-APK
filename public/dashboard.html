@@ -51,11 +51,311 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             transition: background 0.3s ease, color 0.3s ease;
         }
+
+        /* ===== GLOBAL VISUAL ENHANCEMENTS ===== */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        /* Page entry animation */
+        .page.active {
+            animation: pageSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes pageSlideIn {
+            0% { opacity: 0; transform: translateY(16px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Enhanced stat cards */
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff1a1a, #ff4d4d, #cc0000);
+        }
+        .stat-card.secondary::before {
+            background: linear-gradient(90deg, #22c55e, #10b981, #059669);
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(255,26,26,0.15);
+        }
+        .stat-icon {
+            animation: statIconFloat 3s ease-in-out infinite;
+        }
+        @keyframes statIconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* Enhanced cards */
+        .card {
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+            position: relative;
+        }
+        .card:hover {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,26,26,0.06);
+        }
+
+        /* Page header enhancements */
+        .page > h1:first-child,
+        .page > div:first-child > h1 {
+            position: relative;
+            display: inline-block;
+        }
+        .auto-style-1 {
+            font-size: 28px !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.5px;
+        }
+
+        /* Welcome text gradient */
+        #dashboard-page > h1 {
+            background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        /* Enhanced table styling */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .table thead th {
+            position: relative;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .table tbody tr {
+            transition: all 0.2s;
+        }
+        .table tbody tr:hover {
+            background: rgba(255,26,26,0.04) !important;
+            transform: scale(1.002);
+        }
+
+        /* Enhanced buttons */
+        .btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.08), transparent);
+            pointer-events: none;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ff1a1a, #cc0000) !important;
+            box-shadow: 0 3px 12px rgba(255,26,26,0.25);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 24px rgba(255,26,26,0.4) !important;
+        }
+
+        /* Page title decorations */
+        #announcements-page > div:first-child h1,
+        #attendance-page > div:first-child h1,
+        #membership-page > div:first-child h1 {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* Profile avatar enhancement */
+        .auto-style-82 {
+            position: relative;
+            box-shadow: 0 0 30px rgba(255,26,26,0.2);
+            transition: transform 0.3s;
+        }
+        .auto-style-82:hover {
+            transform: scale(1.05);
+        }
+
+        /* Enhanced form inputs across dashboard */
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            transition: all 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            box-shadow: 0 0 0 3px rgba(255,26,26,0.1);
+            border-color: #ff1a1a !important;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Stats grid spacing */
+        .stats-grid {
+            gap: 20px;
+        }
+
+        /* Announcement page card header */
+        #announcements-page .card {
+            overflow: hidden;
+        }
+
+        /* Workout template chips enhancement */
+        .workout-template-chip {
+            transition: all 0.25s !important;
+        }
+        .workout-template-chip:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(255,26,26,0.2) !important;
+        }
+
+        /* Badge enhancements */
+        .badge {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        /* Chart container */
+        .chart-container {
+            position: relative;
+        }
+        .chart-container canvas {
+            transition: opacity 0.3s;
+        }
+
+        /* Toast enhancement */
+        .toast-notification {
+            animation: toastSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes toastSlideIn {
+            0% { opacity: 0; transform: translateX(40px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Grid-2 spacing */
+        .grid-2 {
+            gap: 24px;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #330000;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #660000;
+        }
+
+        /* Content area subtle background pattern */
+        .content {
+            background-image: radial-gradient(circle at 80% 10%, rgba(255,26,26,0.03) 0%, transparent 50%),
+                              radial-gradient(circle at 20% 80%, rgba(153,0,0,0.02) 0%, transparent 50%);
+        }
+
+        /* Payment stat cards */
+        #payments-page .stat-card {
+            border-left: 3px solid #ff1a1a;
+        }
+        #payments-page .stat-card.secondary {
+            border-left-color: #f97316;
+        }
+
+        /* Enhanced modal styling */
+        .modal-content {
+            animation: modalPop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes modalPop {
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            position: relative;
+        }
+        .modal-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #330000, transparent);
+        }
+
+        /* Workout history cards */
+        .workout-card {
+            transition: all 0.25s;
+        }
+        .workout-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        /* Notification badge pulse */
+        .notification-badge {
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Sidebar menu item hover enhancement */
+        .menu-item {
+            position: relative;
+            overflow: hidden;
+        }
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: transparent;
+            transition: all 0.3s;
+        }
+        .menu-item.active::before {
+            background: #fff;
+        }
+        .menu-item:hover::before {
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* Enhanced empty states */
+        .auto-style-6 {
+            font-style: italic;
+            opacity: 0.6;
+        }
+
 
         .sidebar {
             position: fixed;
@@ -1582,7 +1882,7 @@
         }
 
         .auto-style-113 {
-            color: ' + (data.success ? ' #22c55e' : ' #ff4b5c') + '
+            color: #22c55e;
         }
 
         .auto-style-114 {
@@ -1794,11 +2094,9 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- SIDEBAR -->
-    <div class="sidebar" id="sidebar">
+    <div class="sidebar collapsed" id="sidebar">
         <div class="sidebar-header">
-            <h2>TARA FITNESS CENTRE 💪🏻</h2>
-            <button class="toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar" onclick="toggleSidebar()"><i
-                    class="fas fa-bars"></i></button>
+            <h2>TFC 💪🏻</h2>
         </div>
         <div class="sidebar-menu">
             <div class="menu-item active" data-page="dashboard">
@@ -1845,11 +2143,16 @@
     </div>
 
     <!-- MAIN CONTAINER -->
-    <div class="main-container" id="mainContainer">
+    <div class="main-container collapsed" id="mainContainer">
 
         <!-- NAVBAR -->
         <div class="navbar">
-            <div class="navbar-left"></div>
+            <div class="navbar-left">
+                <button class="toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar" onclick="toggleSidebar()" style="color: #ff1a1a;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 style="color: #ff1a1a; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px;">TARA FITNESS CENTRE 💪🏻</h2>
+            </div>
             <div class="navbar-right">
                 <div class="notification-bell" onclick="toggleNotifications()">
                     <i class="fas fa-bell"></i>
@@ -1915,13 +2218,11 @@
                                     <th>Plan</th>
                                     <th>Expiry</th>
                                     <th>Streak 🔥</th>
-                                    <th>QR</th>
-                                    <th>QR Block</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="8" class="auto-style-6">Loading...</td>
+                                    <td colspan="6" class="auto-style-6">Loading...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -2092,26 +2393,418 @@
 
             <!-- GENERATE QR PAGE -->
             <div class="page" id="generateQr-page">
-                <h1 class="auto-style-14">✨ Generate Gym QR</h1>
-                <p class="auto-style-15">Generate the secure Gym QR code. Print and display this at the entrance. Members will scan this to mark their attendance.</p>
+                <style>
+                    .qr-hero {
+                        text-align: center;
+                        padding: 40px 20px 30px;
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    .qr-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: -60%;
+                        left: -20%;
+                        width: 140%;
+                        height: 140%;
+                        background: radial-gradient(circle at 30% 50%, rgba(255,26,26,0.08) 0%, transparent 50%),
+                                    radial-gradient(circle at 70% 50%, rgba(204,0,0,0.06) 0%, transparent 50%);
+                        animation: qrHeroFloat 8s ease-in-out infinite alternate;
+                        pointer-events: none;
+                    }
+                    @keyframes qrHeroFloat {
+                        0% { transform: translateY(0) rotate(0deg); }
+                        100% { transform: translateY(-20px) rotate(3deg); }
+                    }
+                    .qr-hero-icon {
+                        width: 90px;
+                        height: 90px;
+                        margin: 0 auto 20px;
+                        background: linear-gradient(135deg, #ff1a1a 0%, #990000 100%);
+                        border-radius: 24px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 40px;
+                        color: #fff;
+                        box-shadow: 0 8px 32px rgba(255,26,26,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+                        animation: qrIconPulse 3s ease-in-out infinite;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    @keyframes qrIconPulse {
+                        0%, 100% { transform: scale(1); box-shadow: 0 8px 32px rgba(255,26,26,0.3); }
+                        50% { transform: scale(1.06); box-shadow: 0 12px 40px rgba(255,26,26,0.45); }
+                    }
+                    .qr-hero h1 {
+                        font-size: 32px;
+                        font-weight: 800;
+                        color: #f9fafb;
+                        margin-bottom: 10px;
+                        letter-spacing: -0.5px;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    .qr-hero h1 .qr-accent {
+                        background: linear-gradient(135deg, #ff4d4d, #ff1a1a, #cc0000);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                    }
+                    .qr-hero-subtitle {
+                        color: #9ca3af;
+                        font-size: 15px;
+                        max-width: 500px;
+                        margin: 0 auto;
+                        line-height: 1.6;
+                        position: relative;
+                        z-index: 1;
+                    }
 
-                <div class="card" >
-                    <div class="auto-style-45" >
-                        <p class="auto-style-46" >
-                            <i class="fas fa-info-circle"></i>
-                            This QR code is used by all members to mark attendance. You can regenerate it anytime to invalidate old QR codes and enhance security.
-                        </p>
+                    .qr-main-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 24px;
+                        margin-top: 30px;
+                    }
+                    @media (max-width: 900px) {
+                        .qr-main-grid { grid-template-columns: 1fr; }
+                    }
+
+                    .qr-generate-card {
+                        background: linear-gradient(145deg, #0d0d0d 0%, #1a0505 100%);
+                        border: 1px solid #330000;
+                        border-radius: 16px;
+                        padding: 32px;
+                        text-align: center;
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    .qr-generate-card::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        height: 3px;
+                        background: linear-gradient(90deg, transparent, #ff1a1a, transparent);
+                    }
+
+                    .qr-generate-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 16px 36px;
+                        font-size: 16px;
+                        font-weight: 700;
+                        color: #fff;
+                        background: linear-gradient(135deg, #ff1a1a 0%, #cc0000 50%, #990000 100%);
+                        border: none;
+                        border-radius: 14px;
+                        cursor: pointer;
+                        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                        box-shadow: 0 6px 20px rgba(255,26,26,0.35);
+                        position: relative;
+                        overflow: hidden;
+                        margin: 20px 0;
+                    }
+                    .qr-generate-btn::before {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        left: -50%;
+                        width: 200%;
+                        height: 200%;
+                        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+                        animation: qrBtnShine 3s infinite;
+                    }
+                    @keyframes qrBtnShine {
+                        0% { transform: translateX(-100%) rotate(45deg); }
+                        100% { transform: translateX(100%) rotate(45deg); }
+                    }
+                    .qr-generate-btn:hover {
+                        transform: translateY(-3px) scale(1.03);
+                        box-shadow: 0 12px 36px rgba(255,26,26,0.5);
+                    }
+                    .qr-generate-btn:active {
+                        transform: translateY(0) scale(0.98);
+                    }
+                    .qr-generate-btn i {
+                        font-size: 20px;
+                    }
+
+                    .qr-display-area {
+                        display: none;
+                        flex-direction: column;
+                        align-items: center;
+                        margin-top: 28px;
+                        animation: qrReveal 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+                    @keyframes qrReveal {
+                        0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+                        100% { opacity: 1; transform: scale(1) translateY(0); }
+                    }
+
+                    .qr-frame {
+                        position: relative;
+                        padding: 20px;
+                        background: #ffffff;
+                        border-radius: 16px;
+                        box-shadow: 0 8px 40px rgba(255,26,26,0.15), 0 0 0 1px rgba(255,26,26,0.1);
+                    }
+                    .qr-frame::before, .qr-frame::after {
+                        content: '';
+                        position: absolute;
+                        width: 30px;
+                        height: 30px;
+                        border: 3px solid #ff1a1a;
+                    }
+                    .qr-frame::before {
+                        top: 8px; left: 8px;
+                        border-right: none; border-bottom: none;
+                        border-radius: 6px 0 0 0;
+                    }
+                    .qr-frame::after {
+                        bottom: 8px; right: 8px;
+                        border-left: none; border-top: none;
+                        border-radius: 0 0 6px 0;
+                    }
+                    .qr-frame-corner-tr, .qr-frame-corner-bl {
+                        position: absolute;
+                        width: 30px;
+                        height: 30px;
+                        border: 3px solid #ff1a1a;
+                    }
+                    .qr-frame-corner-tr {
+                        top: 8px; right: 8px;
+                        border-left: none; border-bottom: none;
+                        border-radius: 0 6px 0 0;
+                    }
+                    .qr-frame-corner-bl {
+                        bottom: 8px; left: 8px;
+                        border-right: none; border-top: none;
+                        border-radius: 0 0 0 6px;
+                    }
+                    .qr-frame img {
+                        display: block;
+                        max-width: 220px;
+                        border-radius: 6px;
+                    }
+                    .qr-gym-label {
+                        color: #1a0000;
+                        font-weight: 800;
+                        font-size: 14px;
+                        letter-spacing: 1px;
+                        margin-top: 10px;
+                        text-transform: uppercase;
+                    }
+
+                    .qr-action-row {
+                        display: flex;
+                        gap: 12px;
+                        margin-top: 20px;
+                    }
+                    .qr-action-btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 10px 22px;
+                        font-size: 13px;
+                        font-weight: 600;
+                        border: none;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        transition: all 0.25s;
+                    }
+                    .qr-action-download {
+                        background: linear-gradient(135deg, #064d30, #10b981);
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(16,185,129,0.3);
+                    }
+                    .qr-action-download:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 24px rgba(16,185,129,0.4);
+                    }
+                    .qr-action-print {
+                        background: linear-gradient(135deg, #1e3a5f, #3b82f6);
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(59,130,246,0.3);
+                    }
+                    .qr-action-print:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 24px rgba(59,130,246,0.4);
+                    }
+
+                    .qr-info-card {
+                        background: linear-gradient(145deg, #0d0d0d, #111111);
+                        border: 1px solid #1a1a1a;
+                        border-radius: 16px;
+                        padding: 28px;
+                    }
+                    .qr-info-title {
+                        color: #f9fafb;
+                        font-size: 18px;
+                        font-weight: 700;
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    .qr-info-title i {
+                        color: #ff4d4d;
+                    }
+
+                    .qr-step {
+                        display: flex;
+                        gap: 14px;
+                        align-items: flex-start;
+                        margin-bottom: 18px;
+                        padding: 14px;
+                        background: #0a0a0a;
+                        border-radius: 12px;
+                        border: 1px solid #1a1a1a;
+                        transition: all 0.25s;
+                    }
+                    .qr-step:hover {
+                        border-color: #330000;
+                        background: #0f0505;
+                    }
+                    .qr-step-num {
+                        min-width: 36px;
+                        height: 36px;
+                        background: linear-gradient(135deg, #330000, #660000);
+                        border-radius: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #ff6b6b;
+                        font-weight: 800;
+                        font-size: 14px;
+                        flex-shrink: 0;
+                    }
+                    .qr-step-content h4 {
+                        color: #e5e7eb;
+                        font-size: 14px;
+                        margin-bottom: 4px;
+                    }
+                    .qr-step-content p {
+                        color: #6b7280;
+                        font-size: 12px;
+                        line-height: 1.5;
+                        margin: 0;
+                    }
+
+                    .qr-security-tip {
+                        margin-top: 20px;
+                        padding: 16px;
+                        background: linear-gradient(135deg, #0f1a0f, #0a1a0a);
+                        border: 1px solid rgba(34,197,94,0.15);
+                        border-radius: 12px;
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 12px;
+                    }
+                    .qr-security-tip i {
+                        color: #22c55e;
+                        font-size: 18px;
+                        margin-top: 2px;
+                    }
+                    .qr-security-tip p {
+                        color: #86efac;
+                        font-size: 13px;
+                        line-height: 1.5;
+                        margin: 0;
+                    }
+                    .qr-security-tip strong {
+                        color: #bbf7d0;
+                    }
+                </style>
+
+                <!-- Hero Section -->
+                <div class="qr-hero">
+                    <div class="qr-hero-icon">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <h1>Generate <span class="qr-accent">Gym QR</span> Code</h1>
+                    <p class="qr-hero-subtitle">
+                        Create a secure, unique QR code for your gym entrance. Members scan this to mark their attendance instantly.
+                    </p>
+                </div>
+
+                <!-- Main Grid -->
+                <div class="qr-main-grid">
+                    <!-- Left: Generate Card -->
+                    <div class="qr-generate-card">
+                        <h3 style="color:#f9fafb; font-size:20px; margin-bottom:6px;">🔐 Attendance QR Code</h3>
+                        <p style="color:#6b7280; font-size:13px; margin-bottom:20px;">Click below to generate a new secure QR code. Old codes will be invalidated automatically.</p>
+
+                        <button class="qr-generate-btn" onclick="generateGymQR()" id="gymQRGenerateBtn">
+                            <i class="fas fa-bolt"></i>
+                            Generate New QR Code
+                        </button>
+
+                        <!-- QR Display -->
+                        <div class="qr-display-area" id="gymQRContainer">
+                            <div class="qr-frame">
+                                <span class="qr-frame-corner-tr"></span>
+                                <span class="qr-frame-corner-bl"></span>
+                                <img id="gymQRImage" src="" alt="Gym QR Code">
+                                <div class="qr-gym-label">TARA FITNESS CENTRE</div>
+                            </div>
+                            <div class="qr-action-row">
+                                <button class="qr-action-btn qr-action-download" onclick="downloadGymQR()">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                                <button class="qr-action-btn qr-action-print" onclick="window.print()">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <button class="btn btn-primary" onclick="generateGymQR()" >
-                        <i class="fas fa-qrcode"></i> Generate New Gym QR
-                    </button>
+                    <!-- Right: How It Works + Tips -->
+                    <div class="qr-info-card">
+                        <div class="qr-info-title">
+                            <i class="fas fa-lightbulb"></i>
+                            How It Works
+                        </div>
 
-                    <div  id="gymQRContainer" >
-                        <img  id="gymQRImage" src="" alt="Gym QR Code" >
-                        <button id="downloadGymQRBtn" class="btn btn-success" onclick="downloadGymQR()">
-                            <i class="fas fa-download"></i> Download Gym QR
-                        </button>
+                        <div class="qr-step">
+                            <div class="qr-step-num">1</div>
+                            <div class="qr-step-content">
+                                <h4>Generate QR Code</h4>
+                                <p>Click the generate button to create a new unique QR code for your gym.</p>
+                            </div>
+                        </div>
+
+                        <div class="qr-step">
+                            <div class="qr-step-num">2</div>
+                            <div class="qr-step-content">
+                                <h4>Print & Display</h4>
+                                <p>Download or print the QR code and display it at the gym entrance for members.</p>
+                            </div>
+                        </div>
+
+                        <div class="qr-step">
+                            <div class="qr-step-num">3</div>
+                            <div class="qr-step-content">
+                                <h4>Members Scan</h4>
+                                <p>Members scan the QR code from their app to instantly mark their attendance.</p>
+                            </div>
+                        </div>
+
+                        <div class="qr-step">
+                            <div class="qr-step-num">4</div>
+                            <div class="qr-step-content">
+                                <h4>Regenerate for Security</h4>
+                                <p>Generate a new QR anytime to invalidate old codes and prevent misuse.</p>
+                            </div>
+                        </div>
+
+                        <div class="qr-security-tip">
+                            <i class="fas fa-shield-alt"></i>
+                            <p><strong>Security Tip:</strong> Regenerate your QR code periodically (weekly or monthly) to maintain high security and prevent unauthorized attendance marking.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2260,13 +2953,11 @@
                                 <th>Status</th>
                                 <th>Actions</th>
                                 <th>Streak 🔥</th>
-                                <th>QR</th>
-                                <th>QR Block</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="10" class="auto-style-6">No members found</td>
+                                <td colspan="8" class="auto-style-6">No members found</td>
                             </tr>
                         </tbody>
                     </table>
@@ -2814,30 +3505,7 @@
             </div>
         </div>
 
-        <!-- UPLOAD QR MODAL (from members list) -->
-        <div class="modal" id="uploadQRModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Upload QR Code for Member</h3>
-                    <button class="close-btn" onclick="closeModal('uploadQRModal')">×</button>
-                </div>
-                <div class="form-group">
-                            <label for="uploadQRMemberEmail">Member</label>
-                            <input type="text" id="uploadQRMemberEmail" readonly class="auto-style-83" title="Member" placeholder="Enter Member">
-                </div>
-                <div class="form-group">
-                            <label for="uploadQRFile">Select QR Image (unique per member)</label>
-                            <input type="file" id="uploadQRFile" accept="image/*" title="Select QR Image (unique per member)" placeholder="Enter Select QR Image (unique per member)">
-                </div>
-                <div class="auto-style-12">
-                    <button class="auto-style-21 btn btn-primary" onclick="uploadMemberQr()">
-                        <i class="fas fa-upload"></i> Upload
-                    </button>
-                    <button class="auto-style-21 btn btn-secondary"
-                        onclick="closeModal('uploadQRModal')">Cancel</button>
-                </div>
-            </div>
-        </div>
+        <!-- UPLOAD QR MODAL removed -->
 
         <!-- QR BLOCK CONFIRMATION MODAL -->
         <div class="modal" id="qrBlockModal">
@@ -2961,12 +3629,31 @@
                 showToast('3 new notifications!', 'info');
             }
 
-            function showToast(message, type = 'info') {
+            function showToast(message, type = 'info', actionLabel = null, actionCallback = null) {
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
-                toast.innerHTML = message;
+                toast.style.display = 'flex';
+                toast.style.justifyContent = 'space-between';
+                toast.style.alignItems = 'center';
+                toast.style.gap = '15px';
+                toast.style.minWidth = '200px';
+                
+                let content = `<span>${message}</span>`;
+                if (actionLabel && actionCallback) {
+                    content += `<button class="undo-btn" style="background: white; color: black; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: 10px;">${actionLabel}</button>`;
+                }
+                toast.innerHTML = content;
+                
+                if (actionLabel && actionCallback) {
+                    const btn = toast.querySelector('.undo-btn');
+                    btn.onclick = () => {
+                        actionCallback();
+                        toast.remove();
+                    };
+                }
+                
                 document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
+                setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
             }
 
             function toggleTheme() {
@@ -3025,7 +3712,7 @@
                     attDate.value = new Date().toISOString().split('T')[0];
                     attDate.addEventListener('change', (e) => loadAttendanceTable(e.target.value));
                 }
-                adjustQrSection();
+                // adjustQrSection removed (undefined)
             });
 
 
@@ -3153,6 +3840,56 @@
                     .catch(err => showToast('Error creating announcement', 'error'));
             }
 
+            let lastDeletedAnnouncement = null;
+
+            function deleteAnnouncement(id) {
+                fetch('/deleteAnnouncement', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        lastDeletedAnnouncement = data.announcement;
+                        showToast('Announcement deleted', 'success', 'UNDO', undoDeleteAnnouncement);
+                        loadAnnouncements();
+                    } else {
+                        showToast(data.message || 'Error deleting announcement', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast('Error deleting announcement', 'error');
+                });
+            }
+
+            function undoDeleteAnnouncement() {
+                if (!lastDeletedAnnouncement) return;
+                
+                const { title, content, priority, target, expiry } = lastDeletedAnnouncement;
+                
+                fetch('/addAnnouncement', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content, priority, target, expiry })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Announcement restored!', 'success');
+                        lastDeletedAnnouncement = null;
+                        loadAnnouncements();
+                    } else {
+                        showToast(data.message || 'Error restoring announcement', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast('Error restoring announcement', 'error');
+                });
+            }
+
             function loadAnnouncements() {
                 fetch('/getAnnouncements')
                     .then(r => r.json())
@@ -3168,7 +3905,7 @@
                             <td><span class="badge badge-${a.priority === 'high' ? 'danger' : a.priority === 'low' ? 'success' : 'warning'}">${a.priority}</span></td>
                             <td>${a.target}</td>
                             <td>Active</td>
-                            <td><button class="auto-style-100 btn btn-secondary"><i class="fas fa-trash"></i></button></td>
+                            <td><button class="auto-style-100 btn btn-secondary" onclick="deleteAnnouncement('${a._id}')"><i class="fas fa-trash"></i></button></td>
                         </tr>`;
 
                                 if (i < 3) {
@@ -3265,10 +4002,6 @@
                         const rows = allMembers.map(m => {
                             const expiry = m.expiry ? new Date(m.expiry).toLocaleDateString() : '--';
                             const plan = m.membershipPlan ? m.membershipPlan.replace(/([a-z]+)/g, c => c.charAt(0).toUpperCase() + c.slice(1)) : '--';
-                            const isBlockedDash = m.qrBlocked;
-                            const dashBlockBtn = isBlockedDash
-                                ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock</button>`
-                                : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block</button>`;
                             return `<tr>
                         <td>${escapeHtml(m.fullname || '--')}</td>
                         <td>${escapeHtml(m.email || '--')}</td>
@@ -3276,13 +4009,9 @@
                         <td>${escapeHtml(plan)}</td>
                         <td>${escapeHtml(expiry)}</td>
                         <td><span class="auto-style-105">${m.streak || 0} 🔥</span></td>
-                        <td>
-                            ${m.qrImage ? `<div class="auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
-                        </td>
-                        <td>${dashBlockBtn}${isBlockedDash ? ' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
                     </tr>`;
                         }).join('');
-                        if (tbody) tbody.innerHTML = rows || '<tr><td colspan="8" class="auto-style-6">No members found</td></tr>';
+                        if (tbody) tbody.innerHTML = rows || '<tr><td colspan="6" class="auto-style-6">No members found</td></tr>';
 
                         // Detailed Members Table
                         if (memberTbody) {
@@ -3292,10 +4021,6 @@
                                 const daysRemaining = expiry ? Math.ceil((expiry - today) / (1000 * 60 * 60 * 24)) : null;
                                 const status = daysRemaining === null ? '--' : daysRemaining <= 0 ? 'Expired' : daysRemaining <= 5 ? 'Expiring' : 'Active';
                                 const plan = m.membershipPlan ? m.membershipPlan.replace(/_/g, ' ') : '--';
-                                const isBlocked = m.qrBlocked;
-                                const blockBtn = isBlocked
-                                    ? `<button class="btn-unblock-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, false)"><i class='fas fa-lock-open'></i> Unblock QR</button>`
-                                    : `<button class="btn-block-qr" data-email="${escapeHtml(m.email || '')}" onclick="openQRBlockModal(this.dataset.email, true)"><i class='fas fa-lock'></i> Block QR</button>`;
                                 return `<tr>
                             <td>${escapeHtml(m.fullname || '--')}</td>
                             <td>${escapeHtml(m.email || '--')}</td>
@@ -3305,13 +4030,9 @@
                             <td><span class="badge badge-${status === 'Active' ? 'success' : status === 'Expired' ? 'danger' : 'warning'}">${status}</span></td>
                             <td>${m.feesStatus || 'Pending'}</td>
                             <td><span class="auto-style-105">${m.streak || 0} 🔥</span></td>
-                            <td>
-                                ${m.qrImage ? `<div class="auto-style-106"><img src="${m.qrImage}" alt="QR" class="auto-style-107"><button class="auto-style-108 btn btn-secondary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-edit"></i></button></div>` : `<button class="auto-style-109 btn btn-primary" data-email="${escapeHtml(m.email || '')}" onclick="openUploadQRModal(this.dataset.email)"><i class="fas fa-upload"></i> Upload</button>`}
-                            </td>
-                            <td>${blockBtn}${isBlocked ? ' <span class="qr-blocked-badge">🔒 Blocked</span>' : ''}</td>
                         </tr>`;
                             }).join('');
-                            memberTbody.innerHTML = membershipRows || '<tr><td colspan="10" class="auto-style-6">No members found</td></tr>';
+                            memberTbody.innerHTML = membershipRows || '<tr><td colspan="8" class="auto-style-6">No members found</td></tr>';
                         }
 
                         // Populate Generate QR Dropdown
@@ -4437,7 +5158,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${data.stats.map(s =}> {
+                                ${data.stats.map(s => {
                             const rate = s.total > 0 ? Math.round((s.completed / s.total) * 100) : 0;
                             const barColor = rate >= 75 ? '#22c55e' : rate >= 40 ? '#f97316' : '#ef4444';
                             return `<tr class="auto-style-132">

@@ -3,140 +3,387 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Login | Tara Fitness Centre</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
         }
 
         body {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             background: #050505;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             overflow: hidden;
+            position: relative;
         }
 
-        /* Simplified Card */
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: orbFloat 12s ease-in-out infinite alternate;
+        }
+        .bg-orb:nth-child(1) {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, #ff1a1a, transparent 70%);
+            top: -10%; left: -10%;
+            animation-duration: 14s;
+        }
+        .bg-orb:nth-child(2) {
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, #990000, transparent 70%);
+            bottom: -15%; right: -10%;
+            animation-duration: 10s;
+            animation-delay: -3s;
+        }
+        .bg-orb:nth-child(3) {
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, #cc0000, transparent 70%);
+            top: 40%; left: 50%;
+            animation-duration: 16s;
+            animation-delay: -6s;
+            opacity: 0.2;
+        }
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(40px, -30px) scale(1.1); }
+            100% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* Particle Grid */
+        .particle-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            background-image:
+                radial-gradient(circle, rgba(255,26,26,0.08) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridShift 30s linear infinite;
+        }
+        @keyframes gridShift {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
+        }
+
+        /* Card */
         .login-container {
-            width: 380px;
-            padding: 40px;
-            border-radius: 12px;
-            background: #111111;
-            border: 1px solid #330000;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            width: 420px;
+            padding: 44px 40px;
+            border-radius: 20px;
+            background: rgba(17,17,17,0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,26,26,0.12);
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(255,26,26,0.05);
             text-align: center;
             color: white;
+            animation: cardEntry 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff1a1a, #cc0000, transparent);
+            border-radius: 20px 20px 0 0;
+        }
+        @keyframes cardEntry {
+            0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         /* Logo */
+        .logo-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
         .logo {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            margin-bottom: 25px;
             object-fit: cover;
-            border: 2px solid #ff1a1a;
+            border: 3px solid #ff1a1a;
+            box-shadow: 0 0 30px rgba(255,26,26,0.25);
+            transition: transform 0.3s;
+        }
+        .logo:hover { transform: scale(1.08); }
+        .logo-ring {
+            position: absolute;
+            inset: -6px;
+            border: 2px solid rgba(255,26,26,0.2);
+            border-radius: 50%;
+            animation: ringPulse 3s ease-in-out infinite;
+        }
+        @keyframes ringPulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.12); opacity: 0; }
         }
 
-        /* Input Fields */
-        input,
-        select {
+        h2 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+        .subtitle {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        /* Form */
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .input-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4b5563;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        .input-group input,
+        .input-group select {
             width: 100%;
-            padding: 14px;
-            margin: 12px 0;
-            border: 1px solid #333;
+            padding: 14px 14px 14px 42px;
+            border: 1px solid #1f1f1f;
             outline: none;
-            border-radius: 8px;
-            background: #0b0b0b;
+            border-radius: 12px;
+            background: #0a0a0a;
             color: white;
-            transition: 0.2s;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #ff1a1a;
+            box-shadow: 0 0 0 3px rgba(255,26,26,0.1);
+        }
+        .input-group:focus-within i { color: #ff4d4d; }
+
+        .input-group select {
+            appearance: none;
+            cursor: pointer;
+        }
+        .input-group select option {
+            background: #111;
+            color: #fff;
         }
 
-        input:focus,
-        select:focus {
-            border-color: #ff1a1a;
+        label.role-label {
+            display: block;
+            text-align: left;
+            color: #9ca3af;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* Button */
-        button {
+        .login-btn {
             width: 100%;
-            padding: 14px;
-            margin-top: 20px;
+            padding: 15px;
+            margin-top: 8px;
             border: none;
-            border-radius: 8px;
-            background: #ff1a1a;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ff1a1a 0%, #cc0000 50%, #990000 100%);
             color: white;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 15px;
+            font-family: inherit;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.35s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(255,26,26,0.3);
+        }
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+            animation: btnShine 3s infinite;
+        }
+        @keyframes btnShine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255,26,26,0.45);
+        }
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        button:hover {
-            background: #cc0000;
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0 20px;
+        }
+        .divider span {
+            color: #4b5563;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #333, transparent);
         }
 
         /* Footer */
         .footer {
-            margin-top: 25px;
+            margin-top: 24px;
             font-size: 14px;
-            color: #9ca3af;
+            color: #6b7280;
         }
-
         .footer a {
-            color: #ff1a1a;
+            color: #ff4d4d;
             text-decoration: none;
             font-weight: 600;
-            margin-left: 5px;
+            transition: color 0.2s;
+        }
+        .footer a:hover {
+            color: #ff1a1a;
+            text-decoration: underline;
         }
 
-        .footer a:hover {
-            text-decoration: underline;
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            animation: toastIn 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .toast.error { background: linear-gradient(135deg, #991b1b, #dc2626); }
+        .toast.success { background: linear-gradient(135deg, #064e3b, #10b981); }
+        .toast.info { background: linear-gradient(135deg, #1e3a5f, #3b82f6); }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateX(30px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                width: calc(100% - 40px);
+                padding: 32px 24px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+    </div>
+    <div class="particle-grid"></div>
+
+    <div class="toast-container" id="toastContainer"></div>
 
     <div class="login-container">
-        <img src="/logo.jpg" class="logo" alt="Tara Fitness Center Logo">
-        <h2>Sign In</h2>
+        <div class="logo-wrapper">
+            <div class="logo-ring"></div>
+            <img src="/logo.jpg" class="logo" alt="Tara Fitness Centre Logo">
+        </div>
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Sign in to Tara Fitness Centre</p>
 
         <form id="loginForm">
-            <input type="email" name="email" id="loginEmail" placeholder="Email" required>
-            <input type="password" name="password" id="loginPassword" placeholder="Password" required>
-            
-            <label>Login as</label>
-            <select name="role" id="loginRole" title="Login Role" required>
-                <option value="user" selected>Member</option>
-                <option value="admin">Administrator</option>
-            </select>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" name="email" id="loginEmail" placeholder="Email address" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" id="loginPassword" placeholder="Password" required>
+            </div>
 
-            <button type="submit" id="loginBtn">Login</button>
+            <div class="divider"><span>login as</span></div>
+
+            <div class="input-group">
+                <i class="fas fa-user-tag"></i>
+                <select name="role" id="loginRole" title="Login Role" required>
+                    <option value="user" selected>Member</option>
+                    <option value="admin">Administrator</option>
+                </select>
+            </div>
+
+            <button type="submit" id="loginBtn" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i>&nbsp; Sign In
+            </button>
         </form>
 
         <div class="footer">
-            Don't have an account? <a href="/register.html">Register</a>
+            Don't have an account? <a href="/register.html">Create one</a>
         </div>
     </div>
 
     <script>
         function showToast(msg, type = 'info') {
-            alert(msg);
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
         }
 
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
-            const originalText = btn.innerText;
-            btn.innerText = 'Signing in...';
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp; Signing in...';
             btn.disabled = true;
 
             const email = document.getElementById('loginEmail').value;
@@ -153,16 +400,17 @@
                 const result = await response.json();
                 if (result.success) {
                     localStorage.setItem("user", JSON.stringify(result.user));
-                    window.location.href = result.redirect;
+                    showToast('Login successful! Redirecting...', 'success');
+                    setTimeout(() => { window.location.href = result.redirect; }, 600);
                 } else {
-                    alert(result.message || 'Login failed');
-                    btn.innerText = originalText;
+                    showToast(result.message || 'Login failed', 'error');
+                    btn.innerHTML = originalHTML;
                     btn.disabled = false;
                 }
             } catch (err) {
                 console.error(err);
-                alert('Login Error. Please try again.');
-                btn.innerText = originalText;
+                showToast('Login Error. Please try again.', 'error');
+                btn.innerHTML = originalHTML;
                 btn.disabled = false;
             }
         });
