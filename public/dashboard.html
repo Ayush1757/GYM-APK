@@ -3655,15 +3655,17 @@
 
             async function generateGymQR() {
                 try {
+                    const user = JSON.parse(localStorage.getItem('user'));
                     const res = await fetch('/admin/generateGymQR', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ adminEmail: user.email })
                     });
                     const data = await res.json();
                     if (data.success) {
                         const qrContainer = document.getElementById('gymQRContainer');
                         const qrImage = document.getElementById('gymQRImage');
-                        qrImage.src = data.qrDataUrl;
+                        qrImage.src = data.qrImage;
                         qrContainer.style.display = 'flex';
                         showToast('New Gym QR Code generated successfully!', 'success');
                     } else {
