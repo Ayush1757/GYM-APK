@@ -2267,6 +2267,7 @@ app.post("/api/admin/approve-password-reset", async (req, res) => {
 
         // Send Email
         const resetLink = `${req.protocol}://${req.get("host")}/reset-password.html?token=${token}&email=${request.email}`;
+        console.log(`Generated Reset Link for ${request.email}:`, resetLink);
         await sendPasswordResetEmail(request.email, resetLink);
 
         res.json({ success: true, message: "Request approved and reset link sent to user." });
