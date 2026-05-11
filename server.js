@@ -14,6 +14,7 @@ const crypto = require("crypto");
 const QRCode = require("qrcode");
 const { sendMembershipPaymentEmail } = require("./services/emailService");
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Support JSON-encoded bodies
