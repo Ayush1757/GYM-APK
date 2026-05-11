@@ -155,6 +155,18 @@ const workoutSchema = new mongoose.Schema({
 
 const Workout = mongoose.model("Workout", workoutSchema);
 
+/* ================= PASSWORD RESET REQUEST SCHEMA ================= */
+const passwordResetRequestSchema = new mongoose.Schema({
+    email: { type: String, required: true },
+    status: { type: String, default: "Pending" }, // "Pending", "Approved", "Rejected", "Completed"
+    token: String,
+    tokenExpiry: Date,
+    requestedAt: { type: Date, default: Date.now },
+    approvedAt: Date,
+    approvedBy: String // admin email
+});
+const PasswordResetRequest = mongoose.model("PasswordResetRequest", passwordResetRequestSchema);
+
 /* ================= ANALYTICS TRACKING SCHEMAS ================= */
 
 const workoutSessionSchema = new mongoose.Schema({
@@ -1836,9 +1848,12 @@ app.get("/getUserNotifications", async (req, res) => {
 
 const BADGE_DEFINITIONS = [
     // Consistency
+    { id: "streak_3", name: "3-Day Streak", category: "Consistency", icon: "🥉", points: 20 },
     { id: "streak_7", name: "7-Day Streak", category: "Consistency", icon: "🔥", points: 50 },
-    { id: "warrior_100", name: "Workout Warrior", category: "Consistency", icon: "📅", points: 200 },
+    { id: "streak_30", name: "Monthly Warrior", category: "Consistency", icon: "🏆", points: 200 },
+    { id: "warrior_100", name: "Workout Warrior", category: "Consistency", icon: "📅", points: 500 },
     { id: "night_owl", name: "Night Owl", category: "Consistency", icon: "🌙", points: 30 },
+    { id: "early_bird", name: "Early Bird", category: "Consistency", icon: "🌅", points: 30 },
     // Strength
     { id: "plate_picker", name: "Plate Picker", category: "Strength", icon: "💪", points: 40 },
     { id: "bw_champion", name: "Bodyweight Champion", category: "Strength", icon: "🏋️", points: 150 },
@@ -1846,9 +1861,11 @@ const BADGE_DEFINITIONS = [
     // Volume
     { id: "vol_victim", name: "Volume Victim", category: "Volume", icon: "📊", points: 100 },
     { id: "vol_10k", name: "10k Club", category: "Volume", icon: "⚡", points: 250 },
-    { id: "factory_worker", name: "Factory Worker", category: "Volume", icon: "🏭", points: 500 },
+    { id: "vol_50k", name: "50k Club", category: "Volume", icon: "💠", points: 400 },
+    { id: "factory_worker", name: "Factory Worker", category: "Volume", icon: "🏭", points: 600 },
     // Milestones
     { id: "pr_breaker", name: "PR Breaker", category: "Milestones", icon: "🎯", points: 80 },
+    { id: "pr_master", name: "PR Master", category: "Milestones", icon: "🔥", points: 200 },
     { id: "time_keeper", name: "Time Keeper", category: "Milestones", icon: "⏱️", points: 30 },
     { id: "comeback_king", name: "Comeback King", category: "Milestones", icon: "🔄", points: 100 },
 ];
@@ -1858,107 +1875,103 @@ async function checkAndAwardBadges(user, allLogs, prs, attendance) {
     const currentBadges = user.badges.map(b => b.name);
     let totalPoints = user.points || 0;
 
-    const todayStr = new Date().toISOString().split("T")[0];
-
-    // 1. 7-Day Streak
-    if (!currentBadges.includes("7-Day Streak")) {
-        const dates = [...new Set(allLogs.map(l => l.date))].sort();
-        let streak = 0;
-        for (let i = 0; i < dates.length; i++) {
-            if (i === 0) streak = 1;
-            else {
-                const prev = new Date(dates[i - 1]);
-                const curr = new Date(dates[i]);
-                const diff = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
-                if (diff === 1) streak++;
-                else streak = 1;
-            }
-            if (streak >= 7) {
-                user.badges.push({ name: "7-Day Streak", category: "Consistency", icon: "🔥" });
-                totalPoints += 50;
-                earnedNew = true;
-                break;
-            }
-        }
-    }
-
-    // 2. Workout Warrior (100 total)
-    if (!currentBadges.includes("Workout Warrior") && allLogs.length >= 100) {
-        user.badges.push({ name: "Workout Warrior", category: "Consistency", icon: "📅" });
-        totalPoints += 200;
-        earnedNew = true;
-    }
-
-    // 3. Plate Picker (Weight >= 20kg)
-    if (!currentBadges.includes("Plate Picker")) {
-        const hasPlate = allLogs.some(l => (l.exercises || []).some(ex => (Number(ex.weight) || 0) >= 20));
-        if (hasPlate) {
-            user.badges.push({ name: "Plate Picker", category: "Strength", icon: "💪" });
-            totalPoints += 40;
+    const dates = [...new Set(allLogs.map(l => l.date))].sort();
+    
+    // Helper to award a badge
+    const award = (badgeId) => {
+        const def = BADGE_DEFINITIONS.find(d => d.id === badgeId);
+        if (def && !currentBadges.includes(def.name)) {
+            user.badges.push({ name: def.name, category: def.category, icon: def.icon });
+            totalPoints += (def.points || 0);
             earnedNew = true;
+            return true;
         }
-    }
+        return false;
+    };
 
-    // 4. Volume Milestones
-    const totalVol = await VolumeTracking.aggregate([
+    // 1. Streak Logic
+    let streak = 0;
+    let maxStreak = 0;
+    for (let i = 0; i < dates.length; i++) {
+        if (i === 0) streak = 1;
+        else {
+            const prev = new Date(dates[i - 1]);
+            const curr = new Date(dates[i]);
+            const diff = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+            if (diff === 1) streak++;
+            else streak = 1;
+        }
+        if (streak > maxStreak) maxStreak = streak;
+    }
+    if (maxStreak >= 3) award("streak_3");
+    if (maxStreak >= 7) award("streak_7");
+    if (maxStreak >= 30) award("streak_30");
+
+    // 2. Total Workouts
+    if (allLogs.length >= 100) award("warrior_100");
+
+    // 3. Weight/Strength
+    const hasPlate = allLogs.some(l => (l.exercises || []).some(ex => (Number(ex.weight) || 0) >= 20));
+    if (hasPlate) award("plate_picker");
+
+    const benchPR = prs.find(p => p.exerciseName.toLowerCase().includes("bench press"));
+    if (benchPR && benchPR.weight >= (Number(user.weight) || 100)) award("bw_champion");
+
+    const squat = prs.find(p => p.exerciseName.toLowerCase().includes("squat"))?.weight || 0;
+    const bench = prs.find(p => p.exerciseName.toLowerCase().includes("bench press"))?.weight || 0;
+    const deadlift = prs.find(p => p.exerciseName.toLowerCase().includes("deadlift"))?.weight || 0;
+    const totalKg = squat + bench + deadlift;
+    if (totalKg >= 453.5) award("1000lb_club");
+
+    // 4. Volume
+    const totalVolAgg = await VolumeTracking.aggregate([
         { $match: { email: user.email } },
         { $group: { _id: null, total: { $sum: "$totalVolume" } } }
     ]);
-    const vol = (totalVol[0] && totalVol[0].total) || 0;
+    const vol = (totalVolAgg[0] && totalVolAgg[0].total) || 0;
+    if (vol >= 10000) award("vol_victim");
+    if (vol >= 50000) award("vol_10k");
+    if (vol >= 100000) award("vol_50k");
+    if (vol >= 250000) award("factory_worker");
 
-    if (!currentBadges.includes("Volume Victim") && vol >= 10000) {
-        user.badges.push({ name: "Volume Victim", category: "Volume", icon: "📊" });
-        totalPoints += 100; earnedNew = true;
-    }
-    if (!currentBadges.includes("10k Club") && vol >= 50000) {
-        user.badges.push({ name: "10k Club", category: "Volume", icon: "⚡" });
-        totalPoints += 250; earnedNew = true;
-    }
-    if (!currentBadges.includes("Factory Worker") && vol >= 100000) {
-        user.badges.push({ name: "Factory Worker", category: "Volume", icon: "🏭" });
-        totalPoints += 500; earnedNew = true;
-    }
+    // 5. PRs
+    if (prs.length >= 1) award("pr_breaker");
+    if (prs.length >= 10) award("pr_master");
 
-    // 5. Strength Milestones
-    if (!currentBadges.includes("Bodyweight Champion")) {
-        const benchPR = prs.find(p => p.exerciseName.toLowerCase().includes("bench press"));
-        if (benchPR && benchPR.weight >= (Number(user.weight) || 100)) {
-            user.badges.push({ name: "Bodyweight Champion", category: "Strength", icon: "🏋️" });
-            totalPoints += 150; earnedNew = true;
+    // 6. Time-based (Attendance)
+    const hasEarly = attendance.some(a => a.checkInTime && (a.checkInTime.startsWith("05:") || a.checkInTime.startsWith("06:")));
+    if (hasEarly) award("early_bird");
+    
+    const hasEarlyStrict = attendance.some(a => a.checkInTime && a.checkInTime.startsWith("06:"));
+    if (hasEarlyStrict) award("time_keeper");
+
+    const hasLate = attendance.some(a => {
+        if (!a.checkInTime) return false;
+        const hour = parseInt(a.checkInTime.split(":")[0]);
+        return hour >= 21 || hour <= 4;
+    });
+    if (hasLate) award("night_owl");
+
+    // 7. Comeback (Gap of 14 days then back for 3)
+    let comeback = false;
+    for (let i = 1; i < dates.length; i++) {
+        const prev = new Date(dates[i - 1]);
+        const curr = new Date(dates[i]);
+        const diff = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+        if (diff >= 14) {
+            // Check if they did 3 days after this
+            if (dates.length > i + 2) {
+                const after1 = new Date(dates[i+1]);
+                const after2 = new Date(dates[i+2]);
+                if (Math.round((after1 - curr) / (1000 * 60 * 60 * 24)) === 1 && 
+                    Math.round((after2 - after1) / (1000 * 60 * 60 * 24)) === 1) {
+                    comeback = true;
+                    break;
+                }
+            }
         }
     }
-    if (!currentBadges.includes("1000lb Club")) {
-        const squat = prs.find(p => p.exerciseName.toLowerCase().includes("squat"))?.weight || 0;
-        const bench = prs.find(p => p.exerciseName.toLowerCase().includes("bench press"))?.weight || 0;
-        const deadlift = prs.find(p => p.exerciseName.toLowerCase().includes("deadlift"))?.weight || 0;
-        const totalKg = squat + bench + deadlift;
-        if (totalKg >= 453.5) { // 1000 lbs in kg
-            user.badges.push({ name: "1000lb Club", category: "Strength", icon: "🔱" });
-            totalPoints += 500; earnedNew = true;
-        }
-    }
-
-    // 6. Time Keeper (6 AM Workout)
-    if (!currentBadges.includes("Time Keeper")) {
-        const hasEarly = attendance.some(a => a.checkInTime && a.checkInTime.startsWith("06:"));
-        if (hasEarly) {
-            user.badges.push({ name: "Time Keeper", category: "Milestones", icon: "⏱️" });
-            totalPoints += 30; earnedNew = true;
-        }
-    }
-
-    // 7. Night Owl (Late Night)
-    if (!currentBadges.includes("Night Owl")) {
-        const hasLate = attendance.some(a => {
-            if (!a.checkInTime) return false;
-            const hour = parseInt(a.checkInTime.split(":")[0]);
-            return hour >= 21 || hour <= 4;
-        });
-        if (hasLate) {
-            user.badges.push({ name: "Night Owl", category: "Consistency", icon: "🌙" });
-            totalPoints += 30; earnedNew = true;
-        }
-    }
+    if (comeback) award("comeback_king");
 
     if (earnedNew) {
         user.points = totalPoints;
@@ -2112,6 +2125,28 @@ app.get("/getWorkoutProgress", async (req, res) => {
             await user.save();
         }
 
+        // Check for Daily Workout Completion Assignment
+        const todayLog = allLogs.find(l => l.date === todayStr);
+        if (todayLog && todayLog.exercises && todayLog.exercises.length > 0) {
+            const allComplete = todayLog.exercises.every(e => e.status === "Completed");
+            if (allComplete) {
+                // Check if already assigned
+                const hasDaily = user.assignments.some(a => a.title === "Daily Goal" && a.assignedDate && a.assignedDate.toISOString().split("T")[0] === todayStr);
+                if (!hasDaily) {
+                    user.assignments.push({
+                        id: "daily_" + Date.now(),
+                        title: "Daily Goal",
+                        description: "Complete all exercises in your daily workout log",
+                        points: 25,
+                        status: "Pending", // Ready to be claimed
+                        category: "Consistency",
+                        assignedDate: new Date()
+                    });
+                    await user.save();
+                }
+            }
+        }
+
         res.json({
             success: true,
             user: {
@@ -2166,6 +2201,110 @@ app.get("/getDashboardStats", async (req, res) => {
     }
 });
 
+
+
+/* ================= PASSWORD RESET ROUTES ================= */
+
+// 1. User requests password reset
+app.post("/api/forgot-password", async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "No account found with this email." });
+        }
+
+        // Check if there's already a pending request
+        const existing = await PasswordResetRequest.findOne({ email, status: "Pending" });
+        if (existing) {
+            return res.status(400).json({ success: false, message: "A request is already pending admin approval." });
+        }
+
+        const newRequest = new PasswordResetRequest({ email });
+        await newRequest.save();
+
+        res.json({ success: true, message: "Reset request sent to administrator for approval." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+// 2. Admin fetches all reset requests
+app.get("/api/admin/password-reset-requests", async (req, res) => {
+    try {
+        const requests = await PasswordResetRequest.find().sort({ requestedAt: -1 });
+        res.json({ success: true, requests });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+// 3. Admin approves reset request
+const { sendPasswordResetEmail } = require("./services/emailService");
+app.post("/api/admin/approve-password-reset", async (req, res) => {
+    try {
+        const { requestId, adminEmail } = req.body;
+        const request = await PasswordResetRequest.findById(requestId);
+        if (!request) return res.status(404).json({ success: false, message: "Request not found" });
+
+        if (request.status !== "Pending") {
+            return res.status(400).json({ success: false, message: "Request is already " + request.status });
+        }
+
+        // Generate token
+        const token = crypto.randomBytes(32).toString("hex");
+        const expiry = new Date(Date.now() + 3600000); // 1 hour
+
+        request.status = "Approved";
+        request.token = token;
+        request.tokenExpiry = expiry;
+        request.approvedAt = new Date();
+        request.approvedBy = adminEmail;
+        await request.save();
+
+        // Send Email
+        const resetLink = `${req.protocol}://${req.get("host")}/reset-password.html?token=${token}&email=${request.email}`;
+        await sendPasswordResetEmail(request.email, resetLink);
+
+        res.json({ success: true, message: "Request approved and reset link sent to user." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+// 4. User resets password using token
+app.post("/api/reset-password", async (req, res) => {
+    try {
+        const { email, token, newPassword } = req.body;
+        const request = await PasswordResetRequest.findOne({ 
+            email, 
+            token, 
+            status: "Approved",
+            tokenExpiry: { $gt: new Date() } 
+        });
+
+        if (!request) {
+            return res.status(400).json({ success: false, message: "Invalid or expired reset link." });
+        }
+
+        // Update User Password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await User.findOneAndUpdate({ email }, { password: hashedPassword });
+
+        // Mark request as completed
+        request.status = "Completed";
+        request.token = null; // Clear token for security
+        await request.save();
+
+        res.json({ success: true, message: "Password updated successfully! You can now log in." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
 
 /* ================= SERVER ================= */
 

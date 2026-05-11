@@ -359,7 +359,7 @@
 
         .sidebar {
             position: fixed;
-            left: 0;
+            left: -260px;
             top: 0;
             width: 260px;
             height: 100vh;
@@ -370,8 +370,8 @@
             z-index: 1000;
         }
 
-        .sidebar.collapsed {
-            width: 80px;
+        .sidebar.active {
+            left: 0;
         }
 
         .sidebar-header {
@@ -385,10 +385,6 @@
         .sidebar-header h2 {
             font-size: 20px;
             font-weight: bold;
-        }
-
-        .sidebar.collapsed .sidebar-header h2 {
-            display: none;
         }
 
         .toggle-btn {
@@ -430,22 +426,14 @@
             font-size: 18px;
         }
 
-        .sidebar.collapsed .menu-item span {
-            display: none;
-        }
-
-        .sidebar.collapsed .menu-item {
-            justify-content: center;
-        }
-
         .main-container {
-            margin-left: 260px;
+            margin-left: 0;
             transition: all 0.3s ease;
             min-height: 100vh;
         }
 
-        .main-container.collapsed {
-            margin-left: 80px;
+        .main-container.active-sidebar {
+            margin-left: 260px;
         }
 
         .sidebar-overlay {
@@ -456,7 +444,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+            z-index: 900;
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -470,24 +458,11 @@
 
         @media (max-width: 768px) {
             .sidebar {
-                left: -260px;
                 z-index: 2500;
             }
 
-            .sidebar.active {
-                left: 0;
-            }
-
-            .main-container {
-                margin-left: 0 !important;
-            }
-
-            .sidebar-header h2 {
-                display: block !important;
-            }
-            
-            .sidebar.collapsed {
-                width: 260px;
+            .main-container.active-sidebar {
+                margin-left: 0;
             }
         }
 
@@ -2094,7 +2069,7 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- SIDEBAR -->
-    <div class="sidebar collapsed" id="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>TFC 💪🏻</h2>
         </div>
@@ -2135,6 +2110,10 @@
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </div>
+            <div class="menu-item" data-page="resetRequests">
+                <i class="fas fa-key"></i>
+                <span>Reset Requests</span>
+            </div>
             <div class="menu-item" onclick="window.location.href='/attendanceQR.html'">
                 <i class="fas fa-qrcode"></i>
                 <span>My Attendance QR</span>
@@ -2143,7 +2122,7 @@
     </div>
 
     <!-- MAIN CONTAINER -->
-    <div class="main-container collapsed" id="mainContainer">
+    <div class="main-container" id="mainContainer">
 
         <!-- NAVBAR -->
         <div class="navbar">
@@ -2176,6 +2155,10 @@
 
             <!-- DASHBOARD PAGE -->
             <div class="page active" id="dashboard-page">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <img src="/logo.png" alt="TFC Logo" style="width: 40px; height: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(255,26,26,0.3);">
+                    <div style="color: #ff1a1a; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px;">TARA FITNESS CENTRE 💪🏻</div>
+                </div>
                 <h1 class="auto-style-1">Welcome back, <span id="userName">Admin</span>!👋</h1>
 
                 <!-- STATS GRID -->
@@ -2318,6 +2301,32 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- RESET REQUESTS PAGE -->
+            <div class="page" id="resetRequests-page">
+                <div class="auto-style-11">
+                    <h1 class="auto-style-4">Password Reset Requests</h1>
+                </div>
+                <div class="card">
+                    <div class="auto-style-5">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Requested At</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resetRequestsTableBody">
+                                <tr>
+                                    <td colspan="4" class="auto-style-6">Loading requests...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -3521,8 +3530,6 @@
                         attendance.</p>
                 </div>
                 <input type="hidden" id="qrBlockTargetEmail">
-                <input type="hidden" id="qrBlockAction"><!-- 'block' or 'unblock' -->
-                <div class="auto-style-98">
                     <button id="qrBlockConfirmBtn" class="auto-style-99 btn btn-danger" onclick="confirmQRBlock()"><i
                             class="fas fa-lock"></i> Confirm</button>
                     <button class="auto-style-99 btn btn-secondary" onclick="closeModal('qrBlockModal')">Cancel</button>
@@ -3539,17 +3546,14 @@
                 const container = document.getElementById('mainContainer');
                 const overlay = document.getElementById('sidebarOverlay');
                 
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.toggle('active');
-                    overlay.classList.toggle('active');
-                    if (sidebar.classList.contains('active')) {
-                        document.body.style.overflow = 'hidden';
-                    } else {
-                        document.body.style.overflow = '';
-                    }
+                sidebar.classList.toggle('active');
+                container.classList.toggle('active-sidebar');
+                overlay.classList.toggle('active');
+
+                if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
                 } else {
-                    sidebar.classList.toggle('collapsed');
-                    container.classList.toggle('collapsed');
+                    document.body.style.overflow = '';
                 }
             }
 
@@ -5182,7 +5186,69 @@
                         container.innerHTML = '<p class="auto-style-127">Failed to load stats</p>';
                     });
             }
-        </script>
+    
+        async function loadResetRequests() {
+            try {
+                const res = await fetch('/api/admin/password-reset-requests');
+                const data = await res.json();
+                const tbody = document.getElementById('resetRequestsTableBody');
+                
+                if (data.success && data.requests.length > 0) {
+                    tbody.innerHTML = data.requests.map(req => `
+                        <tr>
+                            <td>${req.email}</td>
+                            <td>${new Date(req.requestedAt).toLocaleString()}</td>
+                            <td>
+                                <span class="badge ${req.status === 'Pending' ? 'badge-warning' : (req.status === 'Approved' ? 'badge-success' : (req.status === 'Completed' ? 'badge-success' : 'badge-danger'))}">
+                                    ${req.status}
+                                </span>
+                            </td>
+                            <td>
+                                ${req.status === 'Pending' ? `
+                                    <button class="btn btn-success btn-sm" onclick="approveReset('${req._id}', '${req.email}')" style="padding: 5px 10px; font-size: 11px;">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                ` : (req.status === 'Approved' ? '<span style="font-size: 11px; color: #22c55e;">Link Sent</span>' : (req.status === 'Completed' ? '<span style="font-size: 11px; color: #22c55e;">Reset Done</span>' : '-'))}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="auto-style-6">No requests found</td></tr>';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function approveReset(requestId, userEmail) {
+            if (!confirm(`Approve password reset for ${userEmail}? A reset link will be sent to their email.`)) return;
+            
+            const admin = JSON.parse(localStorage.getItem('user'));
+            try {
+                const res = await fetch('/api/admin/approve-password-reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ requestId, adminEmail: admin.email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Request approved! Link sent to user.', 'success');
+                    loadResetRequests();
+                } else {
+                    showToast(data.message || 'Error approving request', 'error');
+                }
+            } catch (err) {
+                showToast('Server error', 'error');
+            }
+        }
+
+        // Add to page switch logic
+        const originalSwitchPage = window.switchPage;
+        window.switchPage = function(pageId) {
+            if (pageId === 'resetRequests') loadResetRequests();
+            if (typeof originalSwitchPage === 'function') originalSwitchPage(pageId);
+        };
+    </script>
 
 </body>
 

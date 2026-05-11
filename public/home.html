@@ -49,15 +49,182 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             transition: background 0.3s ease, color 0.3s ease;
         }
 
+        /* ===== GLOBAL VISUAL ENHANCEMENTS ===== */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        /* Page entry animation */
+        .page.active {
+            animation: pageSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes pageSlideIn {
+            0% { opacity: 0; transform: translateY(16px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Enhanced stat cards */
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff1a1a, #ff4d4d, #cc0000);
+        }
+        .stat-card.secondary::before {
+            background: linear-gradient(90deg, #22c55e, #10b981, #059669);
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(255,26,26,0.15);
+        }
+        .stat-icon {
+            animation: statIconFloat 3s ease-in-out infinite;
+        }
+        @keyframes statIconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* Enhanced cards */
+        .card {
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+            position: relative;
+        }
+        .card:hover {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,26,26,0.06);
+        }
+
+        /* Member Workout Card Enhancements */
+        .member-workout-card {
+            animation: slideUpFade 0.4s ease forwards;
+            opacity: 0;
+        }
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .member-workout-card:nth-child(1) { animation-delay: 0.1s; }
+        .member-workout-card:nth-child(2) { animation-delay: 0.2s; }
+        .member-workout-card:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Welcome text gradient */
+        #home-page > h1 {
+            background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        /* Enhanced table styling */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .table thead th {
+            position: relative;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .table tbody tr {
+            transition: all 0.2s;
+        }
+        .table tbody tr:hover {
+            background: rgba(255,26,26,0.04) !important;
+            transform: scale(1.002);
+        }
+
+        /* Enhanced buttons */
+        .btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.08), transparent);
+            pointer-events: none;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ff1a1a, #cc0000) !important;
+            box-shadow: 0 3px 12px rgba(255,26,26,0.25);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 24px rgba(255,26,26,0.4) !important;
+        }
+
+        /* Enhanced form inputs */
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            transition: all 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            box-shadow: 0 0 0 3px rgba(255,26,26,0.1);
+            border-color: #ff1a1a !important;
+        }
+
+        /* Badge enhancements */
+        .badge {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #330000;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #660000;
+        }
+
+        /* Enhanced modal styling */
+        .modal-content {
+            animation: modalPop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes modalPop {
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
         .sidebar {
             position: fixed;
-            left: 0;
+            left: -260px;
             top: 0;
             width: 260px;
             height: 100vh;
@@ -68,8 +235,8 @@
             z-index: 1000;
         }
 
-        .sidebar.collapsed {
-            width: 80px;
+        .sidebar.active {
+            left: 0;
         }
 
         .sidebar-header {
@@ -83,10 +250,6 @@
         .sidebar-header h2 {
             font-size: 20px;
             font-weight: bold;
-        }
-
-        .sidebar.collapsed .sidebar-header h2 {
-            display: none;
         }
 
         .toggle-btn {
@@ -128,22 +291,14 @@
             font-size: 18px;
         }
 
-        .sidebar.collapsed .menu-item span {
-            display: none;
-        }
-
-        .sidebar.collapsed .menu-item {
-            justify-content: center;
-        }
-
         .main-container {
-            margin-left: 260px;
+            margin-left: 0;
             transition: all 0.3s ease;
             min-height: 100vh;
         }
 
-        .main-container.collapsed {
-            margin-left: 80px;
+        .main-container.active-sidebar {
+            margin-left: 260px;
         }
 
         .sidebar-overlay {
@@ -154,7 +309,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+            z-index: 900;
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -168,24 +323,11 @@
 
         @media (max-width: 768px) {
             .sidebar {
-                left: -260px;
                 z-index: 2500;
             }
 
-            .sidebar.active {
-                left: 0;
-            }
-
-            .main-container {
-                margin-left: 0 !important;
-            }
-
-            .sidebar-header h2 {
-                display: block !important;
-            }
-            
-            .sidebar.collapsed {
-                width: 260px; /* Disable collapse on mobile, use active toggle instead */
+            .main-container.active-sidebar {
+                margin-left: 0;
             }
         }
 
@@ -1325,6 +1467,146 @@
         .progress-stat-card .psc-value {
             animation: countUp 0.5s ease-out;
         }
+
+        /* Unified Task/Assignment Cards */
+        .task-item-card {
+            background: linear-gradient(135deg, #0d0d0d, #141414);
+            border: 1px solid #1f1f1f;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .task-item-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #ff1a1a;
+            opacity: 0.8;
+        }
+
+        .task-item-card.completed {
+            border-color: #052a15;
+            background: linear-gradient(135deg, #0b0b0b, #05140b);
+        }
+        
+        .task-item-card.completed::before {
+            background: #22c55e;
+        }
+
+        .task-item-card:hover {
+            transform: translateX(5px);
+            border-color: #333;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .task-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: rgba(255, 26, 26, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff1a1a;
+            font-size: 18px;
+        }
+
+        .completed .task-icon-wrap {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .task-details {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 700;
+            color: #fff;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+
+        .task-desc {
+            font-size: 12.5px;
+            color: #9ca3af;
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+
+        .task-points {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-claim {
+            background: #ff1a1a;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(255, 26, 26, 0.3);
+        }
+
+        .btn-claim:hover {
+            background: #e60000;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 26, 26, 0.4);
+        }
+
+        .task-status-done {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        /* Badge Card Enhancements */
+        .badge-card {
+            background: #0b0b0b;
+            border: 1px solid #1a0000;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            transition: 0.3s;
+        }
+        
+        .badge-card:hover {
+            border-color: #ff1a1a;
+            transform: translateY(-5px);
+        }
+
+        .badge-icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .badge-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
     
         </style>
 </head>
@@ -1337,8 +1619,7 @@
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2>TARA FITNESS CENTRE 💪🏻</h2>
-            <button class="toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+            <h2>TFC 💪🏻</h2>
         </div>
         <div class="sidebar-menu">
             <div class="menu-item active" data-page="dashboard">
@@ -1384,7 +1665,12 @@
 
         <!-- NAVBAR -->
         <div class="navbar">
-            <div class="navbar-left"></div>
+            <div class="navbar-left">
+                <button class="toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar" onclick="toggleSidebar()" style="color: #ff1a1a;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 style="color: #ff1a1a; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px;">TARA FITNESS CENTRE 💪🏻</h2>
+            </div>
             <div class="navbar-right">
                 <div class="notification-bell" onclick="toggleNotifications()">
                     <i class="fas fa-bell"></i>
@@ -1419,6 +1705,10 @@
 
             <!-- DASHBOARD PAGE -->
             <div class="page active" id="dashboard-page">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <img src="/logo.png" alt="TFC Logo" style="width: 40px; height: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(255,26,26,0.3);">
+                    <div style="color: #ff1a1a; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px;">TARA FITNESS CENTRE 💪🏻</div>
+                </div>
                 <h1  >Welcome back, <span
                         id="userName">Member</span>!👋</h1>
 
@@ -2371,17 +2661,14 @@
             const container = document.getElementById('mainContainer');
             const overlay = document.getElementById('sidebarOverlay');
             
-            if (window.innerWidth <= 768) {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-                if (sidebar.classList.contains('active')) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
+            sidebar.classList.toggle('active');
+            container.classList.toggle('active-sidebar');
+            overlay.classList.toggle('active');
+
+            if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
             } else {
-                sidebar.classList.toggle('collapsed');
-                container.classList.toggle('collapsed');
+                document.body.style.overflow = '';
             }
         }
 
@@ -3015,33 +3302,36 @@
                             u.badges.forEach(b => {
                                 bHtml += `
                                     <div class="badge-card" title="${b.category}" >
-                                        <div  >${b.icon || '🏅'}</div>
-                                        <div  >${b.name}</div>
+                                        <div class="badge-icon">${b.icon || '🏅'}</div>
+                                        <div class="badge-name">${b.name}</div>
                                     </div>
                                 `;
                             });
                             bCont.innerHTML = bHtml;
                         } else {
-                            bCont.innerHTML = '<p  >No badges yet.</p>';
+                            bCont.innerHTML = '<p class="text-muted">No badges yet. Start training!</p>';
                         }
 
-                        // Load Tasks
+                        // Load Assignments (Tasks)
                         const tCont = document.getElementById('tasksContainer');
                         if (u.assignments && u.assignments.length > 0) {
                             let tHtml = '';
                             u.assignments.forEach(t => {
                                 const isDone = t.status === 'Completed';
                                 tHtml += `
-                                    <div style="background:#0b0b0b; padding:15px; border-radius:12px; border:1px solid ${isDone ? '#052a15' : '#2a0000'}" >
-                                        <div>
-                                            <div style="font-weight:700; color:${isDone ? '#22c55e' : '#ff1a1a'}" >${t.title}</div>
-                                            <div  >${t.description}</div>
-                                            <div  ><i class="fas fa-coins" ></i> ${t.points} Points</div>
+                                    <div class="task-item-card ${isDone ? 'completed' : ''}">
+                                        <div class="task-icon-wrap">
+                                            <i class="fas ${isDone ? 'fa-check-circle' : 'fa-thumbtack'}"></i>
                                         </div>
-                                        <div>
+                                        <div class="task-details">
+                                            <div class="task-title">${t.title}</div>
+                                            <div class="task-desc">${t.description}</div>
+                                            <div class="task-points"><i class="fas fa-coins"></i> ${t.points} Points</div>
+                                        </div>
+                                        <div class="task-action">
                                             ${isDone ?
-                                        '<span  ><i class="fas fa-check-circle"></i> Done</span>' :
-                                        `<button class="btn btn-primary" onclick="completeTask('${t.id}')" >Complete</button>`
+                                        '<span class="task-status-done">Claimed</span>' :
+                                        `<button class="btn btn-claim" onclick="claimAssignment('${t.id}')">Claim</button>`
                                     }
                                         </div>
                                     </div>
@@ -3049,30 +3339,31 @@
                             });
                             tCont.innerHTML = tHtml;
                         } else {
-                            tCont.innerHTML = '<p  >No active tasks assigned.</p>';
+                            tCont.innerHTML = '<p class="text-muted">No active tasks assigned.</p>';
                         }
                     }
                 });
         }
 
-        function completeTask(taskId) {
+        function claimAssignment(id) {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
-            fetch('/complete-task', {
+            fetch('/completeAssignment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email, taskId })
+                body: JSON.stringify({ email: user.email, assignmentId: id })
             })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        showToast(data.message, 'success');
+                        showToast(`🎉 Points Claimed! New Total: ${data.points}`, 'success');
                         loadTasks(); // refresh
-                        loadDashboardData(); // update points/badges count
+                        loadProgressTracker(); // update progress page too
+                        loadDashboardData(); 
                     } else {
                         showToast(data.message, 'error');
                     }
                 })
-                .catch(() => showToast('Failed to complete task', 'error'));
+                .catch(() => showToast('Failed to claim points', 'error'));
         }
 
         // Chart Initialization
@@ -3919,22 +4210,7 @@
         }
 
         function completeAssignment(id) {
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (!user) return;
-            fetch('/completeAssignment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email, assignmentId: id })
-            })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast(data.message, 'success');
-                        loadProgressData(); // Refresh UI
-                    } else {
-                        showToast(data.message, 'error');
-                    }
-                });
+            claimAssignment(id); // Use unified function
         }
 
         function renderBadges(earned) {
@@ -3943,16 +4219,21 @@
             if (!container) return;
 
             const allBadges = [
+                { name: "3-Day Streak", icon: "🥉", category: "Consistency" },
                 { name: "7-Day Streak", icon: "🔥", category: "Consistency" },
+                { name: "Monthly Warrior", icon: "🏆", category: "Consistency" },
                 { name: "Workout Warrior", icon: "📅", category: "Consistency" },
                 { name: "Night Owl", icon: "🌙", category: "Consistency" },
+                { name: "Early Bird", icon: "🌅", category: "Consistency" },
                 { name: "Plate Picker", icon: "💪", category: "Strength" },
                 { name: "Bodyweight Champion", icon: "🏋️", category: "Strength" },
                 { name: "1000lb Club", icon: "🔱", category: "Strength" },
                 { name: "Volume Victim", icon: "📊", category: "Volume" },
                 { name: "10k Club", icon: "⚡", category: "Volume" },
+                { name: "50k Club", icon: "💠", category: "Volume" },
                 { name: "Factory Worker", icon: "🏭", category: "Volume" },
                 { name: "PR Breaker", icon: "🎯", category: "Milestones" },
+                { name: "PR Master", icon: "🔥", category: "Milestones" },
                 { name: "Time Keeper", icon: "⏱️", category: "Milestones" },
                 { name: "Comeback King", icon: "🔄", category: "Milestones" }
             ];

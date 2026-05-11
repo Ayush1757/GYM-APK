@@ -365,7 +365,8 @@
         </form>
 
         <div class="footer">
-            Don't have an account? <a href="/register.html">Create one</a>
+            Don't have an account? <a href="/register.html">Create one</a><br>
+            <a href="#" onclick="openForgotPasswordModal()" style="font-size: 13px; margin-top: 10px; display: inline-block;">Forgot Password?</a>
         </div>
     </div>
 
@@ -414,7 +415,59 @@
                 btn.disabled = false;
             }
         });
+
+        /* --- Forgot Password Functions --- */
+        function openForgotPasswordModal() {
+            document.getElementById('forgotPasswordModal').style.display = 'flex';
+        }
+
+        function closeForgotPasswordModal() {
+            document.getElementById('forgotPasswordModal').style.display = 'none';
+        }
+
+        async function submitResetRequest() {
+            const email = document.getElementById('resetEmail').value;
+            if (!email) return showToast('Please enter your email', 'error');
+
+            const btn = document.getElementById('resetRequestBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    closeForgotPasswordModal();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                showToast('Error sending request', 'error');
+            } finally {
+                btn.innerHTML = 'Send Request';
+                btn.disabled = false;
+            }
+        }
     </script>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: #111; padding: 40px; border-radius: 24px; border: 1px solid rgba(255,26,26,0.2); width: 90%; max-width: 400px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <button onclick="closeForgotPasswordModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #6b7280; font-size: 24px; cursor: pointer;">&times;</button>
+            <h3 style="color: #fff; margin-bottom: 12px; font-weight: 800; font-size: 1.5rem;">Reset Password</h3>
+            <p style="color: #9ca3af; font-size: 14px; margin-bottom: 25px; line-height: 1.5;">Enter your account email to request a reset. An administrator will review and approve your request.</p>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="resetEmail" placeholder="account@email.com" required style="background: #000; border-color: #222;">
+            </div>
+            <button onclick="submitResetRequest()" class="login-btn" id="resetRequestBtn">Send Request</button>
+        </div>
+    </div>
 
 </body>
 
