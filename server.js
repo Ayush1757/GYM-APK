@@ -2242,7 +2242,7 @@ app.get("/api/admin/password-reset-requests", async (req, res) => {
     }
 });
 
-// 3. Admin approves reset request
+// 3. Admin approves reset request (Automatically resets to default password)
 const { sendPasswordResetEmail } = require("./services/emailService");
 app.post("/api/admin/approve-password-reset", async (req, res) => {
     try {
@@ -2254,23 +2254,22 @@ app.post("/api/admin/approve-password-reset", async (req, res) => {
             return res.status(400).json({ success: false, message: "Request is already " + request.status });
         }
 
-        // Generate token
-        const token = crypto.randomBytes(32).toString("hex");
-        const expiry = new Date(Date.now() + 3600000); // 1 hour
+        const defaultPassword = "Member@123";
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
-        request.status = "Approved";
-        request.token = token;
-        request.tokenExpiry = expiry;
+        // Update User Password
+        await User.findOneAndUpdate({ email: request.email }, { password: hashedPassword });
+
+        // Update Request Status
+        request.status = "Completed";
         request.approvedAt = new Date();
         request.approvedBy = adminEmail;
         await request.save();
 
-        // Send Email
-        const resetLink = `${req.protocol}://${req.get("host")}/reset-password.html?token=${token}&email=${request.email}`;
-        console.log(`Generated Reset Link for ${request.email}:`, resetLink);
-        await sendPasswordResetEmail(request.email, resetLink);
+        // Send Email with default password
+        await sendPasswordResetEmail(request.email, defaultPassword);
 
-        res.json({ success: true, message: "Request approved and reset link sent to user." });
+        res.json({ success: true, message: `Request approved. Password reset to ${defaultPassword} and user notified.` });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: "Server error" });
