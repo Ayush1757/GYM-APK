@@ -1,23 +1,30 @@
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 const paymentEmailTemplate = require("../templates/paymentEmailTemplate");
 
-// Use the API key from .env file
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Create a transporter using Gmail SMTP
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL_USER, // Your Gmail address
+        pass: process.env.EMAIL_PASS  // Your Google App Password
+    }
+});
 
 const sendMembershipPaymentEmail = async (emailData) => {
     try {
         const { memberEmail } = emailData;
         const htmlContent = paymentEmailTemplate(emailData);
         
-        const data = await resend.emails.send({
-            from: process.env.EMAIL_FROM || "Tara Fitness Centre <onboarding@resend.dev>",
+        const mailOptions = {
+            from: `"Tara Fitness Centre" <${process.env.EMAIL_USER}>`,
             to: memberEmail,
             subject: "Membership Payment Confirmation – Tara Fitness Centre",
             html: htmlContent
-        });
+        };
 
-        console.log(`Payment email sent successfully to ${memberEmail}. ID: ${data?.id || data?.data?.id}`);
-        return { success: true, data };
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`Payment email sent successfully to ${memberEmail}. ID: ${info.messageId}`);
+        return { success: true, data: info };
     } catch (error) {
         console.error(`Error sending payment email:`, error);
         return { success: false, error };
@@ -26,30 +33,32 @@ const sendMembershipPaymentEmail = async (emailData) => {
 
 const sendPasswordResetEmail = async (email, resetLink) => {
     try {
-        const response = await resend.emails.send({
-            from: process.env.EMAIL_FROM || "Tara Fitness Centre <onboarding@resend.dev>",
+        const mailOptions = {
+            from: `"Tara Fitness Centre" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: "Password Reset Request Approved – Tara Fitness Centre",
             html: `
-                <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                    <h2 style="color: #ff1a1a;">Password Reset Approved</h2>
+                <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 10px;">
+                    <h2 style="color: #ff1a1a; text-align: center;">Password Reset Approved</h2>
                     <p>Hello,</p>
-                    <p>Your request to reset your password has been approved by the administrator.</p>
+                    <p>Your request to reset your password for your Tara Fitness Centre account has been approved by the administrator.</p>
                     <p>Click the button below to set a new password. This link will expire in 1 hour.</p>
-                    <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background-color: #ff1a1a; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 20px;">Reset Password</a>
-                    <p style="margin-top: 30px; font-size: 12px; color: #666;">If you didn't request this, please contact us immediately.</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${resetLink}" style="display: inline-block; padding: 14px 28px; background-color: #ff1a1a; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(255,26,26,0.2);">Reset My Password</a>
+                    </div>
+                    <p style="font-size: 12px; color: #777; border-top: 1px solid #eee; padding-top: 20px;">
+                        If you did not request this change, please ignore this email or contact support if you have concerns.
+                    </p>
+                    <p style="font-size: 12px; color: #777; text-align: center; margin-top: 10px;">
+                        © 2026 Tara Fitness Centre. All rights reserved.
+                    </p>
                 </div>
             `
-        });
+        };
 
-        console.log(`Resend response for ${email}:`, JSON.stringify(response, null, 2));
-        
-        if (response.error) {
-            console.error(`Resend error for ${email}:`, response.error);
-            return { success: false, error: response.error };
-        }
-
-        return { success: true, data: response.data };
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`Password reset email sent to ${email}. ID: ${info.messageId}`);
+        return { success: true, data: info };
     } catch (error) {
         console.error(`Error sending reset email:`, error);
         return { success: false, error };
