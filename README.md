@@ -1,6 +1,6 @@
 # login-app
 
-This is a simple gym login app.
+This is a gym management application built for commercial purpose.
 
 To enable administrator registration you must provide an `ADMIN_KEY` value. You can set it in your environment or create a `.env` file in the project root.
 
